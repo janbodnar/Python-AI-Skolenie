@@ -1,5 +1,24 @@
 # OpenAI 
 
+The OpenAI Python library is an official SDK that provides seamless access to OpenAI’s REST API  
+from any Python 3.8+ application. It’s designed to help developers integrate powerful AI  
+capabilities—like text generation, image analysis, and chat interactions—into their own software.  
+
+Built using `httpx` and auto-generated from OpenAI’s OpenAPI specification via the **Stainless** toolchain,   
+the library ensures consistent, up-to-date access to all available endpoints and features.  
+
+Since its release, the OpenAI Python library has become the **de facto standard for AI programming in Python**.  
+It's widely adopted across industries, research institutions, and open-source communities.  
+
+
+## Use cases
+
+- Chatbots and virtual assistants
+- Text summarization and translation
+- Code generation and debugging
+- Image generation and editing (via DALL·E)
+- Speech-to-text transcription (via Whisper)
+
 
 ## Simple Chat 
 
