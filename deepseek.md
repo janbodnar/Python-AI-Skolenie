@@ -18,14 +18,15 @@ client = OpenAI(
 )
 
 # Round 1
-messages = [{"role": "user", "content": "What's the highest mountain in the world?"}]
+messages = [
+    {"role": "user", "content": "What's the highest mountain in the world?"}]
 response = client.chat.completions.create(
     model="deepseek-chat",
     messages=messages
 )
 
 messages.append(response.choices[0].message)
-print(f"Messages Round 1: {messages}")
+# print(f"Messages Round 1: {messages}")
 
 # Round 2
 messages.append({"role": "user", "content": "What is the second?"})
@@ -35,5 +36,12 @@ response = client.chat.completions.create(
 )
 
 messages.append(response.choices[0].message)
-print(f"Messages Round 2: {messages}")
+# print(f"Messages Round 2: {messages}")
+
+for msg in messages:
+
+    if type(msg) is dict:
+        print(msg)
+    else:
+        print(msg.content)
 ```
