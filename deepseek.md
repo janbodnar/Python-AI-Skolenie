@@ -1,6 +1,29 @@
 # DeepSeek 
 
 
+## Simple chat 
+
+```python
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    base_url="https://api.deepseek.com",
+    api_key=os.environ.get("DEEPSEEK_API_KEY"),
+)
+
+response = client.chat.completions.create(
+    model="deepseek-chat",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant"},
+        {"role": "user", "content": "Is Pluto a planet?"},
+    ],
+    stream=False
+)
+
+print(response.choices[0].message.content)
+```
+
 
 ## Multi-turn conversation
 
