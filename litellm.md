@@ -26,6 +26,13 @@ pip install litellm
 - **Speeds up development** with consistent syntax
 - **Ideal for experimentation** and scaling across providers
 
+## Environment variables 
+
+It is a standard practice for LiteLLM to automatically looks for provider-specific  
+API keys in environment variables based on the model being used. For DeepSeek models,  
+it specifically looks for `DEEPSEEK_API_KEY`.
+
+
 
 
 ## Calculate cost of request
