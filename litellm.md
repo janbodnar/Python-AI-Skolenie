@@ -1,15 +1,15 @@
 # LiteLLM
 
 
-### 🐍 LiteLLM in Python: A Developer-Friendly Overview
-
 **LiteLLM** is an open-source **Python library** that provides a **unified API** for interacting with  
 over **100+ large language model (LLM) providers**. It's designed to make it easy for developers to  
-switch between different models—like OpenAI, Anthropic, Hugging Face, VertexAI, and more—without rewriting their codebase.
+switch between different models—like OpenAI, Anthropic, Hugging Face, VertexAI, and more—without  
+rewriting their codebase.
 
 ```bash
 pip install litellm
 ```
+
 ## Core Capabilities
 
 - **Unified Interface**: Use the same function calls (`completion`, `embedding`, etc.) across all supported providers.
@@ -19,16 +19,12 @@ pip install litellm
 - **Streaming & Async Support**: Includes support for streaming responses and asynchronous calls.
 
 
-
-
-
-### 🧠 Why Use LiteLLM?
+## Why Use LiteLLM?
 
 - **Simplifies LLM integration** across platforms
 - **Reduces vendor lock-in**
 - **Speeds up development** with consistent syntax
 - **Ideal for experimentation** and scaling across providers
-
 
 
 
