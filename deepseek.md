@@ -1,5 +1,12 @@
 # DeepSeek 
 
+DeepSeek LLM is a cutting-edge open-source large language model developed  
+by DeepSeek-AI, designed for high performance in natural language understanding,  
+coding, mathematics, and multilingual tasks—especially in English and Chinese.
+
+The `deepseek-chat` model points to DeepSeek-V3-0324. The `deepseek-reasoner` model  
+points to DeepSeek-R1-0528.
+
 
 ## Simple chat 
 
