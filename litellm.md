@@ -120,3 +120,101 @@ response = litellm.completion(
 
 print(response.choices[0].message.content)
 ```
+
+## Function call
+
+```python
+import random
+import litellm
+
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+
+# Define the tool exposed to the model
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_random_language",
+            "description": "Returns a random language to translate into",
+            "parameters": {
+                "type": "object",
+                "properties": {},
+                "required": []
+            }
+        }
+    }
+]
+
+# Sample text to be translated
+sample_text = "Hello, how are you?"
+prompt = f"""
+Pick a random language using get_random_language and 
+translate this sentence into it: '{sample_text}'
+"""
+
+
+# Initial user message
+messages = [
+    {
+        "role": "user",
+        "content": prompt
+    }
+]
+
+# Tool function registry
+def get_random_language():
+    languages = ["Spanish", "Czech", "Hungarian", "French", 
+                 "German", "Italian", "Slovak", "Polish", "Russian"]
+    return random.choice(languages)
+
+function_registry = {
+    "get_random_language": get_random_language
+}
+
+# First round: ask model to decide what function to call
+response = litellm.completion(
+    model="deepseek/deepseek-chat",
+    messages=messages,
+    tools=tools,
+    function_call="auto"
+)
+
+# Check if tool was called
+tool_calls = response["choices"][0]["message"].get("tool_calls")
+if not tool_calls:
+    print("No tool was called. Model responded with:")
+    print(response["choices"][0]["message"]["content"])
+    exit()
+
+tool_call = tool_calls[0]
+function_name = tool_call["function"]["name"]
+print(f"Model called function: {function_name}")
+arguments = tool_call["function"].get("arguments", "{}")
+
+# Run tool if it's registered
+if function_name in function_registry:
+    tool_result = function_registry[function_name]()
+else:
+    raise ValueError(f"Unknown function: {function_name}")
+
+# Feed tool call & result back into conversation
+messages.append(response["choices"][0]["message"])
+messages.append({
+    "role": "tool",
+    "tool_call_id": tool_call["id"],
+    "content": f'"{tool_result}"'  # needs to be a JSON string
+})
+
+# Final round: get the model to complete the translation using the tool output
+final_response = litellm.completion(
+    model="deepseek/deepseek-chat",
+    messages=messages,
+    tools=tools
+)
+
+# Print the model's translated sentence
+print("\n Model's Final Translation:")
+print(final_response["choices"][0]["message"]["content"])
+```
+
