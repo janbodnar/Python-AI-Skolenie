@@ -31,6 +31,33 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
+## Streaming response
+
+```python
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    base_url="https://api.deepseek.com",
+    api_key=os.environ.get("DEEPSEEK_API_KEY"),
+)
+
+response = client.chat.completions.create(
+    model="deepseek-chat",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant"},
+        {"role": "user", "content": "Is Pluto a planet?"},
+    ],
+    stream=True
+)
+
+# Stream the response
+for chunk in response:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+print()  # New line at the end
+```
+
 
 ## Multi-turn conversation
 
