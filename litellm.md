@@ -34,6 +34,53 @@ it specifically looks for `DEEPSEEK_API_KEY`.
 
 
 
+## Basic request via openrouter 
+
+The examples assume the existence of `OPENROUTER_API_KEY` env variable. 
+
+Using `qwen/qwen3-coder:free` model.  
+
+```python
+from litellm import completion
+
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+
+query = """
+Write a Python function that calculates age from a 
+date of birth string
+"""
+
+response = completion(
+  model="openrouter/qwen/qwen3-coder:free",
+  messages=[{ "content": query,"role": "user"}]
+)
+
+print(response.choices[0].message.content)
+```
+
+
+Using `z-ai/glm-4.5-air:free` model. 
+
+```python
+from litellm import completion
+
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning)
+
+query = """
+Write a Python function that calculates age from a 
+date of birth string
+"""
+
+response = completion(
+  model="openrouter/z-ai/glm-4.5-air:free",
+  messages=[{ "content": query,"role": "user"}]
+)
+
+print(response.choices[0].message.content)
+```
+
 
 ## Calculate cost of request
 
