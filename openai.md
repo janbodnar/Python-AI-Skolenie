@@ -207,3 +207,279 @@ print("\n Language selected:", tool_result)
 print("Final translation response:")
 print(final_response.choices[0].message.content)
 ```
+
+
+## Temperature 
+
+```python
+#!/usr/bin/env python3
+"""
+Temperature CLI App using OpenAI DeepSeek with Function Calling
+This app determines the temperature for any chosen city using Open-Meteo API
+"""
+
+import json
+import requests
+import os
+import sys
+from typing import Dict, Any, List
+import openai
+from datetime import datetime
+
+# Configure OpenAI client for DeepSeek
+client = openai.OpenAI(
+    api_key=os.getenv("DEEPSEEK_API_KEY"),
+    base_url="https://api.deepseek.com/v1"
+)
+
+
+# Function to get coordinates for a city using Open-Meteo Geocoding API
+def get_city_coordinates(city_name: str) -> Dict[str, float]:
+    """Get latitude and longitude for a given city name."""
+    try:
+        url = "https://geocoding-api.open-meteo.com/v1/search"
+        params = {
+            "name": city_name,
+            "count": 1,
+            "language": "en",
+            "format": "json"
+        }
+        
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        
+        data = response.json()
+        if "results" in data and len(data["results"]) > 0:
+            result = data["results"][0]
+            return {
+                "latitude": result["latitude"],
+                "longitude": result["longitude"],
+                "name": result.get("name", city_name),
+                "country": result.get("country", "")
+            }
+        else:
+            raise ValueError(f"City '{city_name}' not found")
+    
+    except Exception as e:
+        raise Exception(f"Error getting coordinates: {str(e)}")
+
+# Function to get temperature from Open-Meteo API
+def get_temperature(latitude: float, longitude: float) -> Dict[str, Any]:
+    """Get current temperature for given coordinates."""
+    try:
+        url = "https://api.open-meteo.com/v1/forecast"
+        params = {
+            "latitude": latitude,
+            "longitude": longitude,
+            "current_weather": "true",
+            "temperature_unit": "celsius"
+        }
+        
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+        
+        data = response.json()
+        return {
+            "temperature": data["current_weather"]["temperature"],
+            "windspeed": data["current_weather"]["windspeed"],
+            "winddirection": data["current_weather"]["winddirection"],
+            "weathercode": data["current_weather"]["weathercode"],
+            "time": data["current_weather"]["time"]
+        }
+    
+    except Exception as e:
+        raise Exception(f"Error getting temperature: {str(e)}")
+
+# Define function schema for OpenAI function calling
+functions = [
+    {
+        "name": "get_city_temperature",
+        "description": "Get the current temperature for a specific city",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "city_name": {
+                    "type": "string",
+                    "description": "The name of the city to get temperature for"
+                }
+            },
+            "required": ["city_name"]
+        }
+    }
+]
+
+# Combined function that uses both geocoding and weather APIs
+def get_city_temperature(city_name: str) -> Dict[str, Any]:
+    """Get temperature for a city using city name."""
+    try:
+        # Get coordinates
+        city_info = get_city_coordinates(city_name)
+        
+        # Get temperature
+        weather_data = get_temperature(city_info["latitude"], city_info["longitude"])
+        
+        # Combine results
+        return {
+            "city": city_info["name"],
+            "country": city_info["country"],
+            "coordinates": {
+                "latitude": city_info["latitude"],
+                "longitude": city_info["longitude"]
+            },
+            "temperature": weather_data["temperature"],
+            "windspeed": weather_data["windspeed"],
+            "winddirection": weather_data["winddirection"],
+            "weathercode": weather_data["weathercode"],
+            "time": weather_data["time"]
+        }
+    
+    except Exception as e:
+        raise Exception(f"Error getting city temperature: {str(e)}")
+
+# Function to process natural language queries using OpenAI
+def process_natural_language(query: str) -> Dict[str, Any]:
+    """Process natural language query using OpenAI function calling."""
+    try:
+        messages = [
+            {"role": "user", "content": query}
+        ]
+        
+        response = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=messages,
+            functions=functions,
+            function_call="auto"
+        )
+        
+        # Check if function was called
+        if response.choices[0].message.function_call:
+            function_call = response.choices[0].message.function_call
+            if function_call.name == "get_city_temperature":
+                arguments = json.loads(function_call.arguments)
+                city_name = arguments["city_name"]
+                return get_city_temperature(city_name)
+        
+        # If no function was called, extract city name from response
+        # Fallback to simple extraction
+        city_name = extract_city_from_query(query)
+        if city_name:
+            return get_city_temperature(city_name)
+        
+        raise ValueError("Could not determine city from query")
+    
+    except Exception as e:
+        raise Exception(f"Error processing query: {str(e)}")
+
+# Simple city name extraction fallback
+def extract_city_from_query(query: str) -> str:
+    """Extract city name from query using simple parsing."""
+    query_lower = query.lower()
+    
+    # Common patterns
+    patterns = [
+        "temperature in",
+        "weather in",
+        "what's the temperature in",
+        "what is the temperature in",
+        "how hot is it in",
+        "how cold is it in"
+    ]
+    
+    for pattern in patterns:
+        if pattern in query_lower:
+            city = query_lower.split(pattern)[1].strip()
+            # Remove punctuation
+            city = city.rstrip('?')
+            return city.title()
+    
+    # If no pattern matched, return the query as city name
+    return query.strip().title()
+
+# Weather code descriptions
+WEATHER_CODES = {
+    0: "Clear sky",
+    1: "Mainly clear",
+    2: "Partly cloudy",
+    3: "Overcast",
+    45: "Fog",
+    48: "Depositing rime fog",
+    51: "Light drizzle",
+    53: "Moderate drizzle",
+    55: "Dense drizzle",
+    61: "Slight rain",
+    63: "Moderate rain",
+    65: "Heavy rain",
+    71: "Slight snow fall",
+    73: "Moderate snow fall",
+    75: "Heavy snow fall",
+    77: "Snow grains",
+    80: "Slight rain showers",
+    81: "Moderate rain showers",
+    82: "Violent rain showers",
+    85: "Slight snow showers",
+    86: "Heavy snow showers",
+    95: "Thunderstorm",
+    96: "Thunderstorm with slight hail",
+    99: "Thunderstorm with heavy hail"
+}
+
+def get_weather_description(code: int) -> str:
+    """Get weather description from weather code."""
+    return WEATHER_CODES.get(code, "Unknown")
+
+def format_temperature_output(data: Dict[str, Any]) -> str:
+    """Format the temperature data for display."""
+    weather_desc = get_weather_description(data["weathercode"])
+    
+    output = f"""
+╔══════════════════════════════════════════════════════════════╗
+║                    WEATHER REPORT                            ║
+╠══════════════════════════════════════════════════════════════╣
+║ City: {data['city']}, {data['country']}
+║ Coordinates: {data['coordinates']['latitude']:.2f}°N, {data['coordinates']['longitude']:.2f}°E
+║ Time: {data['time']}
+║ Temperature: {data['temperature']}°C
+║ Weather: {weather_desc}
+║ Wind: {data['windspeed']} km/h at {data['winddirection']}°
+╚══════════════════════════════════════════════════════════════╝
+"""
+    return output
+
+def main():
+    """Main CLI function."""
+    print("🌡️  Temperature CLI App with OpenAI DeepSeek")
+    print("=" * 50)
+    
+    # Check if OpenAI API key is set
+    if not os.getenv("DEEPSEEK_API_KEY"):
+        print("❌ Error: DEEPSEEK_API_KEY environment variable not set")
+        print("Please set your OpenAI API key: export DEEPSEEK_API_KEY='your-key-here'")
+        sys.exit(1)
+    
+    # Get user input
+    if len(sys.argv) > 1:
+        query = " ".join(sys.argv[1:])
+    else:
+        query = input("Enter city name or weather query: ").strip()
+    
+    if not query:
+        print("❌ Error: No input provided")
+        sys.exit(1)
+    
+    try:
+        print(f"\n🔍 Processing query: '{query}'...")
+        
+        # Process the query
+        result = process_natural_language(query)
+        
+        # Display results
+        print(format_temperature_output(result))
+        
+    except Exception as e:
+        print(f"❌ Error: {str(e)}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+```
+
