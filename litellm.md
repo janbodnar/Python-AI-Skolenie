@@ -12,8 +12,10 @@ pip install litellm
 
 ## Core Capabilities
 
-- **Unified Interface**: Use the same function calls (`completion`, `embedding`, etc.) across all supported providers.
-- **Provider-Agnostic**: Switch models by simply changing the model string (e.g., from `openai/gpt-4o` to `huggingface/WizardLM`).
+- **Unified Interface**: Use the same function calls (`completion`, `embedding`, etc.)
+  across all supported providers.
+- **Provider-Agnostic**: Switch models by simply changing the model string
+  (e.g., from `openai/gpt-4o` to `huggingface/WizardLM`).
 - **Retry & Fallback Logic**: Automatically handles timeouts and failures by switching to backup models.
 - **Cost Tracking & Budgets**: Monitor usage and set spending limits per project.
 - **Streaming & Async Support**: Includes support for streaming responses and asynchronous calls.
@@ -122,6 +124,12 @@ print(response.choices[0].message.content)
 ```
 
 ## Function call
+
+The script demonstrates function calling with LiteLLM by having an AI model translate  
+"Hello, how are you?" into a randomly selected language. It defines a get_random_language  
+tool that returns a random language from 9 options, uses DeepSeek via LiteLLM to first  
+request this function call, then feeds the result back to the model to complete the  
+translation in a two-stage interaction loop.
 
 ```python
 import random
