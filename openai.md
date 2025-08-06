@@ -203,7 +203,7 @@ final_response = client.chat.completions.create(
 )
 
 # --- Output the result ---
-print("\n Language selected:", tool_result)
+print"\n Language selected:", tool_result)
 print("Final translation response:")
 print(final_response.choices[0].message.content)
 ```
@@ -467,7 +467,7 @@ def main():
         sys.exit(1)
     
     try:
-        print(f"\n🔍 Processing query: '{query}'...")
+        print("\n🔍 Processing query: '{query}'...")
         
         # Process the query
         result = process_natural_language(query)
@@ -623,7 +623,7 @@ def process_natural_language(query: str) -> Dict[str, Any]:
                 "content": (
                     "You are a weather assistant. When the user asks about weather or temperature, "
                     "identify the most likely city name and call the function get_city_temperature "
-                    "with parameter {\"city_name\": \"...\"}. Prefer well-known cities if ambiguous."
+                    "with parameter {"city_name": "..."}. Prefer well-known cities if ambiguous."
                 ),
             },
             {"role": "user", "content": query},
@@ -652,8 +652,8 @@ def process_natural_language(query: str) -> Dict[str, Any]:
                 "role": "system",
                 "content": (
                     "Extract the target city name from the user's query. "
-                    "Respond ONLY with JSON exactly in this format: {\"city_name\": \"...\"}. "
-                    "If no city is present, respond with {\"city_name\": null}."
+                    "Respond ONLY with JSON exactly in this format: {"city_name": "..."}. "
+                    "If no city is present, respond with {"city_name": null}."
                 ),
             },
             {"role": "user", "content": query},
@@ -671,7 +671,7 @@ def process_natural_language(query: str) -> Dict[str, Any]:
         except Exception:
             # As a resilience measure, try to locate a JSON object in the text
             import re
-            m = re.search(r"\{[^{}]*\"city_name\"[^{}]*\}", extract_text, re.IGNORECASE | re.DOTALL)
+            m = re.search("\{[^{}]*"city_name"[^{}]*\}", extract_text, re.IGNORECASE | re.DOTALL)
             if m:
                 try:
                     city_name = json.loads(m.group(0)).get("city_name")
@@ -758,7 +758,7 @@ def main():
         sys.exit(1)
     
     try:
-        print(f"\n🔍 Processing query: '{query}'...")
+        print("\n🔍 Processing query: '{query}'...")
         
         # Process the query
         result = process_natural_language(query)
@@ -774,3 +774,183 @@ if __name__ == "__main__":
     main()
 ```
 
+
+
+## System prompts and persona swapping (OpenRouter + OpenAI SDK compatible)
+
+This example demonstrates how swapping only the system prompt changes the
+model's persona and behavior, while keeping user inputs the same. It also shows
+optional multi-turn memory while changing personas.
+
+Prerequisites:
+- Environment variable OPENROUTER_API_KEY set
+- openai Python package installed (pip install openai)
+- Using OpenRouter-compatible OpenAI client configuration:
+  - base_url="https://openrouter.ai/api/v1"
+  - api_key=os.environ["OPENROUTER_API_KEY"]
+
+
+System prompts are a powerful way to set the model's persona, tone, and
+behavior. By changing the system prompt, you can make the model act like a 
+different character or expert, even if the user input remains the same.
+
+Persona swapping is useful for:
+- Creating multi-character chatbots
+- Adapting the model's tone for different audiences
+- Testing how the model responds to different personas
+
+
+## Single-turn: swap personas by system prompt
+
+Single-turn examples show how to change the system prompt to swap personas  
+for a single user message. The system prompt at index 0 is the only thing that   
+changes; the user message remains the same. This allows you to see how the model 
+responds differently based on the system persona.  
+
+```python
+# system_persona_examples.py
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ.get("OPENROUTER_API_KEY"),
+)
+
+MODEL = "z-ai/glm-4.5-air:free"
+
+def run_chat(system_prompt: str, user_message: str) -> str:
+    """Run a single-turn chat with a given system persona."""
+    resp = client.chat.completions.create(
+        model=MODEL,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message},
+        ],
+    )
+    return resp.choices[0].message.content
+
+def persona_swapping_single_turn():
+    user_question = "Explain recursion to a 10-year-old in 2-3 sentences."
+
+    # Persona A: Friendly teacher
+    system_a = (
+        "You are a friendly grade-school teacher. "
+        "Use simple language, warmth, and 2-3 short sentences."
+    )
+    answer_a = run_chat(system_a, user_question)
+    print("\\n--- Persona A (Friendly teacher) ---\\n" + answer_a)
+
+    # Persona B: Concise senior software engineer
+    system_b = (
+        "You are a concise senior software engineer. "
+        "Be precise, use minimal words, and avoid fluff."
+    )
+    answer_b = run_chat(system_b, user_question)
+    print("\\n--- Persona B (Senior engineer) ---\\n" + answer_b)
+
+if __name__ == "__main__":
+    persona_swapping_single_turn()
+```
+
+Run:
+```
+python system_persona_examples.py
+```
+
+Expected behavior: The two answers differ in tone and style, even though the user message is identical. Only the system role changed.
+
+## Multi-turn: preserve memory while swapping personas
+
+The multi-turn example shows how to maintain conversation history while swapping
+personas. The system message at index 0 is replaced to change the persona for
+the next turn, while keeping the conversation context intact.
+
+
+```python
+# system_persona_examples.py
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ.get("OPENROUTER_API_KEY"),
+)
+
+MODEL = "z-ai/glm-4.5-air:free"
+
+def run_chat(system_prompt: str, user_message: str) -> str:
+    """Run a single-turn chat with a given system persona."""
+    resp = client.chat.completions.create(
+        model=MODEL,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message},
+        ],
+    )
+    return resp.choices[0].message.content
+
+# system_persona_examples.py (continued)
+def persona_swapping_multi_turn():
+    # Start with Persona A and build context
+    system_a = (
+        "You are a friendly grade-school teacher. "
+        "Use simple language, warmth, and 2-3 short sentences."
+    )
+
+    # Conversation history with Persona A
+    history = [
+        {"role": "system", "content": system_a},
+        {"role": "user", "content": "I'm learning Python. What is a function?"},
+    ]
+    resp1 = client.chat.completions.create(model=MODEL, messages=history)
+    print("\\n[A1 - Teacher]\\n" + resp1.choices[0].message.content)
+    history.append(resp1.choices[0].message)
+
+    # Continue with Persona A for follow-up
+    history.append({"role": "user", "content": "Can you give a very short example?"})
+    resp2 = client.chat.completions.create(model=MODEL, messages=history)
+    print("\\n[A2 - Teacher]\\n" + resp2.choices[0].message.content)
+    history.append(resp2.choices[0].message)
+
+    # Swap to Persona B but preserve history context;
+    # IMPORTANT: replace the last system message to steer new turns.
+    system_b = (
+        "You are a concise senior software engineer. "
+        "Be precise and avoid fluff. Keep answers tight."
+    )
+    # Replace the initial system message with Persona B for the next turn:
+    history[0] = {"role": "system", "content": system_b}
+
+    # Ask another follow-up; model retains previous conversation content
+    history.append({"role": "user", "content": "Optimize the example for clarity."})
+    resp3 = client.chat.completions.create(model=MODEL, messages=history)
+    print("\\n[B1 - Senior engineer]\\n" + resp3.choices[0].message.content)
+
+if __name__ == "__main__":
+    persona_swapping_multi_turn()
+```
+
+Notes:
+- In multi-turn flows, the conversation "memory" is the prior messages you send  
+  back each time. Swapping personas is done by changing the system message at  
+  index 0 while keeping the rest of the history.  
+- You can insert or prepend a new system message for the next turn; most APIs  
+  use the first system message as the active instruction.  
+
+## Minimal persona system prompts
+
+- Helpful tutor:
+  - "You are a friendly tutor. Use simple language, empathy, and short
+    sentences."
+- Product manager:
+  - "You are a pragmatic product manager. Focus on user impact, trade-offs, and
+    prioritization."
+- Senior engineer:
+  - "You are a concise senior software engineer. Be precise and to the point."
+- Security auditor:
+  - "You are a cautious security auditor. Emphasize risks, mitigations, and
+    least privilege."
+- Data scientist:
+  - "You are a data scientist. Offer statistical reasoning and caveats in clear
+    language."
