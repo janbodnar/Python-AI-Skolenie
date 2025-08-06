@@ -968,7 +968,219 @@ Notes:
     language."
 
 
- ## Prompting and shooting 
+## Chain-of-Thought (CoT) Prompting — Brief Definition
+
+**Chain-of-thought prompting** is a technique in prompt engineering where a language model is guided  
+to solve complex problems by generating **intermediate reasoning steps** before arriving at a final answer.
+
+- Simulates **human-like reasoning**
+- Breaks down problems into **manageable sub-steps**
+- Improves accuracy on tasks like **math, logic, and commonsense reasoning**
+
+Instead of asking for a direct answer, you prompt the model to “think step by step,” which helps it stay  
+logical and coherent throughout the process.
+
+The example demonstrates the Chain-of-Thought (CoT) prompting technique using  
+OpenRouter's Horizon model. It summarizes a math problem and shows how to use  
+different prompting strategies. The problem involves basic arithmetic  
+operations and the script provides three different approaches to solve it:  
+ 
+1) Explicit CoT with step-by-step reasoning     
+2) Concise final answer only  
+3) Safe-CoT with brief rationale  
+   
+```
+import os
+import sys
+import textwrap
+
+try:
+    # Optional convenience for local development
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
+
+
+def load_env():
+    """
+    Load environment variables (if python-dotenv is installed) and validate key presence.
+    Expected: OPENROUTER_API_KEY
+    """
+    if load_dotenv:
+        load_dotenv()
+    if not os.getenv("OPENROUTER_API_KEY"):
+        print(
+            "Missing OPENROUTER_API_KEY in environment.\n"
+            "Create a .env with OPENROUTER_API_KEY=sk-or-... OR export it.",
+            file=sys.stderr,
+        )
+
+
+def get_client():
+    """
+    Return an OpenAI-compatible client targeting OpenRouter.
+    Requires: openai (v1+)
+    """
+    try:
+        from openai import OpenAI  # type: ignore
+    except Exception as e:
+        print(
+            "The 'openai' package is required (pip install openai). Error: {}".format(e),
+            file=sys.stderr,
+        )
+        raise
+
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    if not api_key:
+        raise RuntimeError("OPENROUTER_API_KEY is not set")
+
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+    )
+    return client
+
+
+def call_horizon(
+    client,
+    messages,
+    temperature=0.2,
+    max_tokens=512,
+    seed=42,
+):
+    """
+    Wrapper for OpenRouter chat.completions using the Horizon LLM.
+    Model: openrouter/horizon-beta
+    """
+    completion = client.chat.completions.create(
+        model="openrouter/horizon-beta",
+        messages=messages,  # type: ignore
+        temperature=temperature,
+        max_tokens=max_tokens,
+        seed=seed,
+    )
+    return completion.choices[0].message.content or ""
+
+
+def pretty_box(title, content):
+    print("=" * 80)
+    print(title)
+    print("-" * 80)
+    print(textwrap.dedent(content).strip())
+    print("=" * 80)
+
+
+def build_problem():
+    # Classic GSM-style problem
+    return (
+        "Taylor has 5 packs of markers. Each pack contains 12 markers. "
+        "Taylor gives 7 markers to a friend and then buys 1 more pack. "
+        "How many markers does Taylor have now?"
+    )
+
+
+def cot_messages(problem):
+    """
+    Explicit Chain-of-Thought prompting.
+    Note: This can increase token usage. Consider concise variants for production.
+    """
+    return [
+        {
+            "role": "system",
+            "content": (
+                "You are a careful math tutor. Use step-by-step reasoning to solve problems accurately."
+            ),
+        },
+        {
+            "role": "user",
+            "content": (
+                f"Problem: {problem}\n\n"
+                "Think through the problem step by step, do arithmetic carefully, and explain your reasoning "
+                "before giving the final answer.\n"
+                "Format:\n"
+                "Reasoning:\n"
+                "Final Answer: <number>"
+            ),
+        },
+    ]
+
+
+def concise_messages(problem):
+    """
+    Ask only for the final numeric answer.
+    Helpful when you want a short, low-cost response once you've validated the approach.
+    """
+    return [
+        {
+            "role": "system",
+            "content": "You are a concise math solver. Provide only the final numeric answer.",
+        },
+        {
+            "role": "user",
+            "content": f"Problem: {problem}\nGive only: Final Answer: <number>",
+        },
+    ]
+
+
+def safe_cot_messages(problem):
+    """
+    A constrained CoT that requests concise reasoning (3-5 steps) to limit verbosity/cost.
+    """
+    return [
+        {
+            "role": "system",
+            "content": "You are a helpful math tutor. Show a brief 3-5 step reasoning then the final answer.",
+        },
+        {
+            "role": "user",
+            "content": (
+                f"Problem: {problem}\n\n"
+                "Provide concise reasoning in at most 5 short steps, then the final answer.\n"
+                "Format:\n"
+                "Reasoning:\n"
+                "Final Answer: <number>"
+            ),
+        },
+    ]
+
+
+def run_demo():
+    """
+    Demonstrates three prompting strategies with OpenRouter + Horizon:
+      1) Explicit CoT (step-by-step reasoning)
+      2) Concise-only (final numeric answer)
+      3) Safe-CoT (brief 3-5 step rationale)
+    """
+    load_env()
+    client = get_client()
+    problem = build_problem()
+
+    # 1) Explicit CoT
+    cot_out = call_horizon(client, cot_messages(problem), temperature=0.2, max_tokens=600)
+    pretty_box("Explicit CoT (step-by-step reasoning)", cot_out)
+
+    # 2) Concise final answer only
+    concise_out = call_horizon(client, concise_messages(problem), temperature=0.0, max_tokens=50)
+    pretty_box("Concise only (final numeric answer)", concise_out)
+
+    # 3) Safe-CoT with brief rationale
+    safe_cot_out = call_horizon(client, safe_cot_messages(problem), temperature=0.2, max_tokens=200)
+    pretty_box("Safe-CoT (brief rationale)", safe_cot_out)
+
+
+if __name__ == "__main__":
+    """
+    Usage:
+      1) pip install openai python-dotenv  (or manage deps in your preferred file)
+      2) Put your key in .env: OPENROUTER_API_KEY=sk-or-...
+      3) python example_cot_openrouter_horizon.py
+    """
+    run_demo()
+```
+
+
+
+## Prompting and shooting 
 
 In the context of AI, **prompting** is the act of providing a large language model (LLM) with   
 instructions, questions, or context to guide it toward a specific response. A prompt is simply  
