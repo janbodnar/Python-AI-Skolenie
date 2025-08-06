@@ -960,3 +960,254 @@ Notes:
 - Data scientist:
   - "You are a data scientist. Offer statistical reasoning and caveats in clear
     language."
+
+
+ ## Prompting and shooting 
+
+In the context of AI, **prompting** is the act of providing a large language model (LLM) with   
+instructions, questions, or context to guide it toward a specific response. A prompt is simply  
+the text you input into the AI.
+
+**Prompting is the primary way we communicate with and control AI models.** A well-crafted prompt  
+can be the difference between a useless, generic response and a highly accurate, useful one.
+
+### What does "-Shot" or "Shooting" Mean?
+
+The term **"-shot"** is a machine learning metaphor for **"an example"** or **"a demonstration"**.  
+When you are "shooting," you are giving the model examples to learn from within the prompt itself.  
+This is also known as **in-context learning**.
+
+So, when you combine the two:
+
+* **Zero-Shot:** You give the model **zero shots** (no examples) at learning the task. You are betting  
+  that the model is smart enough to figure out what you want from the instruction alone.  
+* **One-Shot:** You give the model **one shot** (a single example) to learn from. This gives it a clear  
+  hint about the expected pattern or output format.  
+* **Few-Shot:** You give the model **a few shots** (multiple examples) to learn from. This provides more  
+  robust guidance, helping it understand more complex or nuanced tasks.
+
+In summary, **prompting** is how you talk to the AI, and **"shooting"** refers to the number of examples  
+you include in your prompt to show the AI what you mean.
+
+
+ ```python
+"""
+Demonstration: Zero-shot vs One-shot vs Few-shot Prompting (OpenRouter-compatible OpenAI SDK)
+
+Prerequisites:
+- pip install openai
+- Environment variable OPENROUTER_API_KEY must be set.
+
+This script runs the same classification task (classify short support tickets into categories)
+using three approaches:
+1) Zero-shot: only task instruction, no examples
+2) One-shot: one labeled example
+3) Few-shot: three labeled examples
+
+It prints the model outputs to show how examples shape behavior and consistency.
+At the end, it prints a compact summary table comparing results across approaches.
+
+Usage:
+    python prompting_zero_one_few_shot.py --model z-ai/glm-4.5-air:free
+"""
+
+import argparse
+import os
+import sys
+from textwrap import dedent
+
+# OpenRouter-compatible OpenAI client
+try:
+    from openai import OpenAI
+except ImportError:
+    print("Missing dependency: openai. Install with: pip install openai")
+    sys.exit(1)
+
+
+DEFAULT_MODEL = "openrouter/horizon-beta"
+
+CATEGORIES = ["billing", "technical", "account", "shipping", "other"]
+
+TICKETS = [
+    "My last invoice seems too high, can you check the charges?",
+    "I can't log in after resetting my password.",
+    "Where is my package? The tracking has not updated for 3 days.",
+    "How do I change the email on my profile?",
+    "The app crashes when I try to upload a file.",
+    "I was billed twice for the same subscription this month.",
+    "My profile picture keeps disappearing after I upload it.",
+    "Can I get a refund for the duplicate charge?",
+    "The login page shows an error after the latest update.",
+    "I need to update my shipping address before the order ships.",
+]
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Zero-shot / One-shot / Few-shot prompting demo.")
+    parser.add_argument("--model", type=str, default=DEFAULT_MODEL, help=f"LLM model (default: {DEFAULT_MODEL})")
+    return parser.parse_args()
+
+
+def get_client():
+    api_key = os.environ.get("OPENROUTER_API_KEY")
+    if not api_key:
+        print("Missing OPENROUTER_API_KEY environment variable.")
+        sys.exit(1)
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+    )
+    return client
+
+
+def common_system():
+    return dedent(f"""
+        You are a helpful assistant that classifies short customer support tickets.
+        Output ONLY a single category from this set: {CATEGORIES}.
+        If uncertain, choose "other". Do not add extra words.
+    """).strip()
+
+
+def run_chat(client, model, messages):
+    resp = client.chat.completions.create(
+        model=model,
+        messages=messages,
+    )
+    return resp.choices[0].message.content.strip()
+
+
+def normalize_label(text):
+    """
+    Normalize model output to a single token label for table readability.
+    - Lowercase, strip punctuation/quotes
+    - Pick the first known category mentioned
+    - Fallback to 'other' if none matched
+    """
+    import re
+    raw = (text or "").strip().lower()
+    raw = raw.replace('"', '').replace("'", "")
+    # compress whitespace
+    raw = re.sub(r"\s+", " ", raw)
+    # try exact match first
+    for c in CATEGORIES:
+        if raw == c:
+            return c
+    # search first occurrence of any category token
+    for c in CATEGORIES:
+        if re.search(rf"\b{re.escape(c)}\b", raw):
+            return c
+    return "other"
+
+
+def zero_shot(client, model, ticket):
+    system = common_system()
+    user = f"Ticket: {ticket}\nCategory:"
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": user},
+    ]
+    return run_chat(client, model, messages)
+
+
+def one_shot(client, model, ticket):
+    system = common_system()
+    example_input = "The invoice for last month has unexpected charges."
+    example_output = "billing"
+
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": f"Ticket: {example_input}\nCategory:"},
+        {"role": "assistant", "content": example_output},
+        {"role": "user", "content": f"Ticket: {ticket}\nCategory:"},
+    ]
+    return run_chat(client, model, messages)
+
+
+def few_shot(client, model, ticket):
+    system = common_system()
+
+    examples = [
+        ("I can't access my account after the update.", "technical"),
+        ("Please change the email on my account to my work address.", "account"),
+        ("The shipping status hasn't changed and the package is late.", "shipping"),
+        ("I was charged twice for the same subscription this month.", "billing"),
+        ("My profile picture keeps disappearing after I upload it.", "technical"),
+    ]
+
+    messages = [{"role": "system", "content": system}]
+
+    for ex_in, ex_out in examples:
+        messages.append({"role": "user", "content": f"Ticket: {ex_in}\nCategory:"})
+        messages.append({"role": "assistant", "content": ex_out})
+
+    messages.append({"role": "user", "content": f"Ticket: {ticket}\nCategory:"})
+
+    return run_chat(client, model, messages)
+
+
+def main():
+    args = parse_args()
+    client = get_client()
+
+    print("Task: Classify support tickets into one of", CATEGORIES)
+    print("\nTickets:")
+    for i, t in enumerate(TICKETS, 1):
+        print(f"{i}. {t}")
+
+    # Collect raw and normalized results for summary
+    zero_raw, one_raw, few_raw = [], [], []
+    zero, one, few = [], [], []
+
+    print("\n=== ZERO-SHOT RESULTS ===")
+    for t in TICKETS:
+        out = zero_shot(client, args.model, t)
+        zero_raw.append(out)
+        z = normalize_label(out)
+        zero.append(z)
+        print(f"- {t}\n  -> {out}")
+
+    print("\n=== ONE-SHOT RESULTS ===")
+    for t in TICKETS:
+        out = one_shot(client, args.model, t)
+        one_raw.append(out)
+        o = normalize_label(out)
+        one.append(o)
+        print(f"- {t}\n  -> {out}")
+
+    print("\n=== FEW-SHOT RESULTS ===")
+    for t in TICKETS:
+        out = few_shot(client, args.model, t)
+        few_raw.append(out)
+        f = normalize_label(out)
+        few.append(f)
+        print(f"- {t}\n  -> {out}")
+
+    # Summary table (normalized labels for readability)
+    print("\n=== SUMMARY TABLE (normalized) ===")
+    print("| # | Ticket | Zero-shot | One-shot | Few-shot |")
+    print("|---|--------|-----------|----------|----------|")
+    for i, t in enumerate(TICKETS, 1):
+        z, o, f = zero[i-1], one[i-1], few[i-1]
+        short_t = t if len(t) <= 60 else t[:57] + "..."
+        print(f"| {i} | {short_t} | {z} | {o} | {f} |")
+
+    # Optional: show raw outputs table for inspection
+    print("\n=== RAW OUTPUTS (verbatim) ===")
+    print("| # | Zero-shot | One-shot | Few-shot |")
+    print("|---|-----------|----------|----------|")
+    for i in range(len(TICKETS)):
+        zr = zero_raw[i].replace("\n", " ")[:120]
+        orr = one_raw[i].replace("\n", " ")[:120]
+        fr = few_raw[i].replace("\n", " ")[:120]
+        print(f"| {i+1} | {zr} | {orr} | {fr} |")
+
+    print("\nNotes:")
+    print("- Normalized table shows clean category tokens for comparison.")
+    print("- Raw outputs table helps students see how prompting affects verbosity.")
+    print("- Few-shot typically yields the most consistent category usage.")
+
+
+if __name__ == "__main__":
+    main()
+```
+
