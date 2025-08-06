@@ -778,34 +778,34 @@ if __name__ == "__main__":
 
 ## System prompts and persona swapping (OpenRouter + OpenAI SDK compatible)
 
-This example demonstrates how swapping only the system prompt changes the
-model's persona and behavior, while keeping user inputs the same. It also shows
-optional multi-turn memory while changing personas.
+This example demonstrates how swapping only the system prompt changes the  
+model's persona and behavior, while keeping user inputs the same. It also shows  
+optional multi-turn memory while changing personas.  
 
 Prerequisites:
-- Environment variable OPENROUTER_API_KEY set
-- openai Python package installed (pip install openai)
-- Using OpenRouter-compatible OpenAI client configuration:
-  - base_url="https://openrouter.ai/api/v1"
-  - api_key=os.environ["OPENROUTER_API_KEY"]
+- Environment variable OPENROUTER_API_KEY set  
+- openai Python package installed (pip install openai)  
+- Using OpenRouter-compatible OpenAI client configuration:  
+  - base_url="https://openrouter.ai/api/v1"  
+  - api_key=os.environ["OPENROUTER_API_KEY"]  
 
 
-System prompts are a powerful way to set the model's persona, tone, and
-behavior. By changing the system prompt, you can make the model act like a 
-different character or expert, even if the user input remains the same.
+System prompts are a powerful way to set the model's persona, tone, and  
+behavior. By changing the system prompt, you can make the model act like a   
+different character or expert, even if the user input remains the same.  
 
-Persona swapping is useful for:
-- Creating multi-character chatbots
-- Adapting the model's tone for different audiences
-- Testing how the model responds to different personas
+Persona swapping is useful for:  
+- Creating multi-character chatbots  
+- Adapting the model's tone for different audiences  
+- Testing how the model responds to different personas  
 
 
 ## Single-turn: swap personas by system prompt
 
-Single-turn examples show how to change the system prompt to swap personas  
-for a single user message. The system prompt at index 0 is the only thing that   
-changes; the user message remains the same. This allows you to see how the model 
-responds differently based on the system persona.  
+Single-turn examples show how to change the system prompt to swap personas   
+for a single user message. The system prompt at index 0 is the only thing that    
+changes; the user message remains the same. This allows you to see how the model   
+responds differently based on the system persona.    
 
 ```python
 # system_persona_examples.py
@@ -858,13 +858,14 @@ Run:
 python system_persona_examples.py
 ```
 
-Expected behavior: The two answers differ in tone and style, even though the user message is identical. Only the system role changed.
+Expected behavior: The two answers differ in tone and style, even though the user  
+message is identical. Only the system role changed.  
 
 ## Multi-turn: preserve memory while swapping personas
 
-The multi-turn example shows how to maintain conversation history while swapping
-personas. The system message at index 0 is replaced to change the persona for
-the next turn, while keeping the conversation context intact.
+The multi-turn example shows how to maintain conversation history while swapping  
+personas. The system message at index 0 is replaced to change the persona for  
+the next turn, while keeping the conversation context intact.  
 
 
 ```python
