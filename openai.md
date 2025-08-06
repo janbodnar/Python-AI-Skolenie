@@ -211,6 +211,11 @@ print(final_response.choices[0].message.content)
 
 ## Temperature 
 
+The next example demonstrates how to use OpenAI's function calling capabilities  
+to create a CLI app that fetches the current temperature for a given city using  
+the Open-Meteo API. The app uses natural language processing to extract the city  
+name from user queries and provides structured output.  
+
 ```python
 #!/usr/bin/env python3
 """
