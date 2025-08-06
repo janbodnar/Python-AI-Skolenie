@@ -1016,7 +1016,7 @@ operations and the script provides three different approaches to solve it:
 2) Concise final answer only  
 3) Safe-CoT with brief rationale  
    
-```
+```python
 import os
 import sys
 import textwrap
