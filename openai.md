@@ -980,6 +980,33 @@ to solve complex problems by generating **intermediate reasoning steps** before 
 Instead of asking for a direct answer, you prompt the model to “think step by step,” which helps it stay  
 logical and coherent throughout the process.
 
+By making its reasoning explicit, the LLM is forced to follow a more  
+structured, step-by-step path to the answer. This process reduces the  
+likelihood of "jumping to conclusions."  
+
+Here's a breakdown of why this reduces mistakes:  
+
+1. Self-Correction When an LLM generates its reasoning step-by-step, it's  
+essentially creating a series of intermediate thoughts. A logical error in one  
+step is often more apparent when it's written out, allowing the model to  
+correct itself in a subsequent step. This is similar to how a person might  
+catch a math mistake by writing out their work instead of doing it all in  
+their head.  
+
+2. Reduced Over-generalization Without CoT, an LLM might rely on a pattern or  
+an association from its training data that's a shortcut but not applicable to  
+the current problem. By forcing it to break down the problem, CoT makes the  
+model process the unique details of the prompt more carefully. This prevents  
+it from defaulting to a general, but potentially incorrect, answer.  
+
+3. Verification Forcing the LLM to provide its reasoning means that its final  
+answer is no longer a blind guess. It's now supported by a series of logical  
+steps. If the final answer is wrong, a human can easily look at the reasoning  
+to pinpoint the exact step where the model went astray, making the error  
+transparent and easier to debug.  
+
+
+
 The example demonstrates the Chain-of-Thought (CoT) prompting technique using  
 OpenRouter's Horizon model. It summarizes a math problem and shows how to use  
 different prompting strategies. The problem involves basic arithmetic  
