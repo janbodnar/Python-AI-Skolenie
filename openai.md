@@ -1253,3 +1253,190 @@ if __name__ == "__main__":
     main()
 ```
 
+## Agents
+
+An agent is a system that autonomously perceives its environment, makes decisions, and takes    
+actions to achieve a specific goal—often by interacting with tools, APIs, or other systems.  
+
+The difference between an agent and normal code that chats with a large language model (LLM)  
+lies in autonomy, decision-making, and task orchestration. Let’s break it down:  
+
+---
+
+### 🤖 Agent vs. Normal LLM Code
+
+| Feature                      | **Agent**                                                                 | **Normal LLM Code**                                                  |
+|-----------------------------|---------------------------------------------------------------------------|----------------------------------------------------------------------|
+| **Autonomy**                | Can make decisions and take actions without constant user input           | Executes only what the user explicitly asks                          |
+| **Memory / State**          | Maintains context across steps, sometimes with long-term memory           | Usually stateless or limited to short-term context                  |
+| **Tool Use**                | Can call external tools, APIs, databases, or code to complete tasks       | May respond with code or suggestions, but doesn’t execute them      |
+| **Goal-Oriented Behavior**  | Works toward a defined objective, often breaking it into subtasks         | Responds to prompts without a broader goal                          |
+| **Planning & Reasoning**    | Plans steps, evaluates outcomes, and adjusts strategy                     | Responds reactively, without strategic planning                     |
+| **Looping / Iteration**     | Can loop through tasks, retry failures, and refine outputs                | Typically one-shot responses unless manually prompted               |
+| **Examples**                | AutoGPT, LangChain agents, OpenAI’s function-calling agents               | Basic chatbot, code assistant, or prompt-based interaction          |
+
+
+
+
+
+This program summarizes web content from URLs using OpenAI's API.  
+It fetches the content of each URL, extracts text, and generates a summary.  
+The agent can process multiple URLs concurrently for efficiency.  
+
+```python
+import asyncio
+import aiohttp
+import os
+from openai import AsyncOpenAI
+from bs4 import BeautifulSoup
+import logging
+
+
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+import sys
+
+# Ensure compatibility with Windows event loop policy
+if sys.platform.startswith("win"):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
+class URLSummarizerAgent:
+    """Agent that summarizes web content from URLs using OpenAI"""
+    
+    def __init__(self, api_key, model="openrouter/horizon-beta"):
+        self.client = AsyncOpenAI(
+            api_key=api_key,
+            base_url="https://openrouter.ai/api/v1"
+        )
+        self.model = model
+        
+    async def fetch_url_content(self, url: str) -> str:
+        """Fetch and extract text content from URL"""
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, timeout=30) as response:
+                    if response.status == 200:
+                        html = await response.text()
+                        soup = BeautifulSoup(html, 'html.parser')
+                        
+                        # Remove script and style elements
+                        for script in soup(["script", "style"]):
+                            script.decompose()
+                        
+                        # Get text content
+                        text = soup.get_text()
+                        lines = (line.strip() for line in text.splitlines())
+                        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+                        content = ' '.join(chunk for chunk in chunks if chunk)
+                        
+                        # Limit content to avoid token limits
+                        return content[:8000]
+                    else:
+                        logger.error(f"Failed to fetch {url}: {response.status}")
+                        return ""
+        except Exception as e:
+            logger.error(f"Error fetching {url}: {str(e)}")
+            return ""
+    
+    async def summarize_text(self, text, max_length=150):
+        """Summarize text using OpenAI"""
+        if not text:
+            return "No content to summarize"
+            
+        prompt = f"""Please provide a concise summary of the following text in {max_length} words or less. 
+Focus on the main points and key insights:
+
+{text}
+
+Summary:"""
+
+        try:
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=200,
+                temperature=0.3
+            )
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            logger.error(f"Error summarizing text: {str(e)}")
+            return "Error generating summary"
+    
+    async def summarize_url(self, url):
+        """Summarize a single URL"""
+        logger.info(f"Processing URL: {url}")
+        
+        content = await self.fetch_url_content(url)
+        if not content:
+            return {"url": url, "summary": "Failed to fetch content", "status": "error"}
+        
+        summary = await self.summarize_text(content)
+        return {
+            "url": url,
+            "summary": summary,
+            "status": "success",
+            "content_length": len(content)
+        }
+    
+    async def summarize_multiple_urls(self, urls):
+        """Summarize multiple URLs concurrently"""
+        logger.info(f"Starting to process {len(urls)} URLs")
+        
+        # Create independent tasks for each URL
+        tasks = [self.summarize_url(url) for url in urls]
+        
+        # Run all tasks concurrently
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # Handle any exceptions
+        processed_results = []
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                processed_results.append({
+                    "url": urls[i],
+                    "summary": f"Error: {str(result)}",
+                    "status": "error"
+                })
+            else:
+                processed_results.append(result)
+        
+        return processed_results
+
+async def main():
+    """Example usage"""
+    # Get API key from environment
+    api_key = os.getenv("OPENROUTER_API_KEY")
+    if not api_key:
+        raise ValueError("Please set OPENROUTER_API_KEY environment variable")
+    
+    # Initialize agent
+    agent = URLSummarizerAgent(api_key)
+    
+    # Example URLs to summarize
+    urls = [
+        "https://en.wikipedia.org/wiki/Artificial_intelligence",
+        "https://en.wikipedia.org/wiki/Machine_learning",
+        "https://en.wikipedia.org/wiki/Deep_learning"
+    ]
+    
+    # Process URLs concurrently
+    results = await agent.summarize_multiple_urls(urls)
+    
+    # Display results
+    for result in results:
+        print(f"\n{'='*60}")
+        print(f"URL: {result['url']}")
+        print(f"Status: {result['status']}")
+        print(f"Summary: {result['summary']}")
+        if 'content_length' in result:
+            print(f"Content Length: {result['content_length']} characters")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
