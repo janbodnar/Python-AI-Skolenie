@@ -1016,6 +1016,13 @@ import os
 import sys
 from textwrap import dedent
 
+try:
+    from rich.console import Console
+    from rich.table import Table
+    RICH_AVAILABLE = True
+except ImportError:
+    RICH_AVAILABLE = False
+
 # OpenRouter-compatible OpenAI client
 try:
     from openai import OpenAI
@@ -1183,25 +1190,54 @@ def main():
         print(f"- {t}\n  -> {out}")
 
     # Summary table (normalized labels for readability)
-    print("\n=== SUMMARY TABLE (normalized) ===")
-    print("| # | Ticket | Zero-shot | One-shot | Few-shot |")
-    print("|---|--------|-----------|----------|----------|")
-    for i, t in enumerate(TICKETS, 1):
-        z, o, f = zero[i-1], one[i-1], few[i-1]
-        short_t = t if len(t) <= 60 else t[:57] + "..."
-        print(f"| {i} | {short_t} | {z} | {o} | {f} |")
+    if RICH_AVAILABLE:
+        console = Console()
+        table = Table(title="Summary Table (normalized)")
+        table.add_column("#", justify="right")
+        table.add_column("Ticket", max_width=60)
+        table.add_column("Zero-shot")
+        table.add_column("One-shot")
+        table.add_column("Few-shot")
 
-    # Optional: show raw outputs table for inspection
-    print("\n=== RAW OUTPUTS (verbatim) ===")
-    print("| # | Zero-shot | One-shot | Few-shot |")
-    print("|---|-----------|----------|----------|")
-    for i in range(len(TICKETS)):
-        zr = zero_raw[i].replace("\n", " ")[:120]
-        orr = one_raw[i].replace("\n", " ")[:120]
-        fr = few_raw[i].replace("\n", " ")[:120]
-        print(f"| {i+1} | {zr} | {orr} | {fr} |")
+        for i, t in enumerate(TICKETS, 1):
+            z, o, f = zero[i-1], one[i-1], few[i-1]
+            table.add_row(str(i), t, z, o, f)
+        console.print(table)
+
+        raw_table = Table(title="Raw Outputs (verbatim)")
+        raw_table.add_column("#")
+        raw_table.add_column("Zero-shot", max_width=40)
+        raw_table.add_column("One-shot", max_width=40)
+        raw_table.add_column("Few-shot", max_width=40)
+        for i in range(len(TICKETS)):
+            zr = zero_raw[i].replace("\n", " ")[:120]
+            orr = one_raw[i].replace("\n", " ")[:120]
+            fr = few_raw[i].replace("\n", " ")[:120]
+            raw_table.add_row(str(i+1), zr, orr, fr)
+        console.print(raw_table)
+    else:
+        print("\n=== SUMMARY TABLE (normalized) ===")
+        print("| # | Ticket | Zero-shot | One-shot | Few-shot |")
+        print("|---|--------|-----------|----------|----------|")
+        for i, t in enumerate(TICKETS, 1):
+            z, o, f = zero[i-1], one[i-1], few[i-1]
+            short_t = t if len(t) <= 60 else t[:57] + "..."
+            print(f"| {i} | {short_t} | {z} | {o} | {f} |")
+
+        print("\n=== RAW OUTPUTS (verbatim) ===")
+        print("| # | Zero-shot | One-shot | Few-shot |")
+        print("|---|-----------|----------|----------|")
+        for i in range(len(TICKETS)):
+            zr = zero_raw[i].replace("\n", " ")[:120]
+            orr = one_raw[i].replace("\n", " ")[:120]
+            fr = few_raw[i].replace("\n", " ")[:120]
+            print(f"| {i+1} | {zr} | {orr} | {fr} |")
 
     print("\nNotes:")
+    if RICH_AVAILABLE:
+        print("Tables rendered with Rich (https://rich.readthedocs.io)")
+    else:
+        print("Install Rich for prettier tables: pip install rich")
     print("- Normalized table shows clean category tokens for comparison.")
     print("- Raw outputs table helps students see how prompting affects verbosity.")
     print("- Few-shot typically yields the most consistent category usage.")
