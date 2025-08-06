@@ -113,18 +113,23 @@ print(response.choices[0].message.content)
 
 ## Function call 
 
+This example demonstrates how to use the OpenRouter-compatible OpenAI SDK  
+to call a model with function calling capabilities, specifically DeepSeek's  
+chat model.
+
 ```python
 import random
 import os
 from openai import OpenAI
 
-# --- Step 1: Initialize DeepSeek client ---
+
+# Initialize DeepSeek client
 client = OpenAI(
     api_key=os.getenv("DEEPSEEK_API_KEY"),  # Make sure this env var is set
     base_url="https://api.deepseek.com"
 )
 
-# --- Step 2: Define callable tool for the model ---
+# Define callable tool for the model
 tools = [
     {
         "type": "function",
@@ -140,20 +145,22 @@ tools = [
     }
 ]
 
-# --- Step 3: Sample input sentence ---
+# Initial prompt to model
+
 sample_text = "Hello, how are you?"
 
-# --- Step 4: Initial prompt to model ---
+prompt = f"""Pick a random language using get_random_language and 
+translate this sentence into it: '{sample_text}'
+"""
+
 messages = [
     {
         "role": "user",
-        "content": f"Pick a random language using get_random_language and translate this sentence into it: '{sample_text}'"
+        "content": prompt
     }
 ]
 
-# --- Step 5: Function registry (dispatcher) ---
-
-
+# Function registry (dispatcher) ---
 def get_random_language():
     languages = ["Spanish", "Czech", "Hungarian", "French", 
                  "German", "Italian", "Slovak", "Polish", "Russian"]
@@ -163,7 +170,7 @@ function_registry = {
     "get_random_language": get_random_language
 }
 
-# --- Step 6: First model call to trigger tool ---
+# First model call to trigger tool
 response = client.chat.completions.create(
     model="deepseek-chat",
     messages=messages,
@@ -177,7 +184,7 @@ if not tool_calls:
     print(response.choices[0].message.content)
     exit()
 
-# --- Step 7: Extract tool call and execute it ---
+# Extract tool call and execute it
 tool_call = tool_calls[0]
 function_name = tool_call.function.name
 
@@ -187,7 +194,7 @@ if function_name in function_registry:
 else:
     raise ValueError(f"Unknown function: {function_name}")
 
-# --- Step 8: Feed tool call + result back to model ---
+# Feed tool call + result back to model
 messages.append(response.choices[0].message)
 messages.append({
     "role": "tool",
@@ -195,19 +202,18 @@ messages.append({
     "content": f'"{tool_result}"'
 })
 
-# --- Step 9: Final model call to complete the task ---
+# Final model call to complete the task
 final_response = client.chat.completions.create(
     model="deepseek-chat",
     messages=messages,
     tools=tools
 )
 
-# --- Output the result ---
-print"\n Language selected:", tool_result)
+# Output the result
+print("\n Language selected:", tool_result)
 print("Final translation response:")
 print(final_response.choices[0].message.content)
 ```
-
 
 ## Temperature 
 
