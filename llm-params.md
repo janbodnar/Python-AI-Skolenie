@@ -89,7 +89,7 @@ different models and use cases, so experimentation is key to finding the best
 combination for your specific needs.  
 
 
-## Temperature example
+## Example
 
 ```python
 #!/usr/bin/python
@@ -155,7 +155,7 @@ def demonstrate_parameter_effects():
                     messages=[{"role": "user", "content": prompt}],
                     temperature=temp,
                     top_p=top_p,
-                    max_tokens=30
+                    max_tokens=300
                 )
                 
                 result = response.choices[0].message.content.strip()
@@ -184,11 +184,11 @@ def interactive_demo():
             print("-" * 40)
             
             response = client.chat.completions.create(
-                model="gpt-3.5-turbo",
+                model="deepseek-chat",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=temp,
                 top_p=top_p,
-                max_tokens=50
+                max_tokens=1500
             )
             
             result = response.choices[0].message.content.strip()
