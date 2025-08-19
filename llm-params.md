@@ -34,13 +34,13 @@ possible next words.
   the most likely tokens that collectively account for 90% of the total probability. The model then  
   randomly samples from this "nucleus" of tokens.  
 
-* **Low Top-p (e.g., 0.1)**: This restricts the model to a very small set of the most probable tokens, resulting  
-   in predictable and constrained text. This is useful for maintaining a consistent tone and style.  
+* **Low Top-p (e.g., 0.1)**: This restricts the model to a very small set of the most probable tokens,  
+  resulting in predictable and constrained text. This is useful for maintaining a consistent tone and style.   
 
-* **High Top-p (e.g., 0.9+)**: This allows the model to consider a broader range of tokens, promoting more
-  diverse and nuanced outputs. This is often preferred over temperature for creative tasks because it adapts to
-  the context. In a situation where a few words are highly likely, `top_p` will select from a small group, but in a
-  situation with many plausible next words, it will expand the group accordingly.
+* **High Top-p (e.g., 0.9+)**: This allows the model to consider a broader range of tokens, promoting more  
+  diverse and nuanced outputs. This is often preferred over temperature for creative tasks because it adapts to  
+  the context. In a situation where a few words are highly likely, `top_p` will select from a small group, but in a  
+  situation with many plausible next words, it will expand the group accordingly.  
 
 
 
