@@ -89,4 +89,151 @@ different models and use cases, so experimentation is key to finding the best
 combination for your specific needs.  
 
 
+## Temperature example
+
+```python
+#!/usr/bin/python
+"""
+Temperature and Top-P Parameter Demo with OpenAI
+
+This script demonstrates the practical effects of temperature and top_p parameters
+on OpenAI model outputs using a simple, focused example.
+
+Key Learning Points:
+- Temperature (0.0-2.0): Controls overall randomness
+  - 0.0 = deterministic, same output every time
+  - 1.0 = balanced creativity
+  - 2.0 = maximum randomness
+
+- Top-P (0.0-1.0): Controls vocabulary diversity via nucleus sampling
+  - 1.0 = consider all possible words
+  - 0.5 = consider only top 50% most likely words
+  - 0.1 = very focused, only top 10% most likely words
+"""
+
+import os
+from openai import OpenAI
+
+# Initialize OpenAI client
+client = OpenAI(
+    api_key=os.getenv("DEEPSEEK_API_KEY"),
+    base_url="https://api.deepseek.com"
+)
+
+def demonstrate_parameter_effects():
+    """Demonstrate temperature and top_p effects with clear examples."""
+    
+    prompt = "Write exactly one creative sentence about coffee."
+    
+    print("=" * 70)
+    print("OPENAI LLM PARAMETERS: TEMPERATURE & TOP-P DEMO")
+    print("=" * 70)
+    print(f"Prompt: {prompt}")
+    print()
+    
+    # Test cases showing parameter effects
+    test_cases = [
+        # (temperature, top_p, description)
+        (0.0, 1.0, "Deterministic (temp=0.0, top_p=1.0)"),
+        (0.3, 1.0, "Conservative (temp=0.3, top_p=1.0)"),
+        (0.7, 1.0, "Balanced (temp=0.7, top_p=1.0)"),
+        (1.0, 1.0, "Creative (temp=1.0, top_p=1.0)"),
+        (1.5, 1.0, "Very Creative (temp=1.5, top_p=1.0)"),
+        (1.0, 0.5, "Focused Creative (temp=1.0, top_p=0.5)"),
+        (2.0, 1.0, "Maximum Randomness (temp=2.0, top_p=1.0)"),
+    ]
+    
+    for temp, top_p, description in test_cases:
+        print(f"\n🎯 {description}")
+        print("-" * 50)
+        
+        # Generate 3 samples for each setting
+        for i in range(3):
+            try:
+                response = client.chat.completions.create(
+                    model="deepseek-chat",
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=temp,
+                    top_p=top_p,
+                    max_tokens=30
+                )
+                
+                result = response.choices[0].message.content.strip()
+                print(f"  Sample {i+1}: {result}")
+                
+            except Exception as e:
+                print(f"  Sample {i+1}: Error - {e}")
+
+def interactive_demo():
+    """Interactive mode for testing custom parameters."""
+    
+    print("\n" + "=" * 70)
+    print("INTERACTIVE PARAMETER TESTING")
+    print("=" * 70)
+    
+    prompt = input("\nEnter your prompt (or press Enter for default): ").strip()
+    if not prompt:
+        prompt = "Write a creative product name for a new smartphone app."
+    
+    while True:
+        try:
+            temp = float(input("\nEnter temperature (0.0-2.0): "))
+            top_p = float(input("Enter top_p (0.0-1.0): "))
+            
+            print(f"\n🎯 Testing: temp={temp}, top_p={top_p}")
+            print("-" * 40)
+            
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=temp,
+                top_p=top_p,
+                max_tokens=50
+            )
+            
+            result = response.choices[0].message.content.strip()
+            print(result)
+            
+            again = input("\nTry another combination? (y/n): ").lower()
+            if again != 'y':
+                break
+                
+        except ValueError:
+            print("Please enter valid numbers")
+        except Exception as e:
+            print(f"Error: {e}")
+
+if __name__ == "__main__":
+    # Check if OpenAI API key is set
+    if not os.getenv("DEEPSEEK_API_KEY"):
+        print("Error: DEEPSEEK_API_KEY environment variable not set")
+        print("Please set your OpenAI API key: export DEEPSEEK_API_KEY='your-key'")
+        exit(1)
+    
+    print("Choose demo mode:")
+    print("1. Parameter effects demonstration")
+    print("2. Interactive parameter testing")
+    
+    choice = input("Enter 1 or 2: ").strip()
+    
+    if choice == "1":
+        demonstrate_parameter_effects()
+    elif choice == "2":
+        interactive_demo()
+    else:
+        print("Invalid choice. Running parameter effects demo...")
+        demonstrate_parameter_effects()
+    
+    print("\n" + "=" * 70)
+    print("DEMO COMPLETE!")
+    print("=" * 70)
+    print("Key takeaways:")
+    print("- Lower temperature = more predictable outputs")
+    print("- Higher temperature = more creative/random outputs")
+    print("- Lower top_p = more focused vocabulary")
+    print("- Higher top_p = more diverse word choices")
+```
+
+
+
 
