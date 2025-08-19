@@ -88,6 +88,22 @@ Remember, these are starting points. The ideal settings can vary between
 different models and use cases, so experimentation is key to finding the best  
 combination for your specific needs.  
 
+## Deepseek documentation
+
+The default value of temperature is 1.0.
+
+We recommend users to set the temperature according to their use  
+case listed in below.
+
+| Use Case                      | Temperature |
+|-------------------------------|-------------|
+| Coding / Math                 | 0.0         |
+| Data Cleaning / Data Analysis | 1.0         |
+| General Conversation          | 1.3         |
+| Translation                   | 1.3         |
+| Creative Writing / Poetry     | 1.5         |
+
+
 
 ## Example
 
