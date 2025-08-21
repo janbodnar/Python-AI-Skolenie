@@ -499,7 +499,6 @@ if __name__ == "__main__":
 The example used LLM to determine the city from the prompt.  
 
 ```python
-#!/usr/bin/env python3
 """
 Temperature CLI App using OpenAI DeepSeek with Function Calling
 This app determines the temperature for any chosen city using Open-Meteo API
@@ -509,9 +508,7 @@ import json
 import requests
 import os
 import sys
-from typing import Dict, Any, List
 import openai
-from datetime import datetime
 
 # Configure OpenAI client for DeepSeek
 client = openai.OpenAI(
@@ -521,7 +518,7 @@ client = openai.OpenAI(
 
 
 # Function to get coordinates for a city using Open-Meteo Geocoding API
-def get_city_coordinates(city_name: str) -> Dict[str, float]:
+def get_city_coordinates(city_name):
     """Get latitude and longitude for a given city name."""
     try:
         url = "https://geocoding-api.open-meteo.com/v1/search"
@@ -551,7 +548,7 @@ def get_city_coordinates(city_name: str) -> Dict[str, float]:
         raise Exception(f"Error getting coordinates: {str(e)}")
 
 # Function to get temperature from Open-Meteo API
-def get_temperature(latitude: float, longitude: float) -> Dict[str, Any]:
+def get_temperature(latitude, longitude):
     """Get current temperature for given coordinates."""
     try:
         url = "https://api.open-meteo.com/v1/forecast"
@@ -596,7 +593,7 @@ functions = [
 ]
 
 # Combined function that uses both geocoding and weather APIs
-def get_city_temperature(city_name: str) -> Dict[str, Any]:
+def get_city_temperature(city_name):
     """Get temperature for a city using city name."""
     try:
         # Get coordinates
@@ -624,7 +621,7 @@ def get_city_temperature(city_name: str) -> Dict[str, Any]:
         raise Exception(f"Error getting city temperature: {str(e)}")
 
 # Function to process natural language queries using OpenAI
-def process_natural_language(query: str) -> Dict[str, Any]:
+def process_natural_language(query):
     """Process natural language query using OpenAI function calling."""
     try:
         # Encourage tool usage via system guidance
@@ -634,7 +631,7 @@ def process_natural_language(query: str) -> Dict[str, Any]:
                 "content": (
                     "You are a weather assistant. When the user asks about weather or temperature, "
                     "identify the most likely city name and call the function get_city_temperature "
-                    "with parameter {"city_name": "..."}. Prefer well-known cities if ambiguous."
+                    "with parameter {\"city_name\": \"...\"}. Prefer well-known cities if ambiguous."
                 ),
             },
             {"role": "user", "content": query},
@@ -663,8 +660,8 @@ def process_natural_language(query: str) -> Dict[str, Any]:
                 "role": "system",
                 "content": (
                     "Extract the target city name from the user's query. "
-                    "Respond ONLY with JSON exactly in this format: {"city_name": "..."}. "
-                    "If no city is present, respond with {"city_name": null}."
+                    "Respond ONLY with JSON exactly in this format: {\"city_name\": \"...\"}. "
+                    "If no city is present, respond with {\"city_name\": null}."
                 ),
             },
             {"role": "user", "content": query},
@@ -682,7 +679,7 @@ def process_natural_language(query: str) -> Dict[str, Any]:
         except Exception:
             # As a resilience measure, try to locate a JSON object in the text
             import re
-            m = re.search("\{[^{}]*"city_name"[^{}]*\}", extract_text, re.IGNORECASE | re.DOTALL)
+            m = re.search(r"\{[^{}]*\"city_name\"[^{}]*\}", extract_text, re.IGNORECASE | re.DOTALL)
             if m:
                 try:
                     city_name = json.loads(m.group(0)).get("city_name")
@@ -725,11 +722,11 @@ WEATHER_CODES = {
     99: "Thunderstorm with heavy hail"
 }
 
-def get_weather_description(code: int) -> str:
+def get_weather_description(code):
     """Get weather description from weather code."""
     return WEATHER_CODES.get(code, "Unknown")
 
-def format_temperature_output(data: Dict[str, Any]) -> str:
+def format_temperature_output(data):
     """Format the temperature data for display."""
     weather_desc = get_weather_description(data["weathercode"])
     
@@ -749,12 +746,12 @@ def format_temperature_output(data: Dict[str, Any]) -> str:
 
 def main():
     """Main CLI function."""
-    print("🌡️  Temperature CLI App with OpenAI DeepSeek")
+    print("Temperature CLI App with OpenAI DeepSeek")
     print("=" * 50)
     
     # Check if OpenAI API key is set
     if not os.getenv("DEEPSEEK_API_KEY"):
-        print("❌ Error: DEEPSEEK_API_KEY environment variable not set")
+        print("Error: DEEPSEEK_API_KEY environment variable not set")
         print("Please set your OpenAI API key: export DEEPSEEK_API_KEY='your-key-here'")
         sys.exit(1)
     
@@ -765,11 +762,11 @@ def main():
         query = input("Enter city name or weather query: ").strip()
     
     if not query:
-        print("❌ Error: No input provided")
+        print("Error: No input provided")
         sys.exit(1)
     
     try:
-        print("\n🔍 Processing query: '{query}'...")
+        print(f"\nProcessing query: '{query}'...")
         
         # Process the query
         result = process_natural_language(query)
@@ -778,7 +775,7 @@ def main():
         print(format_temperature_output(result))
         
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
+        print(f"Error: {str(e)}")
         sys.exit(1)
 
 if __name__ == "__main__":
