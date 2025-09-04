@@ -22,6 +22,10 @@ It's widely adopted across industries, research institutions, and open-source co
 
 ## Simple Chat 
 
+A minimal “hello world” chat that sends one user message to a model via OpenRouter and prints the reply.
+Use this to verify your environment (API key, base_url) and confirm the client returns a response.
+Key bits: initialize OpenAI with OpenRouter base_url, provide a messages list, and read choices[0].message.content.
+
 ```python
 from openai import OpenAI
 import os
@@ -46,6 +50,9 @@ print(completion.choices[0].message.content)
 
 
 ## Streaming 
+
+Demonstrates token-by-token streaming so you can display the model’s response in real time.
+Set stream=True and iterate over the server-sent events, printing chunk.choices[0].delta.content as it arrives.
 
 ```python
 from openai import OpenAI
@@ -82,6 +89,10 @@ print()
 ```
 
 ## Using DeepSeek 
+
+Shows how to target DeepSeek’s native API with the OpenAI-compatible SDK.
+Configure base_url to https://api.deepseek.com and use the model deepseek-chat with your DEEPSEEK_API_KEY.
+This example performs a non-streaming chat completion with a simple system+user prompt.
 
 ```python
 # Please install OpenAI SDK first: `pip install openai`
@@ -793,7 +804,7 @@ def persona_swapping_single_turn():
         "Use simple language, warmth, and 2-3 short sentences."
     )
     answer_a = run_chat(system_a, user_question)
-    print("\\n--- Persona A (Friendly teacher) ---\\n" + answer_a)
+    print("\n--- Persona A (Friendly teacher) ---\n" + answer_a)
 
     # Persona B: Concise senior software engineer
     system_b = (
@@ -801,7 +812,7 @@ def persona_swapping_single_turn():
         "Be precise, use minimal words, and avoid fluff."
     )
     answer_b = run_chat(system_b, user_question)
-    print("\\n--- Persona B (Senior engineer) ---\\n" + answer_b)
+    print("\n--- Persona B (Senior engineer) ---\n" + answer_b)
 
 if __name__ == "__main__":
     persona_swapping_single_turn()
@@ -859,13 +870,13 @@ def persona_swapping_multi_turn():
         {"role": "user", "content": "I'm learning Python. What is a function?"},
     ]
     resp1 = client.chat.completions.create(model=MODEL, messages=history)
-    print("\\n[A1 - Teacher]\\n" + resp1.choices[0].message.content)
+    print("\n[A1 - Teacher]\n" + resp1.choices[0].message.content)
     history.append(resp1.choices[0].message)
 
     # Continue with Persona A for follow-up
     history.append({"role": "user", "content": "Can you give a very short example?"})
     resp2 = client.chat.completions.create(model=MODEL, messages=history)
-    print("\\n[A2 - Teacher]\\n" + resp2.choices[0].message.content)
+    print("\n[A2 - Teacher]\n" + resp2.choices[0].message.content)
     history.append(resp2.choices[0].message)
 
     # Swap to Persona B but preserve history context;
@@ -880,7 +891,7 @@ def persona_swapping_multi_turn():
     # Ask another follow-up; model retains previous conversation content
     history.append({"role": "user", "content": "Optimize the example for clarity."})
     resp3 = client.chat.completions.create(model=MODEL, messages=history)
-    print("\\n[B1 - Senior engineer]\\n" + resp3.choices[0].message.content)
+    print("\n[B1 - Senior engineer]\n" + resp3.choices[0].message.content)
 
 if __name__ == "__main__":
     persona_swapping_multi_turn()
@@ -1877,7 +1888,3 @@ if __name__ == "__main__":
     share = os.getenv("GRADIO_SHARE", "false").lower() in ("1", "true", "yes")
     demo.queue().launch(server_name="localhost", server_port=int(os.getenv("PORT", "7860")), share=share)
 ```
-
-
-
-
