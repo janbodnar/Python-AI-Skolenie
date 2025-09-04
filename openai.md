@@ -111,7 +111,7 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-## Function call 
+## Function call/tool call
 
 This example demonstrates how to use the OpenRouter-compatible OpenAI SDK  
 to call a model with function calling capabilities, specifically DeepSeek's  
@@ -215,17 +215,17 @@ print("Final translation response:")
 print(final_response.choices[0].message.content)
 ```
 
-## Temperature 
+## Temperature with tool call
 
 The next example demonstrates how to use OpenAI's function calling capabilities  
 to create a CLI app that fetches the current temperature for a given city using  
 the Open-Meteo API. The app uses natural language processing to extract the city  
 name from user queries and provides structured output.  
 
+
 ```python
-#!/usr/bin/env python3
 """
-Temperature CLI App using OpenAI DeepSeek with Function Calling
+Temperature CLI App using OpenAI Tools API (DeepSeek)
 This app determines the temperature for any chosen city using Open-Meteo API
 """
 
@@ -233,20 +233,18 @@ import json
 import requests
 import os
 import sys
-from typing import Dict, Any, List
 import openai
-from datetime import datetime
 
 # Configure OpenAI client for DeepSeek
-client = openai.OpenAI(
+deepseek_client = openai.OpenAI(
     api_key=os.getenv("DEEPSEEK_API_KEY"),
     base_url="https://api.deepseek.com/v1"
 )
 
-
 # Function to get coordinates for a city using Open-Meteo Geocoding API
-def get_city_coordinates(city_name: str) -> Dict[str, float]:
+def geocode_city(city_name):
     """Get latitude and longitude for a given city name."""
+    print('geocode_city')
     try:
         url = "https://geocoding-api.open-meteo.com/v1/search"
         params = {
@@ -255,10 +253,10 @@ def get_city_coordinates(city_name: str) -> Dict[str, float]:
             "language": "en",
             "format": "json"
         }
-        
+
         response = requests.get(url, params=params)
         response.raise_for_status()
-        
+
         data = response.json()
         if "results" in data and len(data["results"]) > 0:
             result = data["results"][0]
@@ -270,13 +268,14 @@ def get_city_coordinates(city_name: str) -> Dict[str, float]:
             }
         else:
             raise ValueError(f"City '{city_name}' not found")
-    
-    except Exception as e:
-        raise Exception(f"Error getting coordinates: {str(e)}")
 
-# Function to get temperature from Open-Meteo API
-def get_temperature(latitude: float, longitude: float) -> Dict[str, Any]:
-    """Get current temperature for given coordinates."""
+    except Exception as e:
+        raise Exception("Error getting temperature") from e
+
+# Function to get weather from Open-Meteo API
+def fetch_current_weather(latitude, longitude):
+    """Get current weather for given coordinates."""
+    print('fetch_current_weather')
     try:
         url = "https://api.open-meteo.com/v1/forecast"
         params = {
@@ -285,10 +284,10 @@ def get_temperature(latitude: float, longitude: float) -> Dict[str, Any]:
             "current_weather": "true",
             "temperature_unit": "celsius"
         }
-        
+
         response = requests.get(url, params=params)
         response.raise_for_status()
-        
+
         data = response.json()
         return {
             "temperature": data["current_weather"]["temperature"],
@@ -297,38 +296,41 @@ def get_temperature(latitude: float, longitude: float) -> Dict[str, Any]:
             "weathercode": data["current_weather"]["weathercode"],
             "time": data["current_weather"]["time"]
         }
-    
-    except Exception as e:
-        raise Exception(f"Error getting temperature: {str(e)}")
 
-# Define function schema for OpenAI function calling
-functions = [
+    except Exception as e:
+        raise Exception("Error getting temperature") from e
+
+# Define tool schema for Tools API
+WEATHER_TOOLS = [
     {
-        "name": "get_city_temperature",
-        "description": "Get the current temperature for a specific city",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "city_name": {
-                    "type": "string",
-                    "description": "The name of the city to get temperature for"
-                }
-            },
-            "required": ["city_name"]
+        "type": "function",
+        "function": {
+            "name": "fetch_city_weather",
+            "description": "Get the current weather for a specific city. Extract the city name from natural language queries about weather, temperature, or climate.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "city_name": {
+                        "type": "string",
+                        "description": "The name of the city to get weather for. Extract this from natural language queries like 'What's the weather in Paris?' or 'How hot is it in Tokyo?'"
+                    }
+                },
+                "required": ["city_name"]
+            }
         }
     }
 ]
 
 # Combined function that uses both geocoding and weather APIs
-def get_city_temperature(city_name: str) -> Dict[str, Any]:
-    """Get temperature for a city using city name."""
+def fetch_city_weather(city_name):
+    """Get weather for a city using city name."""
     try:
         # Get coordinates
-        city_info = get_city_coordinates(city_name)
-        
-        # Get temperature
-        weather_data = get_temperature(city_info["latitude"], city_info["longitude"])
-        
+        city_info = geocode_city(city_name)
+
+        # Get weather
+        weather_data = fetch_current_weather(city_info["latitude"], city_info["longitude"])
+
         # Combine results
         return {
             "city": city_info["name"],
@@ -343,71 +345,54 @@ def get_city_temperature(city_name: str) -> Dict[str, Any]:
             "weathercode": weather_data["weathercode"],
             "time": weather_data["time"]
         }
-    
-    except Exception as e:
-        raise Exception(f"Error getting city temperature: {str(e)}")
 
-# Function to process natural language queries using OpenAI
-def process_natural_language(query: str) -> Dict[str, Any]:
-    """Process natural language query using OpenAI function calling."""
+    except Exception as e:
+        raise Exception("Error getting city weather") from e
+
+# Process natural language queries using Tools API
+def resolve_weather_query(query):
+    """Process natural language query using Tools API."""
+    print('resolve_weather_query')
     try:
         messages = [
-            {"role": "user", "content": query}
+            {
+                "role": "system",
+                "content": (
+                    "You are a weather assistant. When the user asks about weather or temperature, "
+                    "identify the most likely city name and call the function fetch_city_weather "
+                    "with parameter {\"city_name\": \"...\"}. Do not answer directly."
+                ),
+            },
+            {"role": "user", "content": query},
         ]
-        
-        response = client.chat.completions.create(
+
+        response = deepseek_client.chat.completions.create(
             model="deepseek-chat",
             messages=messages,
-            functions=functions,
-            function_call="auto"
+            tools=WEATHER_TOOLS,
+            tool_choice={"type": "function", "function": {"name": "fetch_city_weather"}}
         )
-        
-        # Check if function was called
-        if response.choices[0].message.function_call:
-            function_call = response.choices[0].message.function_call
-            if function_call.name == "get_city_temperature":
-                arguments = json.loads(function_call.arguments)
-                city_name = arguments["city_name"]
-                return get_city_temperature(city_name)
-        
-        # If no function was called, extract city name from response
-        # Fallback to simple extraction
-        city_name = extract_city_from_query(query)
-        if city_name:
-            return get_city_temperature(city_name)
-        
-        raise ValueError("Could not determine city from query")
-    
-    except Exception as e:
-        raise Exception(f"Error processing query: {str(e)}")
 
-# Simple city name extraction fallback
-def extract_city_from_query(query: str) -> str:
-    """Extract city name from query using simple parsing."""
-    query_lower = query.lower()
-    
-    # Common patterns
-    patterns = [
-        "temperature in",
-        "weather in",
-        "what's the temperature in",
-        "what is the temperature in",
-        "how hot is it in",
-        "how cold is it in"
-    ]
-    
-    for pattern in patterns:
-        if pattern in query_lower:
-            city = query_lower.split(pattern)[1].strip()
-            # Remove punctuation
-            city = city.rstrip('?')
-            return city.title()
-    
-    # If no pattern matched, return the query as city name
-    return query.strip().title()
+        msg = response.choices[0].message
+
+        # Expect a tool call
+        if getattr(msg, "tool_calls", None):
+            for tc in msg.tool_calls:
+                if getattr(tc, "type", "") == "function" and getattr(tc, "function", None):
+                    fn = tc.function
+                    if fn.name == "fetch_city_weather":
+                        args = json.loads(fn.arguments or "{}")
+                        city_name = args.get("city_name")
+                        if city_name:
+                            return fetch_city_weather(city_name)
+
+        raise ValueError("No tool call produced or city name not found")
+
+    except Exception as e:
+        raise Exception("Error processing query") from e
 
 # Weather code descriptions
-WEATHER_CODES = {
+WEATHER_CODE_DESCRIPTIONS = {
     0: "Clear sky",
     1: "Mainly clear",
     2: "Partly cloudy",
@@ -434,14 +419,14 @@ WEATHER_CODES = {
     99: "Thunderstorm with heavy hail"
 }
 
-def get_weather_description(code: int) -> str:
+def describe_weather_code(code):
     """Get weather description from weather code."""
-    return WEATHER_CODES.get(code, "Unknown")
+    return WEATHER_CODE_DESCRIPTIONS.get(code, "Unknown")
 
-def format_temperature_output(data: Dict[str, Any]) -> str:
-    """Format the temperature data for display."""
-    weather_desc = get_weather_description(data["weathercode"])
-    
+def format_weather_report(data):
+    """Format the weather data for display."""
+    weather_desc = describe_weather_code(data["weathercode"])
+
     output = f"""
 ╔══════════════════════════════════════════════════════════════╗
 ║                    WEATHER REPORT                            ║
@@ -457,50 +442,51 @@ def format_temperature_output(data: Dict[str, Any]) -> str:
     return output
 
 def main():
-    """Main CLI function."""
-    print("🌡️  Temperature CLI App with OpenAI DeepSeek")
+
+    print("Temperature CLI App with OpenAI DeepSeek (Tools API)")
     print("=" * 50)
-    
+
     # Check if OpenAI API key is set
     if not os.getenv("DEEPSEEK_API_KEY"):
-        print("❌ Error: DEEPSEEK_API_KEY environment variable not set")
+        print("Error: DEEPSEEK_API_KEY environment variable not set")
         print("Please set your OpenAI API key: export DEEPSEEK_API_KEY='your-key-here'")
         sys.exit(1)
-    
+
     # Get user input
     if len(sys.argv) > 1:
         query = " ".join(sys.argv[1:])
     else:
         query = input("Enter city name or weather query: ").strip()
-    
+
     if not query:
-        print("❌ Error: No input provided")
+        print("Error: No input provided")
         sys.exit(1)
-    
+
     try:
-        print("\n🔍 Processing query: '{query}'...")
-        
+        print(f"\nProcessing query: '{query}'...")
+
         # Process the query
-        result = process_natural_language(query)
-        
+        result = resolve_weather_query(query)
+
         # Display results
-        print(format_temperature_output(result))
-        
+        print(format_weather_report(result))
+
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
+        print(f"Error: {str(e)}")
         sys.exit(1)
 
 if __name__ == "__main__":
     main()
 ```
 
-## Temperature II
+## Temperature without tool call
 
-The example used LLM to determine the city from the prompt.  
+The following example determines the weather in a city without a tool call. We request  
+the model to return a JSON output and pass it directly to `fetch_city_weather`. 
 
 ```python
 """
-Temperature CLI App using OpenAI DeepSeek with Function Calling
+Temperature CLI App using OpenAI DeepSeek without Function Calling
 This app determines the temperature for any chosen city using Open-Meteo API
 """
 
@@ -511,15 +497,16 @@ import sys
 import openai
 
 # Configure OpenAI client for DeepSeek
-client = openai.OpenAI(
+deepseek_client = openai.OpenAI(
     api_key=os.getenv("DEEPSEEK_API_KEY"),
     base_url="https://api.deepseek.com/v1"
 )
 
 
 # Function to get coordinates for a city using Open-Meteo Geocoding API
-def get_city_coordinates(city_name):
+def geocode_city(city_name):
     """Get latitude and longitude for a given city name."""
+    print('geocode_city')
     try:
         url = "https://geocoding-api.open-meteo.com/v1/search"
         params = {
@@ -528,10 +515,10 @@ def get_city_coordinates(city_name):
             "language": "en",
             "format": "json"
         }
-        
+
         response = requests.get(url, params=params)
         response.raise_for_status()
-        
+
         data = response.json()
         if "results" in data and len(data["results"]) > 0:
             result = data["results"][0]
@@ -543,13 +530,15 @@ def get_city_coordinates(city_name):
             }
         else:
             raise ValueError(f"City '{city_name}' not found")
-    
-    except Exception as e:
-        raise Exception(f"Error getting coordinates: {str(e)}")
 
-# Function to get temperature from Open-Meteo API
-def get_temperature(latitude, longitude):
-    """Get current temperature for given coordinates."""
+    except Exception as e:
+        raise Exception("Error getting temperature") from e
+
+
+# Function to get weather from Open-Meteo API
+def fetch_current_weather(latitude, longitude):
+    """Get current weather for given coordinates."""
+    print('fetch_current_weather')
     try:
         url = "https://api.open-meteo.com/v1/forecast"
         params = {
@@ -558,10 +547,10 @@ def get_temperature(latitude, longitude):
             "current_weather": "true",
             "temperature_unit": "celsius"
         }
-        
+
         response = requests.get(url, params=params)
         response.raise_for_status()
-        
+
         data = response.json()
         return {
             "temperature": data["current_weather"]["temperature"],
@@ -570,38 +559,23 @@ def get_temperature(latitude, longitude):
             "weathercode": data["current_weather"]["weathercode"],
             "time": data["current_weather"]["time"]
         }
-    
-    except Exception as e:
-        raise Exception(f"Error getting temperature: {str(e)}")
 
-# Define function schema for OpenAI function calling
-functions = [
-    {
-        "name": "get_city_temperature",
-        "description": "Get the current temperature for a specific city. Extract the city name from natural language queries about weather, temperature, or climate.",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "city_name": {
-                    "type": "string",
-                    "description": "The name of the city to get temperature for. Extract this from natural language queries like 'What's the weather in Paris?' or 'How hot is it in Tokyo?'"
-                }
-            },
-            "required": ["city_name"]
-        }
-    }
-]
+    except Exception as e:
+        raise Exception(f"Error getting temperature") from e
+
 
 # Combined function that uses both geocoding and weather APIs
-def get_city_temperature(city_name):
-    """Get temperature for a city using city name."""
+def fetch_city_weather(city_name):
+    """Get weather for a city using city name."""
+    print('fetch_city_weather')
     try:
         # Get coordinates
-        city_info = get_city_coordinates(city_name)
-        
-        # Get temperature
-        weather_data = get_temperature(city_info["latitude"], city_info["longitude"])
-        
+        city_info = geocode_city(city_name)
+
+        # Get weather
+        weather_data = fetch_current_weather(
+            city_info["latitude"], city_info["longitude"])
+
         # Combine results
         return {
             "city": city_info["name"],
@@ -616,86 +590,54 @@ def get_city_temperature(city_name):
             "weathercode": weather_data["weathercode"],
             "time": weather_data["time"]
         }
-    
+
     except Exception as e:
-        raise Exception(f"Error getting city temperature: {str(e)}")
+        raise Exception(f"Error getting city weather") from e
 
 # Function to process natural language queries using OpenAI
-def process_natural_language(query):
-    """Process natural language query using OpenAI function calling."""
+
+
+def resolve_weather_query(query):
+    """Process natural language query using OpenAI."""
+    print('resolve_weather_query')
     try:
-        # Encourage tool usage via system guidance
         messages = [
             {
                 "role": "system",
                 "content": (
-                    "You are a weather assistant. When the user asks about weather or temperature, "
-                    "identify the most likely city name and call the function get_city_temperature "
-                    "with parameter {\"city_name\": \"...\"}. Prefer well-known cities if ambiguous."
+                    "You are a weather assistant. Extract the city name from the user's query about weather or temperature. "
+                    "Respond ONLY with JSON in this format: {\"city_name\": \"city_name_here\"}. "
+                    "If no city is found, respond with {\"city_name\": null}."
                 ),
             },
             {"role": "user", "content": query},
         ]
-        
-        response = client.chat.completions.create(
+
+        response = deepseek_client.chat.completions.create(
             model="deepseek-chat",
             messages=messages,
-            functions=functions,
-            function_call="auto"
-        )
-        
-        # Path 1: tool call returned
-        msg = response.choices[0].message
-        if getattr(msg, "function_call", None):
-            fc = msg.function_call
-            if fc.name == "get_city_temperature":
-                args = json.loads(fc.arguments or "{}")
-                city_name = args.get("city_name")
-                if city_name:
-                    return get_city_temperature(city_name)
-        
-        # Path 2: constrained JSON extraction via LLM (still LLM-based)
-        extract_messages = [
-            {
-                "role": "system",
-                "content": (
-                    "Extract the target city name from the user's query. "
-                    "Respond ONLY with JSON exactly in this format: {\"city_name\": \"...\"}. "
-                    "If no city is present, respond with {\"city_name\": null}."
-                ),
-            },
-            {"role": "user", "content": query},
-        ]
-        extract_resp = client.chat.completions.create(
-            model="deepseek-chat",
-            messages=extract_messages,
             temperature=0
         )
-        extract_text = extract_resp.choices[0].message.content or ""
-        
-        city_name = None
-        try:
-            city_name = json.loads(extract_text).get("city_name")
-        except Exception:
-            # As a resilience measure, try to locate a JSON object in the text
-            import re
-            m = re.search(r"\{[^{}]*\"city_name\"[^{}]*\}", extract_text, re.IGNORECASE | re.DOTALL)
-            if m:
-                try:
-                    city_name = json.loads(m.group(0)).get("city_name")
-                except Exception:
-                    city_name = None
-        
+
+        msg = response.choices[0].message
+
+        content = msg.content or ""
+        data = json.loads(content)
+        city_name = data.get("city_name")
+
         if city_name:
-            return get_city_temperature(str(city_name))
-        
+            return fetch_city_weather(city_name)
+
         raise ValueError("Could not determine city from query")
-    
+
     except Exception as e:
-        raise Exception(f"Error processing query: {str(e)}")
+        print(e)
+
+        raise Exception(f"Error processing query") from e
+
 
 # Weather code descriptions
-WEATHER_CODES = {
+WEATHER_CODE_DESCRIPTIONS = {
     0: "Clear sky",
     1: "Mainly clear",
     2: "Partly cloudy",
@@ -722,14 +664,16 @@ WEATHER_CODES = {
     99: "Thunderstorm with heavy hail"
 }
 
-def get_weather_description(code):
-    """Get weather description from weather code."""
-    return WEATHER_CODES.get(code, "Unknown")
 
-def format_temperature_output(data):
-    """Format the temperature data for display."""
-    weather_desc = get_weather_description(data["weathercode"])
-    
+def describe_weather_code(code):
+    """Get weather description from weather code."""
+    return WEATHER_CODE_DESCRIPTIONS.get(code, "Unknown")
+
+
+def format_weather_report(data):
+    """Format the weather data for display."""
+    weather_desc = describe_weather_code(data["weathercode"])
+
     output = f"""
 ╔══════════════════════════════════════════════════════════════╗
 ║                    WEATHER REPORT                            ║
@@ -744,39 +688,41 @@ def format_temperature_output(data):
 """
     return output
 
+
 def main():
-    """Main CLI function."""
+
     print("Temperature CLI App with OpenAI DeepSeek")
     print("=" * 50)
-    
+
     # Check if OpenAI API key is set
     if not os.getenv("DEEPSEEK_API_KEY"):
         print("Error: DEEPSEEK_API_KEY environment variable not set")
         print("Please set your OpenAI API key: export DEEPSEEK_API_KEY='your-key-here'")
         sys.exit(1)
-    
+
     # Get user input
     if len(sys.argv) > 1:
         query = " ".join(sys.argv[1:])
     else:
         query = input("Enter city name or weather query: ").strip()
-    
+
     if not query:
         print("Error: No input provided")
         sys.exit(1)
-    
+
     try:
         print(f"\nProcessing query: '{query}'...")
-        
+
         # Process the query
-        result = process_natural_language(query)
-        
+        result = resolve_weather_query(query)
+
         # Display results
-        print(format_temperature_output(result))
-        
+        print(format_weather_report(result))
+
     except Exception as e:
         print(f"Error: {str(e)}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
