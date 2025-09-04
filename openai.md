@@ -22,9 +22,12 @@ It's widely adopted across industries, research institutions, and open-source co
 
 ## Simple Chat 
 
-A minimal “hello world” chat that sends one user message to a model via OpenRouter and prints the reply.
-Use this to verify your environment (API key, base_url) and confirm the client returns a response.
-Key bits: initialize OpenAI with OpenRouter base_url, provide a messages list, and read choices[0].message.content.
+A minimal “hello world” chat that sends one user message to a model via OpenRouter and prints  
+the reply. Use this to verify your environment (API key, base_url) and confirm the client  
+returns a response.  
+
+Key bits: initialize OpenAI with OpenRouter `base_url`, provide a messages list, and  
+read `choices[0].message.content`.
 
 ```python
 from openai import OpenAI
@@ -51,8 +54,9 @@ print(completion.choices[0].message.content)
 
 ## Streaming 
 
-Demonstrates token-by-token streaming so you can display the model’s response in real time.
-Set stream=True and iterate over the server-sent events, printing chunk.choices[0].delta.content as it arrives.
+Demonstrates token-by-token streaming so you can display the model’s response in real time.  
+Set stream=True and iterate over the server-sent events, printing `chunk.choices[0].delta.content`  
+as it arrives.
 
 ```python
 from openai import OpenAI
@@ -90,9 +94,9 @@ print()
 
 ## Using DeepSeek 
 
-Shows how to target DeepSeek’s native API with the OpenAI-compatible SDK.
-Configure base_url to https://api.deepseek.com and use the model deepseek-chat with your DEEPSEEK_API_KEY.
-This example performs a non-streaming chat completion with a simple system+user prompt.
+Shows how to target DeepSeek’s native API with the OpenAI-compatible SDK.  
+Configure base_url to `https://api.deepseek.com` and use the model `deepseek-chat` with your `DEEPSEEK_API_KEY`.  
+This example performs a non-streaming chat completion with a simple system+user prompt.  
 
 ```python
 # Please install OpenAI SDK first: `pip install openai`
