@@ -149,6 +149,22 @@ print("Extracted info:", info)
 
 ## Classification
 
+This section demonstrates a small Python script that classifies multiple short customer  
+support tickets into predefined categories (billing, technical, account, shipping, other)  
+using a model hosted via OpenRouter. The 
+
+- Builds a concise system prompt describing the classification task and allowed categories.  
+- Sends all sample tickets in a single chat request.
+- Uses response_format with a json_schema (and strict: True) so the model returns a strict  
+  JSON array of objects with "ticket" and "category" fields.
+- Parses the model response with json.loads and prints a readable summary table using the rich library.
+
+Notes and tips:
+- "strict": True encourages the model to follow the JSON schema exactly. If the model returns
+  non-JSON or deviates, add simple post-processing or retries (for example, try to extract
+  the first JSON block from the response).
+- For production use, consider batching, rate limits, and error handling around API calls.
+
 ```python
 import argparse
 import os
@@ -267,3 +283,7 @@ def main():
 if __name__ == "__main__":
     main()
 ```
+
+
+
+
