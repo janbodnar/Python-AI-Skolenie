@@ -80,3 +80,60 @@ file. For images, it looks like this:
 - image/jpeg → MIME type (could also be image/png, image/gif, etc.).
 - base64 → Specifies that the data is base64-encoded.
 - ... → The actual base64 string representing the image.
+
+
+## Structured output
+
+
+```python
+from openai import OpenAI
+import os
+import json
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ.get("OPENROUTER_API_KEY"),
+)
+
+text = """
+Extract information about people mentioned in the following text. For each
+person, provide their name, age, and city of residence in a structured JSON
+format. John Doe is a software engineer living in New York. He is 30 years old
+and enjoys hiking and photography. Jane Smith is a graphic designer based in San
+Francisco. She is 28 years old and loves painting and traveling."""
+
+response = client.chat.completions.create(
+    extra_body={},
+    model="mistralai/mistral-small-3.2-24b-instruct:free",  # Model supporting structured outputs
+    messages=[
+        {
+            "role": "user",
+            "content": text
+        }
+    ],
+    response_format={
+        "type": "json_schema",
+        "json_schema": {
+            "name": "people_info",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "age": {"type": "integer"},
+                        "city": {"type": "string"}
+                    },
+                    "required": ["name", "age", "city"],
+                    "additionalProperties": False
+                }
+            },
+            "strict": True
+        }
+    }
+)
+
+# Parse the JSON response
+info = json.loads(response.choices[0].message.content)
+print("Extracted info:", info)
+```
