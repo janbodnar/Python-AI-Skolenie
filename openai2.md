@@ -1,6 +1,12 @@
 # OpenAI examples 2
 
 
+This example demonstrates how to use the OpenAI library for image analysis via OpenRouter, leveraging  
+a vision-capable model like GPT-4o. It sends a user message with an image URL and a text prompt, then  
+prints the model's descriptive response.  
+
+Use a vision-enabled model, structure the message content as a list with `text` and `image_url` types.
+
 
 ## Image description
 
