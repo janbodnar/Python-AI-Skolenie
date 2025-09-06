@@ -84,6 +84,15 @@ file. For images, it looks like this:
 
 ## Structured output
 
+This example shows how to ask a model to return data in a strict JSON format  
+and how to parse that output in Python. We provide the model with a text prompt  
+asking it to extract information about people mentioned in the text (name, age, city).  
+
+The `response_format` uses `json_schema` to enforce the expected structure;  
+setting `"strict": true` helps ensure the model's response conforms to the schema. 
+After receiving the response, the example parses the model output with `json.loads`  
+and prints the extracted structured data. 
+
 
 ```python
 from openai import OpenAI
