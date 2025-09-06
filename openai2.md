@@ -157,13 +157,13 @@ using a model hosted via OpenRouter. The
 - Sends all sample tickets in a single chat request.
 - Uses response_format with a json_schema (and strict: True) so the model returns a strict  
   JSON array of objects with "ticket" and "category" fields.
-- Parses the model response with json.loads and prints a readable summary table using the rich library.
+- Parses the model response with json.loads and prints a readable summary table using the rich library.  
 
 Notes and tips:
-- "strict": True encourages the model to follow the JSON schema exactly. If the model returns
-  non-JSON or deviates, add simple post-processing or retries (for example, try to extract
+- "strict": True encourages the model to follow the JSON schema exactly. If the model returns  
+  non-JSON or deviates, add simple post-processing or retries (for example, try to extract  
   the first JSON block from the response).
-- For production use, consider batching, rate limits, and error handling around API calls.
+- For production use, consider batching, rate limits, and error handling around API calls.  
 
 ```python
 import argparse
