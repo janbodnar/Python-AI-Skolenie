@@ -89,7 +89,7 @@ and how to parse that output in Python. We provide the model with a text prompt
 asking it to extract information about people mentioned in the text (name, age, city).  
 
 The `response_format` uses `json_schema` to enforce the expected structure;  
-setting `"strict": true` helps ensure the model's response conforms to the schema. 
+setting `"strict": true` helps ensure the model's response conforms to the schema.  
 After receiving the response, the example parses the model output with `json.loads`  
 and prints the extracted structured data. 
 
@@ -145,4 +145,125 @@ response = client.chat.completions.create(
 # Parse the JSON response
 info = json.loads(response.choices[0].message.content)
 print("Extracted info:", info)
+```
+
+## Classification
+
+```python
+import argparse
+import os
+import sys
+from textwrap import dedent
+
+from rich.console import Console
+from rich.table import Table
+
+from openai import OpenAI
+
+
+DEFAULT_MODEL = "openrouter/sonoma-sky-alpha"
+
+CATEGORIES = ["billing", "technical", "account", "shipping", "other"]
+
+TICKETS = [
+    "My last invoice seems too high, can you check the charges?",
+    "I can't log in after resetting my password.",
+    "Where is my package? The tracking has not updated for 3 days.",
+    "How do I change the email on my profile?",
+    "The app crashes when I try to upload a file.",
+    "I was billed twice for the same subscription this month.",
+    "My profile picture keeps disappearing after I upload it.",
+    "Can I get a refund for the duplicate charge?",
+    "The login page shows an error after the latest update.",
+    "I need to update my shipping address before the order ships.",
+]
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Ticket classification demo.")
+    parser.add_argument("--model", type=str, default=DEFAULT_MODEL,
+                        help=f"LLM model (default: {DEFAULT_MODEL})")
+    return parser.parse_args()
+
+
+def get_client():
+    api_key = os.environ.get("OPENROUTER_API_KEY")
+    if not api_key:
+        print("Missing OPENROUTER_API_KEY environment variable.")
+        sys.exit(1)
+    client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=api_key,
+    )
+    return client
+
+
+def classify_tickets(client, model, tickets):
+    system = dedent(f"""
+       You are a helpful assistant that classifies short customer support tickets.
+       Classify each ticket into one of these categories: {CATEGORIES}.
+       Return the results as a JSON array of objects, each with "ticket" and "category" fields.
+   """).strip()
+
+    ticket_list = "\n".join(f"{i+1}. {t}" for i, t in enumerate(tickets))
+    user = f"Classify the following tickets:\n{ticket_list}"
+
+    messages = [
+        {"role": "system", "content": system},
+        {"role": "user", "content": user},
+    ]
+
+    response = client.chat.completions.create(
+        model=model,
+        messages=messages,
+        response_format={
+            "type": "json_schema",
+            "json_schema": {
+                "name": "ticket_classifications",
+                "schema": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "ticket": {"type": "string"},
+                            "category": {"type": "string"}
+                        },
+                        "required": ["ticket", "category"]
+                    }
+                },
+                "strict": True
+            }
+        }
+    )
+
+    import json
+    return json.loads(response.choices[0].message.content)
+
+
+def main():
+    args = parse_args()
+    client = get_client()
+
+    print("Task: Classify support tickets into one of", CATEGORIES)
+    print("\nTickets:")
+    for i, t in enumerate(TICKETS, 1):
+        print(f"{i}. {t}")
+
+    # Classify all tickets in one request
+    classifications = classify_tickets(client, args.model, TICKETS)
+
+    # Summary table
+    console = Console()
+    table = Table(title="Classification Summary")
+    table.add_column("#", justify="right")
+    table.add_column("Ticket", max_width=60)
+    table.add_column("Category")
+
+    for i, item in enumerate(classifications, 1):
+        table.add_row(str(i), item["ticket"], item["category"])
+    console.print(table)
+
+
+if __name__ == "__main__":
+    main()
 ```
