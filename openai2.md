@@ -284,6 +284,26 @@ if __name__ == "__main__":
     main()
 ```
 
+## Audio transcription
 
+```python
+import openai
+import os
+
+API_KEY = os.getenv("GROQ_API_KEY")
+client = openai.OpenAI(api_key=API_KEY, base_url="https://api.groq.com/openai/v1")
+
+def transcribe_file(path):
+    with open(path, "rb") as audio_file:
+        transcription = client.audio.transcriptions.create(
+            model="whisper-large-v3",
+            file=audio_file,
+            prompt="Give us only the text of the fable."
+        )
+    return transcription.text
+
+result = transcribe_file("aesop_fox_grapes.mp3")
+print(result)
+```
 
 
