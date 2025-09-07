@@ -286,12 +286,13 @@ if __name__ == "__main__":
 
 ## Audio transcription
 
-
-This example demonstrates how to transcribe a local audio file to text using the OpenAI Python client.  
-Tt reads the audio file in binary, sends it to the audio transcription endpoint with model  
-`whisper-large-v3` and an optional prompt to steer the output, then returns the transcription  
-via `transcription.text`. The snippet shows configuring the client with an API key (`GROQ_API_KEY`) and a  
-custom `base_url`, and can be adapted by changing the model, file path, or prompt.  
+This example demonstrates how to transcribe a local audio file to text using the
+OpenAI Python client. It reads the audio file in binary, sends it to the audio
+transcription endpoint with model `whisper-large-v3` and an optional prompt to
+steer the output, then returns the transcription via `transcription.text`. The
+snippet shows configuring the client with an API key (`GROQ_API_KEY`) and a  
+custom `base_url`, and can be adapted by changing the model, file path, or
+prompt.  
 
 ```python
 import openai
@@ -312,5 +313,10 @@ def transcribe_file(path):
 result = transcribe_file("aesop_fox_grapes.mp3")
 print(result)
 ```
+
+The `transcribe_file` function can be reused to transcribe any local audio file
+by providing its path. The parameters are model (choose from available Whisper
+models), file (the binary audio file), and an optional prompt to guide the
+transcription.
 
 
