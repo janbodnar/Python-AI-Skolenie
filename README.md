@@ -16,7 +16,6 @@ Python AI Skolenie
 | **Codex CLI**   | OpenAI-powered CLI for real-time coding and GitHub integration.             | [Codex CLI](https://github.com/openai/codex) |
 | **Aider**       | CLI tool for refactoring and reviewing code with AI.                        | [Aider](https://github.com/Aider-AI/aider) |
 | **Continue.dev**| CLI-first agent for code completion and project scaffolding.                | [Continue.dev](https://github.com/continuedev/continue) |
-| **Smol Developer** | Minimalist CLI agent that builds apps from natural language prompts.     | [Smol Developer](https://github.com/smol-ai/developer) |
 | **TabbyML**     | Local-first AI assistant with CLI hooks; works offline.                     | [TabbyML](https://github.com/TabbyML/tabby) |
 | **Void**        | Privacy-focused, offline-capable CLI code editor.                           | [Void](https://github.com/voideditor/void) |
 | **Trae**        | ByteDance’s CLI agent for fast prototyping and app generation.              | [Trae](https://github.com/Trae-AI/Trae) |
