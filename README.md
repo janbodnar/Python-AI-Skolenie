@@ -2,7 +2,10 @@
 Python AI Skolenie
 
 
+## Prompts
 
+- Provide follow up questions
+- Suggest defaults
 
 ## Top Terminal-Based AI CLI Tools (Actively Maintained)
 
