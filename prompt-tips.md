@@ -82,96 +82,39 @@ To write effective AI prompts:
 
 ---
 
-## 1. Paraphrase
-- Use: Avoid plagiarism by rewording content.
+## Text Transformation Techniques
 
-## 2. Reframe
-- Use: Change the perspective or focus of the text.
+- **Paraphrase**: Reword content to avoid plagiarism.
+- **Reframe**: Shift the perspective or focus of the text.
+- **Summarize**: Provide a brief overview of lengthy content.
+- **Expand**: Add depth and detail to enhance understanding.
+- **Explain**: Clarify complex ideas in simpler terms.
+- **Reinterpret**: Offer a new or alternative understanding.
+- **Simplify**: Make language easier to grasp for a general audience.
+- **Elaborate**: Add more explanation or supporting detail.
+- **Amplify**: Strengthen the message or key points.
+- **Clarify**: Make confusing statements or concepts clearer.
+- **Adapt**: Modify content for a different audience or purpose.
+- **Modernize**: Update outdated language or concepts.
+- **Formalize**: Convert casual language into a formal tone.
+- **Informalize**: Make the language more casual and approachable.
+- **Condense**: Shorten content by focusing on essential points.
+- **Emphasize/Reiterate**: Highlight important ideas more strongly.
+- **Diversify**: Add variety in sentence structure or vocabulary.
+- **Neutralize**: Remove bias or opinion to make the text more objective.
+- **Streamline**: Cut unnecessary content or redundancy.
+- **Enrich/Embellish**: Add flair and vivid detail to enhance appeal.
+- **Illustrate**: Use examples to clarify or support a point.
+- **Synthesize**: Combine multiple ideas into a cohesive whole.
+- **Sensationalize**: Make content more dramatic or eye-catching.
+- **Humanize**: Make the text more relatable and personal.
+- **Elevate**: Make language more sophisticated or impressive.
+- **Illuminate**: Make the main ideas crystal clear and enlightening.
+- **Enliven/Energize**: Add liveliness and engagement to the text.
+- **Soft-pedal**: Downplay or reduce the intensity of criticism or tone.
+- **Exaggerate**: Use hyperbole to hype up the message.
+- **Downplay**: Make the tone more mild and reserved.
+- **Glamorize**: Make the content more appealing or glamorous.
 
-## 3. Summarize
-- Use: Provide a quick overview of lengthy content.
 
-## 4. Expand
-- Use: Offer a more comprehensive understanding of a topic.
-
-## 5. Explain
-- Use: Make a complex point clearer.
-
-## 6. Reinterpret
-- Use: Provide a different understanding or perspective.
-
-## 7. Simplify
-- Use: Reduce the complexity of the language.
-
-## 8. Elaborate
-- Use: Add more detail or explanation.
-
-## 9. Amplify
-- Use: Strengthen the message or key points.
-
-## 10. Clarify
-- Use: Make a confusing statement or concept clearer.
-
-## 11. Adapt
-- Use: Modify content for a different audience or purpose.
-
-## 12. Modernize
-- Use: Update outdated language or concepts.
-
-## 13. Formalize
-- Use: Convert informal language into a more formal tone.
-
-## 14. Informalize
-- Use: Make the language more casual and approachable.
-
-## 15. Condense
-- Use: Make the content shorter by focusing on key points.
-
-## 16. Emphasize/Reiterate
-- Use: Highlight certain points more strongly.
-
-## 17. Diversify
-- Use: Add variety in sentence structure or vocabulary.
-
-## 18. Neutralize
-- Use: Remove bias or opinion to make the text more objective.
-
-## 19. Streamline
-- Use: Remove unnecessary content or fluff.
-
-## 20. Enrich/Embellish
-- Use: Add more detail or flair.
-
-## 21. Illustrate
-- Use: Provide examples that clarify a point.
-
-## 22. Synthesize
-- Use: Combine different pieces of information into a cohesive whole.
-
-## 23. Sensationalize
-- Use: Make content more dramatic or eye-catching.
-
-## 24. Humanize
-- Use: Make the text more relatable or personal.
-
-## 25. Elevate
-- Use: Create a more sophisticated or impressive version.
-
-## 26. Illuminate
-- Use: Make the content crystal clear or enlightening.
-
-## 27. Enliven/Energize
-- Use: Make the text more lively or engaging.
-
-## 28. Soft-pedal
-- Use: Downplay or reduce the intensity of the text.
-
-## 29. Exaggerate
-- Use: Hype up the content with hyperbole.
-
-## 30. Downplay
-- Use: Make the tone more mild and reserved.
-
-## 31. Glamorize
-- Use: Make the content more appealing or glamorous.
 
