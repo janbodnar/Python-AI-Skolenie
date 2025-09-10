@@ -68,3 +68,99 @@ To write effective AI prompts:
 - Rephrase the prompt: If a prompt isn't working, try rephrasing it
 - Specify a length: Ask for the response to be a specific number of sentences or words
 - Be patient: Accept that the first answer is rarely perfect; it's a tool to guide you
+
+---
+
+## 1. Paraphrase
+- Use: Avoid plagiarism by rewording content.
+
+## 2. Reframe
+- Use: Change the perspective or focus of the text.
+
+## 3. Summarize
+- Use: Provide a quick overview of lengthy content.
+
+## 4. Expand
+- Use: Offer a more comprehensive understanding of a topic.
+
+## 5. Explain
+- Use: Make a complex point clearer.
+
+## 6. Reinterpret
+- Use: Provide a different understanding or perspective.
+
+## 7. Simplify
+- Use: Reduce the complexity of the language.
+
+## 8. Elaborate
+- Use: Add more detail or explanation.
+
+## 9. Amplify
+- Use: Strengthen the message or key points.
+
+## 10. Clarify
+- Use: Make a confusing statement or concept clearer.
+
+## 11. Adapt
+- Use: Modify content for a different audience or purpose.
+
+## 12. Modernize
+- Use: Update outdated language or concepts.
+
+## 13. Formalize
+- Use: Convert informal language into a more formal tone.
+
+## 14. Informalize
+- Use: Make the language more casual and approachable.
+
+## 15. Condense
+- Use: Make the content shorter by focusing on key points.
+
+## 16. Emphasize/Reiterate
+- Use: Highlight certain points more strongly.
+
+## 17. Diversify
+- Use: Add variety in sentence structure or vocabulary.
+
+## 18. Neutralize
+- Use: Remove bias or opinion to make the text more objective.
+
+## 19. Streamline
+- Use: Remove unnecessary content or fluff.
+
+## 20. Enrich/Embellish
+- Use: Add more detail or flair.
+
+## 21. Illustrate
+- Use: Provide examples that clarify a point.
+
+## 22. Synthesize
+- Use: Combine different pieces of information into a cohesive whole.
+
+## 23. Sensationalize
+- Use: Make content more dramatic or eye-catching.
+
+## 24. Humanize
+- Use: Make the text more relatable or personal.
+
+## 25. Elevate
+- Use: Create a more sophisticated or impressive version.
+
+## 26. Illuminate
+- Use: Make the content crystal clear or enlightening.
+
+## 27. Enliven/Energize
+- Use: Make the text more lively or engaging.
+
+## 28. Soft-pedal
+- Use: Downplay or reduce the intensity of the text.
+
+## 29. Exaggerate
+- Use: Hype up the content with hyperbole.
+
+## 30. Downplay
+- Use: Make the tone more mild and reserved.
+
+## 31. Glamorize
+- Use: Make the content more appealing or glamorous.
+
