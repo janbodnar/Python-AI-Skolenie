@@ -71,6 +71,17 @@ To write effective AI prompts:
 
 ---
 
+- Provide plan for the code changes/plan mode.
+- Break down large tasks into small, incremental steps.
+- Think of the end state and then prompt steps to get there
+- Define 5-10 rules upfront for new projects
+- Maintain a diary file for complex multi-chat sessions
+- Tream prompt like mini specs with stack, behaviour and constraints
+- Reference exising code
+- Commit regularly
+
+---
+
 ## 1. Paraphrase
 - Use: Avoid plagiarism by rewording content.
 
