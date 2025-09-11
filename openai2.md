@@ -147,6 +147,56 @@ info = json.loads(response.choices[0].message.content)
 print("Extracted info:", info)
 ```
 
+---
+
+```python
+from openai import OpenAI
+from pydantic import BaseModel
+from typing import List
+import os
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ["OPENROUTER_API_KEY"],
+)
+
+
+class Step(BaseModel):
+    explanation: str
+    output: str
+
+
+class MathResponse(BaseModel):
+    steps: List[Step]
+    final_answer: str
+
+
+prompt = """
+Solve the equation: 8x + 31 = 2.
+Return your answer as a JSON object matching this format:
+
+{
+  "steps": [
+    {"explanation": "...", "output": "..."},
+    ...
+  ],
+  "final_answer": "..."
+}
+"""
+
+response = client.chat.completions.create(
+    model="openrouter/sonoma-dusk-alpha",
+    messages=[{"role": "user", "content": prompt}],
+)
+
+raw_text = response.choices[0].message.content
+parsed = MathResponse.model_validate_json(raw_text)
+
+print(parsed)
+print(parsed.final_answer)
+```
+
+
 ## Classification
 
 This section demonstrates a small Python script that classifies multiple short customer  
