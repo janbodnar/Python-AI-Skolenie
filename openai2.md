@@ -428,6 +428,138 @@ print(reply.content)
 print(reply.category)
 ```
 
+## NEsted Pydantic models
+
+```python
+import instructor
+from pydantic import BaseModel, Field
+from openai import OpenAI
+from enum import Enum
+import os
+
+# nested Pydantic models example
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ["OPENROUTER_API_KEY"],
+)
+
+client = instructor.from_openai(client)
+MODEL = "openrouter/sonoma-dusk-alpha"
+
+class TicketCategory(str, Enum):
+    GENERAL = "general"
+    ORDER = "order"
+    BILLING = "billing"
+    OTHER = "other"
+
+class Details(BaseModel):
+    priority: str = Field(description="Priority level: 'low', 'medium', 'high'")
+    urgency: str = Field(description="Urgency: 'low', 'medium', 'high'")
+
+class Reply(BaseModel):
+    content: str = Field(description="Your reply that we send to the customer.")
+    category: TicketCategory = Field(description="Correctly assign one of the predefined categories")
+    details: Details = Field(description="Additional details about the ticket")
+
+system_prompt = "You're a helpful customer care assistant that can classify incoming messages, create a response, and assess priority and urgency."
+query = "My order is delayed and I need it urgently for an event tomorrow. Please expedite it!"
+
+reply = client.chat.completions.create(
+    model=MODEL,
+    response_model=Reply,
+    messages=[
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": query},
+    ],
+)
+
+print(reply.content)
+print(reply.category)
+print(reply.details.priority)
+print(reply.details.urgency)
+```
+
+## Extract list of keywords
+
+```python
+import instructor
+from pydantic import BaseModel, Field
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ["OPENROUTER_API_KEY"],
+)
+
+client = instructor.from_openai(client)
+MODEL = "openrouter/sonoma-dusk-alpha"
+
+class Reply(BaseModel):
+    content: str = Field(description="Your reply that we send to the customer.")
+    keywords: list[str] = Field(description="List of key terms extracted from the message")
+
+system_prompt = "You're a helpful assistant that can extract key information from customer messages."
+query = "I'm having trouble with my recent purchase. The product arrived damaged, and I also have questions about the return policy and warranty."
+
+reply = client.chat.completions.create(
+    model=MODEL,
+    response_model=Reply,
+    messages=[
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": query},
+    ],
+)
+
+print(reply.content)
+print(reply.keywords)
+```
+
+## Pydantic validation
+
+```python
+import instructor
+from pydantic import BaseModel, Field, field_validator
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ["OPENROUTER_API_KEY"],
+)
+
+client = instructor.from_openai(client)
+MODEL = "openrouter/sonoma-dusk-alpha"
+
+class Reply(BaseModel):
+    content: str = Field(description="Your reply that we send to the customer.", min_length=10)
+    sentiment: str = Field(description="Overall sentiment: 'positive', 'neutral', 'negative'")
+
+    @field_validator('sentiment')
+    @classmethod
+    def validate_sentiment(cls, v):
+        if v.lower() not in ['positive', 'neutral', 'negative']:
+            raise ValueError('Sentiment must be positive, neutral, or negative')
+        return v.lower()
+
+system_prompt = "You're a helpful customer care assistant that analyzes sentiment and creates responses."
+query = "Thank you for the excellent service! My issue was resolved quickly."
+
+reply = client.chat.completions.create(
+    model=MODEL,
+    response_model=Reply,
+    messages=[
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": query},
+    ],
+)
+
+print(reply.content)
+print(reply.sentiment)
+```
+
+
 ## Audio transcription
 
 This example demonstrates how to transcribe a local audio file to text using the
