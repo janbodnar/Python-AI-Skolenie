@@ -147,7 +147,7 @@ info = json.loads(response.choices[0].message.content)
 print("Extracted info:", info)
 ```
 
----
+This example demonstrates using Pydantic models to define structured output for solving math equations step-by-step. It shows how to define nested models (`Step` and `MathResponse`) and use them to parse the model's response, ensuring type safety and structured data extraction without requiring `response_format` with JSON schema.
 
 ```python
 from openai import OpenAI
@@ -336,6 +336,8 @@ if __name__ == "__main__":
 
 ## Instructor
 
+This example shows how to use the Instructor library with OpenAI to automatically parse responses into Pydantic models. It demonstrates classifying a customer support query and generating a response while extracting structured data (content and category) from the model's output.
+
 ```python
 import instructor
 from pydantic import BaseModel, Field
@@ -375,7 +377,7 @@ print(reply.content)
 print(reply.category)
 ```
 
----
+This example builds upon the previous one by using Python enums to enforce strict categorization. It demonstrates how to define predefined categories as an enum (`TicketCategory`) and ensure the model's response conforms to only those specific values, providing better type safety and validation.
 
 ```python
 import instructor
@@ -430,6 +432,8 @@ print(reply.category)
 
 ## Data extraction
 
+This example demonstrates extracting structured information from natural language text using Pydantic models. It shows how to prompt the model to extract event details (name, date, participants) from unstructured text and parse the response into a typed Python object for further processing.
+
 ```python
 from openai import OpenAI
 from pydantic import BaseModel
@@ -471,6 +475,8 @@ print(event)
 ```
 
 ## Nested Pydantic models
+
+This example demonstrates using nested Pydantic models with Instructor to extract complex, hierarchical data structures. It shows how to define models with nested objects (`Details` within `Reply`) to capture multiple levels of information, such as customer support responses with priority and urgency assessment.
 
 ```python
 import instructor
@@ -524,6 +530,8 @@ print(reply.details.urgency)
 
 ## Extract list of keywords
 
+This example shows how to extract lists of structured data from text using Instructor. It demonstrates extracting key terms and concepts from customer messages while also generating a response, useful for tagging, categorization, and content analysis workflows.
+
 ```python
 import instructor
 from pydantic import BaseModel, Field
@@ -559,6 +567,8 @@ print(reply.keywords)
 ```
 
 ## Pydantic validation
+
+This example demonstrates using Pydantic field validators to enforce custom validation rules on model responses. It shows how to implement field-level validation (minimum length, custom value validation) to ensure the model's output meets specific business requirements and data quality standards.
 
 ```python
 import instructor
