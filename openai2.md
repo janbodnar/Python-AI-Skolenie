@@ -334,6 +334,100 @@ if __name__ == "__main__":
     main()
 ```
 
+## Instructor
+
+```python
+import instructor
+from pydantic import BaseModel, Field
+from openai import OpenAI
+import os
+
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ["OPENROUTER_API_KEY"],
+)
+
+client = instructor.from_openai(client)
+MODEL = "openrouter/sonoma-dusk-alpha"
+
+class Reply(BaseModel):
+    content: str = Field(description="Your reply that we send to the customer.")
+    category: str = Field(
+        description="Category of the ticket: 'general', 'order', 'billing'"
+    )
+
+query = "How do I reset my password in FreeBSD?"
+
+reply = client.chat.completions.create(
+    model=MODEL,
+    response_model=Reply,
+    messages=[
+        {
+            "role": "system",
+            "content": "You're a helpful customer care assistant that can classify incoming messages and create a response.",
+        },
+        {"role": "user", "content": query},
+    ],
+)
+
+print(reply.content)
+print(reply.category)
+```
+
+---
+
+```python
+import instructor
+from pydantic import BaseModel, Field
+from openai import OpenAI
+from enum import Enum
+import os
+
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ["OPENROUTER_API_KEY"],
+)
+
+client = instructor.from_openai(client)
+MODEL = "openrouter/sonoma-dusk-alpha"
+
+
+class TicketCategory(str, Enum):
+    GENERAL = "general"
+    ORDER = "order"
+    BILLING = "billing"
+    OTHER = "other"
+
+
+class Reply(BaseModel):
+    content: str = Field(
+        description="Your reply that we send to the customer.")
+    category: TicketCategory = Field(
+        description="Correctly assign one of the predefined categories"
+    )
+
+
+system_prompt = "You're a helpful customer care assistant that can classify incoming messages and create a response."
+query = "I placed an order last week but haven't received any confirmation email. Can you check the status for me?"
+
+reply = client.chat.completions.create(
+    model=MODEL,
+    response_model=Reply,
+    messages=[
+        {
+            "role": "system",
+            "content": system_prompt,
+        },
+        {"role": "user", "content": query},
+    ],
+)
+
+print(reply.content)
+print(reply.category)
+```
+
 ## Audio transcription
 
 This example demonstrates how to transcribe a local audio file to text using the
