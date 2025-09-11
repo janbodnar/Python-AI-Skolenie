@@ -428,7 +428,49 @@ print(reply.content)
 print(reply.category)
 ```
 
-## NEsted Pydantic models
+## Data extraction
+
+```python
+from openai import OpenAI
+from pydantic import BaseModel
+import os
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ["OPENROUTER_API_KEY"],
+)
+
+class CalendarEvent(BaseModel):
+    name: str
+    date: str
+    participants: list[str]
+
+# Prompt the model to return a JSON object matching the schema
+messages = [
+    {"role": "system", "content": "Extract the event information and return it as a JSON object with keys: name, date, participants."},
+    {"role": "user", "content": "Alice and Bob are going to a science fair on Friday."}
+]
+
+response = client.chat.completions.create(
+    model="openrouter/sonoma-dusk-alpha",
+    messages=messages,
+    temperature=0,
+)
+
+# Parse the model's response using Pydantic
+raw_text = response.choices[0].message.content.strip()
+print(raw_text)
+
+# Optional: clean up if the model wraps JSON in markdown
+# if raw_text.startswith("```json"):
+#     raw_text = raw_text.strip("```json").strip("```")
+
+event = CalendarEvent.model_validate_json(raw_text)
+
+print(event)
+```
+
+## Nested Pydantic models
 
 ```python
 import instructor
