@@ -30,4 +30,4 @@ Python AI Skolenie
 | **Goose**       | Local, extensible AI agent that automates engineering tasks from start to finish. | [Goose](https://github.com/block/goose) |
 | **Crush**       | Glamorous, session-based CLI agent with LSP support and multi-model flexibility. | [Crush](https://github.com/charmbracelet/crush) |
 
-Let me know if you want to sort these by popularity, language support, or model compatibility.
+
