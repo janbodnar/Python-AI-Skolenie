@@ -1797,3 +1797,776 @@ production_manager = deploy_production_system()
 Production deployment patterns ensure CrewAI systems operate reliably  
 at scale with proper monitoring, fallback mechanisms, and performance  
 tracking for enterprise environments.  
+
+## Social Media Marketing Campaign
+
+A sophisticated social media campaign requires coordination between content  
+creators, schedulers, and performance analysts to maximize engagement and  
+reach across multiple platforms.  
+
+```python
+from crewai import Agent, Task, Crew
+from crewai_tools import BaseTool
+from datetime import datetime, timedelta
+
+class SocialMediaTool(BaseTool):
+    name: str = "Social Media Manager"
+    description: str = "Manage social media posting and analytics"
+    
+    def _run(self, action: str, platform: str = None, content: str = None) -> str:
+        if action == "post":
+            return f"Posted to {platform}: '{content[:50]}...'"
+        elif action == "analytics":
+            return f"{platform} analytics: 1,250 views, 89 likes, 23 shares"
+        elif action == "schedule":
+            return f"Content scheduled for {platform} at optimal time"
+        return "Invalid action"
+
+social_tool = SocialMediaTool()
+
+content_creator = Agent(
+    role="Social Media Content Creator",
+    goal="Create engaging, platform-specific content that drives engagement",
+    backstory="You are a creative content specialist with deep understanding "
+              "of social media trends and platform-specific best practices.",
+    tools=[social_tool],
+    verbose=True
+)
+
+campaign_manager = Agent(
+    role="Campaign Manager",
+    goal="Coordinate multi-platform campaigns and optimize timing",
+    backstory="You excel at campaign management with expertise in cross-platform "
+              "coordination and strategic timing for maximum impact.",
+    tools=[social_tool],
+    verbose=True
+)
+
+performance_analyst = Agent(
+    role="Social Media Analyst",
+    goal="Analyze campaign performance and provide optimization insights",
+    backstory="You specialize in social media analytics with strong skills "
+              "in data interpretation and performance optimization.",
+    tools=[social_tool],
+    verbose=True
+)
+
+brand_monitor = Agent(
+    role="Brand Safety Monitor",
+    goal="Ensure all content aligns with brand values and guidelines",
+    backstory="You are responsible for maintaining brand consistency and "
+              "ensuring content meets company standards and values.",
+    verbose=True
+)
+
+content_task = Task(
+    description="Create a week's worth of engaging content for a sustainable "
+                "technology startup launching a new solar panel product",
+    agent=content_creator
+)
+
+campaign_task = Task(
+    description="Develop campaign strategy and schedule content across "
+                "LinkedIn, Twitter, and Instagram for optimal engagement",
+    agent=campaign_manager,
+    context=[content_task]
+)
+
+brand_review_task = Task(
+    description="Review all campaign content for brand alignment and messaging consistency",
+    agent=brand_monitor,
+    context=[content_task, campaign_task]
+)
+
+performance_task = Task(
+    description="Set up tracking and provide performance projections for the campaign",
+    agent=performance_analyst,
+    context=[campaign_task]
+)
+
+crew = Crew(
+    agents=[content_creator, campaign_manager, brand_monitor, performance_analyst],
+    tasks=[content_task, campaign_task, brand_review_task, performance_task],
+    verbose=True
+)
+
+result = crew.kickoff()
+print(result)
+```
+
+Social media campaigns leverage specialized agents for content creation,  
+strategic scheduling, brand compliance, and performance optimization  
+across multiple platforms simultaneously.  
+
+## Scientific Research Collaboration
+
+Research projects benefit from multi-agent collaboration where specialists  
+contribute expertise in literature review, methodology, data analysis,  
+and peer review processes.  
+
+```python
+from crewai import Agent, Task, Crew
+from crewai_tools import BaseTool
+
+class ResearchTool(BaseTool):
+    name: str = "Research Database"
+    description: str = "Access scientific literature and research databases"
+    
+    def _run(self, query: str, database: str = "pubmed") -> str:
+        # Mock research database access
+        return f"Found 15 relevant papers in {database} for query: '{query}'\n" \
+               f"Top result: 'Recent advances in {query}' (2024) - " \
+               f"Significant findings include improved methodologies..."
+
+research_tool = ResearchTool()
+
+literature_researcher = Agent(
+    role="Literature Review Specialist",
+    goal="Conduct comprehensive literature reviews and identify research gaps",
+    backstory="You are a research librarian with PhD in information science "
+              "and expertise in systematic literature review methodologies.",
+    tools=[research_tool],
+    verbose=True
+)
+
+methodology_expert = Agent(
+    role="Research Methodology Expert",
+    goal="Design rigorous research methodologies and experimental protocols",
+    backstory="You are a senior researcher with extensive experience in "
+              "experimental design and statistical methodology.",
+    verbose=True
+)
+
+data_scientist = Agent(
+    role="Research Data Scientist",
+    goal="Analyze research data using appropriate statistical methods",
+    backstory="You specialize in scientific data analysis with expertise "
+              "in statistical modeling and research data interpretation.",
+    verbose=True
+)
+
+peer_reviewer = Agent(
+    role="Peer Review Specialist",
+    goal="Provide critical review and validation of research findings",
+    backstory="You are an experienced peer reviewer with high standards "
+              "for scientific rigor and research quality.",
+    verbose=True
+)
+
+ethics_reviewer = Agent(
+    role="Research Ethics Advisor",
+    goal="Ensure research meets ethical standards and compliance requirements",
+    backstory="You specialize in research ethics with deep knowledge of "
+              "ethical guidelines and regulatory compliance.",
+    verbose=True
+)
+
+literature_task = Task(
+    description="Conduct literature review on machine learning applications "
+                "in renewable energy optimization",
+    agent=literature_researcher
+)
+
+methodology_task = Task(
+    description="Design research methodology for studying ML algorithms "
+                "in energy optimization based on literature gaps",
+    agent=methodology_expert,
+    context=[literature_task]
+)
+
+ethics_task = Task(
+    description="Review proposed methodology for ethical considerations "
+                "and compliance requirements",
+    agent=ethics_reviewer,
+    context=[methodology_task]
+)
+
+analysis_task = Task(
+    description="Plan data analysis approach and statistical methods "
+                "for the proposed research",
+    agent=data_scientist,
+    context=[methodology_task]
+)
+
+review_task = Task(
+    description="Provide critical review of the complete research proposal",
+    agent=peer_reviewer,
+    context=[literature_task, methodology_task, ethics_task, analysis_task]
+)
+
+crew = Crew(
+    agents=[literature_researcher, methodology_expert, ethics_reviewer, 
+            data_scientist, peer_reviewer],
+    tasks=[literature_task, methodology_task, ethics_task, 
+           analysis_task, review_task],
+    verbose=True
+)
+
+result = crew.kickoff()
+print(result)
+```
+
+Scientific research collaboration combines specialized expertise in  
+literature review, methodology design, ethics compliance, and peer  
+review for comprehensive research project development.  
+
+## Emergency Response Coordination
+
+Crisis management scenarios require rapid coordination between multiple  
+specialized teams to assess situations, allocate resources, and coordinate  
+response efforts effectively.  
+
+```python
+from crewai import Agent, Task, Crew
+from crewai_tools import BaseTool
+import json
+from datetime import datetime
+
+class EmergencyTool(BaseTool):
+    name: str = "Emergency Response System"
+    description: str = "Access emergency resources and communication systems"
+    
+    def _run(self, action: str, data: str = None) -> str:
+        if action == "assess_resources":
+            return json.dumps({
+                "ambulances_available": 5,
+                "fire_trucks_available": 3,
+                "police_units_available": 8,
+                "emergency_shelters": ["Central Community Center", "High School Gym"]
+            })
+        elif action == "send_alert":
+            return f"Emergency alert sent: {data}"
+        elif action == "coordinate_response":
+            return f"Response coordinated: {data}"
+        return "System operational"
+
+emergency_tool = EmergencyTool()
+
+incident_commander = Agent(
+    role="Incident Commander",
+    goal="Coordinate overall emergency response and resource allocation",
+    backstory="You are an experienced emergency management professional "
+              "with leadership skills in crisis coordination and decision-making.",
+    tools=[emergency_tool],
+    verbose=True,
+    allow_delegation=True
+)
+
+situation_analyst = Agent(
+    role="Situation Assessment Specialist",
+    goal="Rapidly assess emergency situations and determine response priorities",
+    backstory="You specialize in emergency situation analysis with expertise "
+              "in threat assessment and priority determination.",
+    tools=[emergency_tool],
+    verbose=True
+)
+
+resource_coordinator = Agent(
+    role="Resource Coordination Manager",
+    goal="Manage and allocate emergency resources efficiently",
+    backstory="You excel at resource management with deep knowledge of "
+              "emergency assets and optimal allocation strategies.",
+    tools=[emergency_tool],
+    verbose=True
+)
+
+communications_director = Agent(
+    role="Emergency Communications Director",
+    goal="Manage public communication and information dissemination",
+    backstory="You specialize in crisis communications with ability to "
+              "provide clear, accurate information during emergencies.",
+    tools=[emergency_tool],
+    verbose=True
+)
+
+medical_coordinator = Agent(
+    role="Medical Response Coordinator",
+    goal="Coordinate medical response and healthcare resource allocation",
+    backstory="You are a medical professional with expertise in emergency "
+              "medicine and mass casualty response coordination.",
+    tools=[emergency_tool],
+    verbose=True
+)
+
+def handle_emergency_scenario(scenario_description):
+    # Initial situation assessment
+    assessment_task = Task(
+        description=f"Assess emergency situation: {scenario_description}",
+        agent=situation_analyst
+    )
+    
+    # Resource evaluation
+    resource_task = Task(
+        description="Evaluate available resources for emergency response",
+        agent=resource_coordinator,
+        context=[assessment_task]
+    )
+    
+    # Medical response planning
+    medical_task = Task(
+        description="Plan medical response based on situation assessment",
+        agent=medical_coordinator,
+        context=[assessment_task]
+    )
+    
+    # Communication strategy
+    comm_task = Task(
+        description="Develop public communication strategy for the emergency",
+        agent=communications_director,
+        context=[assessment_task]
+    )
+    
+    # Overall coordination
+    coordination_task = Task(
+        description="Coordinate overall response strategy and resource deployment",
+        agent=incident_commander,
+        context=[assessment_task, resource_task, medical_task, comm_task]
+    )
+    
+    crew = Crew(
+        agents=[situation_analyst, resource_coordinator, medical_coordinator,
+                communications_director, incident_commander],
+        tasks=[assessment_task, resource_task, medical_task, 
+               comm_task, coordination_task],
+        verbose=True
+    )
+    
+    return crew.kickoff()
+
+# Simulate emergency response
+emergency_scenario = ("Major earthquake (7.2 magnitude) hit downtown area. "
+                     "Multiple building collapses reported, estimated 200+ "
+                     "people trapped, power outages across 6 neighborhoods.")
+
+print("🚨 Emergency Response Activation")
+print(f"Scenario: {emergency_scenario}")
+print("=" * 60)
+
+response_plan = handle_emergency_scenario(emergency_scenario)
+print("\n📋 Emergency Response Plan:")
+print(response_plan)
+```
+
+Emergency response coordination demonstrates how CrewAI can handle  
+time-critical scenarios requiring rapid assessment, resource allocation,  
+and coordinated action across multiple specialized teams.  
+
+## Educational Curriculum Development
+
+Educational content creation benefits from collaboration between subject  
+matter experts, instructional designers, assessment specialists, and  
+accessibility reviewers to create comprehensive learning experiences.  
+
+```python
+from crewai import Agent, Task, Crew
+from crewai_tools import BaseTool
+
+class EducationTool(BaseTool):
+    name: str = "Educational Resources"
+    description: str = "Access educational standards and learning resources"
+    
+    def _run(self, query: str, resource_type: str = "standards") -> str:
+        if resource_type == "standards":
+            return f"Educational standards for {query}: Grade-appropriate " \
+                   f"learning objectives and competency requirements identified"
+        elif resource_type == "accessibility":
+            return f"Accessibility guidelines: WCAG 2.1 compliance recommendations " \
+                   f"for {query} content"
+        return f"Educational resource information for: {query}"
+
+education_tool = EducationTool()
+
+subject_expert = Agent(
+    role="Subject Matter Expert",
+    goal="Provide deep domain expertise and ensure content accuracy",
+    backstory="You are a PhD-level expert in your field with extensive "
+              "knowledge and years of teaching experience.",
+    tools=[education_tool],
+    verbose=True
+)
+
+instructional_designer = Agent(
+    role="Instructional Designer",
+    goal="Design effective learning experiences and pedagogical approaches",
+    backstory="You specialize in educational design with expertise in "
+              "learning theory and effective teaching methodologies.",
+    tools=[education_tool],
+    verbose=True
+)
+
+assessment_specialist = Agent(
+    role="Assessment and Evaluation Specialist",
+    goal="Create fair, comprehensive assessments that measure learning outcomes",
+    backstory="You excel in educational assessment design with knowledge "
+              "of various evaluation methods and learning measurement.",
+    verbose=True
+)
+
+accessibility_expert = Agent(
+    role="Accessibility and Inclusion Specialist",
+    goal="Ensure educational content is accessible to all learners",
+    backstory="You specialize in educational accessibility with deep knowledge "
+              "of inclusive design and diverse learning needs.",
+    tools=[education_tool],
+    verbose=True
+)
+
+quality_reviewer = Agent(
+    role="Educational Quality Reviewer",
+    goal="Review curriculum for overall quality and coherence",
+    backstory="You are an experienced educator with expertise in curriculum "
+              "review and quality assurance in educational content.",
+    verbose=True
+)
+
+def develop_curriculum(subject, grade_level, duration):
+    content_task = Task(
+        description=f"Develop comprehensive {subject} curriculum content for "
+                   f"grade {grade_level} spanning {duration}",
+        agent=subject_expert
+    )
+    
+    design_task = Task(
+        description=f"Design instructional approaches and learning activities "
+                   f"for the {subject} curriculum",
+        agent=instructional_designer,
+        context=[content_task]
+    )
+    
+    assessment_task = Task(
+        description="Create assessment strategy and evaluation methods for "
+                   "measuring student progress and learning outcomes",
+        agent=assessment_specialist,
+        context=[content_task, design_task]
+    )
+    
+    accessibility_task = Task(
+        description="Review curriculum for accessibility and create adaptations "
+                   "for diverse learning needs",
+        agent=accessibility_expert,
+        context=[content_task, design_task]
+    )
+    
+    quality_task = Task(
+        description="Conduct comprehensive quality review of complete curriculum",
+        agent=quality_reviewer,
+        context=[content_task, design_task, assessment_task, accessibility_task]
+    )
+    
+    crew = Crew(
+        agents=[subject_expert, instructional_designer, assessment_specialist,
+                accessibility_expert, quality_reviewer],
+        tasks=[content_task, design_task, assessment_task, 
+               accessibility_task, quality_task],
+        verbose=True
+    )
+    
+    return crew.kickoff()
+
+# Example curriculum development
+print("📚 Educational Curriculum Development")
+print("=" * 50)
+
+curriculum_result = develop_curriculum(
+    subject="Environmental Science",
+    grade_level="9-12",
+    duration="one semester"
+)
+
+print("📋 Curriculum Development Result:")
+print(curriculum_result)
+```
+
+Educational curriculum development showcases collaborative expertise in  
+subject matter knowledge, instructional design, assessment creation,  
+and accessibility compliance for comprehensive learning experiences.  
+
+## Legal Case Preparation
+
+Legal case preparation requires coordination between researchers, analysts,  
+document reviewers, and strategic advisors to build comprehensive case  
+strategies and supporting evidence.  
+
+```python
+from crewai import Agent, Task, Crew
+from crewai_tools import BaseTool
+import json
+
+class LegalTool(BaseTool):
+    name: str = "Legal Research System"
+    description: str = "Access legal databases and case law research"
+    
+    def _run(self, query: str, jurisdiction: str = "federal") -> str:
+        # Mock legal database search
+        return f"Legal research results for '{query}' in {jurisdiction} jurisdiction:\n" \
+               f"- Found 23 relevant cases\n" \
+               f"- 8 favorable precedents identified\n" \
+               f"- 3 potential challenges noted\n" \
+               f"- Recent ruling trends analyzed"
+
+legal_tool = LegalTool()
+
+case_researcher = Agent(
+    role="Legal Research Specialist",
+    goal="Conduct thorough legal research and identify relevant precedents",
+    backstory="You are a experienced legal researcher with expertise in "
+              "case law analysis and legal database navigation.",
+    tools=[legal_tool],
+    verbose=True
+)
+
+document_reviewer = Agent(
+    role="Document Review Attorney",
+    goal="Review and analyze case documents for relevance and privilege",
+    backstory="You specialize in document review with keen attention to "
+              "detail and expertise in privilege and relevance determination.",
+    verbose=True
+)
+
+case_strategist = Agent(
+    role="Case Strategy Advisor",
+    goal="Develop comprehensive case strategy and litigation approach",
+    backstory="You are a senior litigation attorney with extensive trial "
+              "experience and strategic planning expertise.",
+    verbose=True
+)
+
+evidence_analyst = Agent(
+    role="Evidence Analysis Specialist",
+    goal="Analyze evidence strength and admissibility considerations",
+    backstory="You excel in evidence analysis with deep knowledge of "
+              "rules of evidence and admissibility standards.",
+    verbose=True
+)
+
+brief_writer = Agent(
+    role="Legal Brief Writer",
+    goal="Draft compelling legal briefs and court documents",
+    backstory="You are skilled in legal writing with ability to craft "
+              "persuasive arguments and clear legal documentation.",
+    verbose=True
+)
+
+compliance_reviewer = Agent(
+    role="Compliance and Ethics Reviewer",
+    goal="Ensure all case preparation meets ethical and procedural standards",
+    backstory="You specialize in legal ethics and procedural compliance "
+              "with meticulous attention to professional standards.",
+    verbose=True
+)
+
+def prepare_legal_case(case_description, case_type):
+    research_task = Task(
+        description=f"Conduct comprehensive legal research for {case_type} case: {case_description}",
+        agent=case_researcher
+    )
+    
+    document_task = Task(
+        description="Review and organize case documents, identify key evidence",
+        agent=document_reviewer
+    )
+    
+    evidence_task = Task(
+        description="Analyze evidence strength and admissibility issues",
+        agent=evidence_analyst,
+        context=[document_task]
+    )
+    
+    strategy_task = Task(
+        description="Develop case strategy based on research and evidence analysis",
+        agent=case_strategist,
+        context=[research_task, evidence_task]
+    )
+    
+    brief_task = Task(
+        description="Draft preliminary legal brief outlining case arguments",
+        agent=brief_writer,
+        context=[research_task, strategy_task]
+    )
+    
+    compliance_task = Task(
+        description="Review case preparation for ethical and procedural compliance",
+        agent=compliance_reviewer,
+        context=[strategy_task, brief_task]
+    )
+    
+    crew = Crew(
+        agents=[case_researcher, document_reviewer, evidence_analyst,
+                case_strategist, brief_writer, compliance_reviewer],
+        tasks=[research_task, document_task, evidence_task,
+               strategy_task, brief_task, compliance_task],
+        verbose=True
+    )
+    
+    return crew.kickoff()
+
+# Example legal case preparation
+print("⚖️ Legal Case Preparation System")
+print("=" * 50)
+
+case_result = prepare_legal_case(
+    case_description="Technology company facing patent infringement lawsuit "
+                    "involving machine learning algorithms",
+    case_type="intellectual property litigation"
+)
+
+print("📋 Case Preparation Analysis:")
+print(case_result)
+```
+
+Legal case preparation demonstrates multi-agent collaboration in research,  
+document review, evidence analysis, strategy development, and compliance  
+verification for comprehensive litigation support.  
+
+## Advanced Financial Trading System
+
+Algorithmic trading systems benefit from multiple agents specializing in  
+market analysis, risk assessment, strategy optimization, and regulatory  
+compliance for sophisticated trading operations.  
+
+```python
+from crewai import Agent, Task, Crew
+from crewai_tools import BaseTool
+import json
+import random
+from datetime import datetime
+
+class TradingTool(BaseTool):
+    name: str = "Financial Market Data"
+    description: str = "Access real-time market data and trading systems"
+    
+    def _run(self, action: str, symbol: str = None, data: str = None) -> str:
+        if action == "market_data":
+            price = round(random.uniform(100, 500), 2)
+            volume = random.randint(10000, 100000)
+            return f"{symbol}: ${price}, Volume: {volume}, " \
+                   f"Change: {random.uniform(-5, 5):.2f}%"
+        elif action == "risk_metrics":
+            return json.dumps({
+                "var_95": random.uniform(0.02, 0.05),
+                "sharpe_ratio": random.uniform(1.2, 2.8),
+                "max_drawdown": random.uniform(0.08, 0.15),
+                "volatility": random.uniform(0.15, 0.35)
+            })
+        elif action == "execute_trade":
+            return f"Trade executed: {data}"
+        return "Market system operational"
+
+trading_tool = TradingTool()
+
+market_analyst = Agent(
+    role="Quantitative Market Analyst",
+    goal="Analyze market conditions and identify trading opportunities",
+    backstory="You are a quantitative analyst with expertise in financial "
+              "markets, statistical analysis, and pattern recognition.",
+    tools=[trading_tool],
+    verbose=True
+)
+
+risk_manager = Agent(
+    role="Risk Management Specialist",
+    goal="Assess and manage trading risks within acceptable parameters",
+    backstory="You specialize in financial risk management with deep knowledge "
+              "of risk metrics and portfolio optimization.",
+    tools=[trading_tool],
+    verbose=True
+)
+
+strategy_optimizer = Agent(
+    role="Trading Strategy Optimizer",
+    goal="Optimize trading strategies based on market analysis and risk assessment",
+    backstory="You excel in algorithmic trading strategy development with "
+              "expertise in optimization and backtesting methodologies.",
+    tools=[trading_tool],
+    verbose=True
+)
+
+compliance_officer = Agent(
+    role="Trading Compliance Officer",
+    goal="Ensure all trading activities comply with regulatory requirements",
+    backstory="You specialize in financial regulation compliance with "
+              "comprehensive knowledge of trading rules and requirements.",
+    verbose=True
+)
+
+execution_manager = Agent(
+    role="Trade Execution Manager",
+    goal="Execute trades efficiently while minimizing market impact",
+    backstory="You are expert in trade execution with knowledge of market "
+              "microstructure and optimal execution strategies.",
+    tools=[trading_tool],
+    verbose=True
+)
+
+performance_analyst = Agent(
+    role="Performance Analytics Specialist",
+    goal="Monitor and analyze trading performance and strategy effectiveness",
+    backstory="You specialize in performance analysis with expertise in "
+              "attribution analysis and strategy evaluation.",
+    tools=[trading_tool],
+    verbose=True
+)
+
+def execute_trading_cycle(market_conditions, portfolio_status):
+    market_analysis_task = Task(
+        description=f"Analyze current market conditions: {market_conditions}",
+        agent=market_analyst
+    )
+    
+    risk_assessment_task = Task(
+        description=f"Assess portfolio risk given current status: {portfolio_status}",
+        agent=risk_manager
+    )
+    
+    strategy_task = Task(
+        description="Optimize trading strategy based on market analysis and risk assessment",
+        agent=strategy_optimizer,
+        context=[market_analysis_task, risk_assessment_task]
+    )
+    
+    compliance_task = Task(
+        description="Review proposed trading strategy for regulatory compliance",
+        agent=compliance_officer,
+        context=[strategy_task]
+    )
+    
+    execution_task = Task(
+        description="Plan trade execution approach for approved strategies",
+        agent=execution_manager,
+        context=[strategy_task, compliance_task]
+    )
+    
+    performance_task = Task(
+        description="Set up performance monitoring for executed trades",
+        agent=performance_analyst,
+        context=[execution_task]
+    )
+    
+    crew = Crew(
+        agents=[market_analyst, risk_manager, strategy_optimizer,
+                compliance_officer, execution_manager, performance_analyst],
+        tasks=[market_analysis_task, risk_assessment_task, strategy_task,
+               compliance_task, execution_task, performance_task],
+        verbose=True
+    )
+    
+    return crew.kickoff()
+
+# Example trading system operation
+print("📈 Advanced Financial Trading System")
+print("=" * 50)
+
+trading_result = execute_trading_cycle(
+    market_conditions="High volatility in tech sector, rising interest rates, "
+                     "strong earnings reports from major companies",
+    portfolio_status="$10M portfolio, 60% equity exposure, 25% cash, "
+                    "15% fixed income, current VaR within limits"
+)
+
+print("📊 Trading System Analysis:")
+print(trading_result)
+```
+
+Advanced financial trading systems demonstrate sophisticated multi-agent  
+coordination for market analysis, risk management, strategy optimization,  
+compliance verification, and trade execution in complex financial markets.
