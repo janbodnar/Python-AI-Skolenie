@@ -1,5 +1,5 @@
 # Python-AI-Skolenie
-Python AI Skolenie
+Python AI Skolenie, kontakt jan.bodnar@gmail.com
 
 
 ## Prompts
