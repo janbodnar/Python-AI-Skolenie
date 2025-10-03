@@ -1955,9 +1955,23 @@ async def call_openrouter(
     messages: t.List[dict],
     temperature: float = 0.7,
     stream: bool = False,
-) -> str:
+):
     """
     Call OpenRouter chat completions. If model == 'mock/echo', returns a simple echo.
+    """
+    if stream:
+        return call_openrouter_stream(model, messages, temperature)
+    else:
+        return await call_openrouter_non_stream(model, messages, temperature)
+
+
+async def call_openrouter_non_stream(
+    model: str,
+    messages: t.List[dict],
+    temperature: float = 0.7,
+) -> str:
+    """
+    Call OpenRouter chat completions without streaming.
     """
     if model == "mock/echo" or not OPENROUTER_API_KEY:
         # Simple deterministic mock for local testing
@@ -1969,17 +1983,59 @@ async def call_openrouter(
         "model": model,
         "messages": messages,
         "temperature": temperature,
-        "stream": False,  # Gradio simple response; you can extend to streaming later
+        "stream": False,
     }
     async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT_S) as client:
         r = await client.post(url, headers=_headers(), json=payload)
         r.raise_for_status()
         data = r.json()
 
-    try:
-        return data["choices"][0]["message"]["content"]
-    except Exception:
-        return json.dumps(data, indent=2)
+        try:
+            return data["choices"][0]["message"]["content"]
+        except Exception:
+            return json.dumps(data, indent=2)
+
+
+async def call_openrouter_stream(
+    model: str,
+    messages: t.List[dict],
+    temperature: float = 0.7,
+) -> t.AsyncGenerator:
+    """
+    Call OpenRouter chat completions with streaming.
+    """
+    if model == "mock/echo" or not OPENROUTER_API_KEY:
+        # Simple deterministic mock for local testing
+        user_last = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
+        response = f"[mock echo] {user_last}"
+        yield response
+        return
+
+    url = f"{OPENROUTER_BASE_URL}/chat/completions"
+    payload = {
+        "model": model,
+        "messages": messages,
+        "temperature": temperature,
+        "stream": True,
+    }
+    async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT_S) as client:
+        # For streaming, we need to make a streaming request
+        async with client.stream("POST", url, headers=_headers(), json=payload) as response:
+            response.raise_for_status()
+            async for line in response.aiter_lines():
+                if line.startswith("data: "):
+                    chunk = line[6:]  # Remove "data: " prefix
+                    if chunk.strip() == "[DONE]":
+                        break
+                    try:
+                        data = json.loads(chunk)
+                        if "choices" in data and len(data["choices"]) > 0:
+                            delta = data["choices"][0].get("delta", {})
+                            content = delta.get("content", "")
+                            if content:
+                                yield content
+                    except json.JSONDecodeError:
+                        continue
 
 
 def _history_to_messages(
@@ -2041,7 +2097,7 @@ async def respond_fn(
     """
     messages = _history_to_messages(history, system_prompt or DEFAULT_SYSTEM_PROMPT)
     messages.append({"role": "user", "content": message})
-    reply = await call_openrouter(model=model, messages=messages, temperature=temperature, stream=False)
+    reply = await call_openrouter_non_stream(model=model, messages=messages, temperature=temperature)
     return reply
 
 
@@ -2099,11 +2155,24 @@ with gr.Blocks(title="OpenRouter Gradio Chat", theme=gr.themes.Soft()) as demo:
         messages = _history_to_messages(history or [], system_prompt or DEFAULT_SYSTEM_PROMPT)
         if message and message.strip():
             messages.append({"role": "user", "content": message})
-        # Call model and append assistant reply
-        reply = await call_openrouter(model=model, messages=messages, temperature=temperature, stream=False)
-        messages.append({"role": "assistant", "content": reply})
-        # Return full messages list to satisfy Chatbot(type="messages")
-        return messages
+        
+        # Initialize the assistant message in the chat history
+        # We'll update this progressively as we receive streaming chunks
+        initial_messages = messages.copy()
+        assistant_message = {"role": "assistant", "content": ""}
+        initial_messages.append(assistant_message)
+        
+        # Call model with streaming
+        stream_gen = await call_openrouter(model=model, messages=messages, temperature=temperature, stream=True)
+        
+        # Process the streaming response
+        full_response = ""
+        async for chunk in stream_gen:
+            full_response += chunk
+            # Update the assistant message content with the accumulated response
+            updated_messages = initial_messages[:-1]  # Remove the last message
+            updated_messages.append({"role": "assistant", "content": full_response})  # Add updated message
+            yield updated_messages  # Yield the updated messages for real-time display
 
     send_event = send_btn.click(
         _respond,
@@ -2145,5 +2214,5 @@ if __name__ == "__main__":
     # Gradio 4.x: queue() no longer supports concurrency_count; use default queue.
     # Set share via env var if desired; otherwise local-only.
     share = os.getenv("GRADIO_SHARE", "false").lower() in ("1", "true", "yes")
-    demo.queue().launch(server_name="localhost", server_port=int(os.getenv("PORT", "7860")), share=share)
+    demo.queue().launch(server_name="localhost", server_port=int(os.getenv("PORT", "7861")), share=share)
 ```
