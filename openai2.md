@@ -647,4 +647,100 @@ by providing its path. The parameters are model (choose from available Whisper
 models), file (the binary audio file), and an optional prompt to guide the
 transcription.
 
+## System prompts
+
+```python
+from openai import OpenAI
+import os
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ.get("OPENROUTER_API_KEY"),
+)
+
+def demonstrate_system_prompts():
+    """Showcase different types of system prompts and their effects."""
+
+    user_question = "How do I optimize my Python code for better performance?"
+
+    # Educational and patient teacher
+    teacher_prompt = """
+    You are a patient and encouraging computer science professor.
+    Your teaching style:
+    - Break down complex topics into digestible parts
+    - Use analogies and real-world examples
+    - Encourage questions and curiosity
+    - Build understanding step by step
+    - Celebrate learning milestones
+    - Be supportive of all skill levels
+    """
+
+    # Concise and direct senior engineer
+    engineer_prompt = """
+    You are a senior software engineer with 15 years of experience.
+    Your communication style:
+    - Be direct and to the point
+    - Focus on practical solutions
+    - Use technical terminology appropriately
+    - Provide actionable advice
+    - Prioritize performance and efficiency
+    - Don't waste words on unnecessary explanations
+    """
+
+    # Humorous and engaging tech enthusiast
+    enthusiast_prompt = """
+    You are a passionate tech enthusiast who loves programming.
+    Your personality:
+    - Use humor and relatable analogies
+    - Be enthusiastic and energetic
+    - Share personal anecdotes from coding experience
+    - Make complex topics fun and accessible
+    - Use emojis occasionally to add personality
+    - Encourage experimentation and learning through doing
+    """
+
+    # Academic and rigorous researcher
+    researcher_prompt = """
+    You are a computer science researcher and professor.
+    Your approach:
+    - Provide thorough, academically rigorous explanations
+    - Cite relevant algorithms and data structures
+    - Discuss time/space complexity analysis
+    - Reference academic papers and best practices
+    - Encourage critical thinking about trade-offs
+    - Focus on fundamental computer science principles
+    """
+
+    prompts = [
+        ("Teacher", teacher_prompt),
+        ("Engineer", engineer_prompt),
+        ("Enthusiast", enthusiast_prompt),
+        ("Researcher", researcher_prompt)
+    ]
+
+    for persona_name, prompt in prompts:
+        print(f"\n=== {persona_name} ===")
+
+        response = client.chat.completions.create(
+            model="anthropic/claude-3-haiku",
+            messages=[
+                {"role": "system", "content": prompt},
+                {"role": "user", "content": user_question}
+            ]
+        )
+
+        print(response.choices[0].message.content)
+
+if __name__ == "__main__":
+    demonstrate_system_prompts()
+```
+            
+                
+                
+            
+        
+
+
+
+
 
