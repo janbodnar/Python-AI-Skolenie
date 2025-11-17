@@ -2,8 +2,7 @@
 Python AI Skolenie, kontakt jan.bodnar@gmail.com
 
 
-![Neural Network Image](neutwork.jpeg)
-
+<img src="neutwork.jpeg" alt="Neural Network Image" style="width:50%;" />
 
 ## Prompts
 
