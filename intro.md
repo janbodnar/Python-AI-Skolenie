@@ -1,4 +1,4 @@
-# Introduction to Working with Artificial Intelligence (AI)
+# Introduction Artificial Intelligence (AI)
 
 Artificial Intelligence (AI) refers to the simulation of human intelligence  
 in machines that are programmed to think and learn like humans. AI has  
