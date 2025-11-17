@@ -2,6 +2,9 @@
 Python AI Skolenie, kontakt jan.bodnar@gmail.com
 
 
+![Neural Network Image](neutwork.jpeg)
+
+
 ## Prompts
 
 - Provide follow up questions
