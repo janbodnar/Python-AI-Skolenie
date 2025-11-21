@@ -15,3 +15,26 @@ for row in nums:
 ```
 
 Iteracia vnorenych zoznamov.
+
+
+## Podtitulok
+
+- for loops
+- while loops
+
+## Syntax MD
+
+| Syntax                  | Description                                              |
+|-------------------------|----------------------------------------------------------|
+| `# Header`              | Creates a level 1 header (use ## for level 2, etc.)      |
+| `**bold**` or `__bold__`| Makes text bold                                          |
+| `*italic*` or `_italic_`| Makes text italic                                        |
+| `~~strikethrough~~`     | Strikes through text                                     |
+| `[link text](url)`      | Creates a hyperlink                                      |
+| `![alt text](image url)`| Embeds an image                                          |
+| `- item` or `* item`    | Creates an unordered list item                           |
+| `1. item`               | Creates an ordered list item                             |
+| `` `code` ``            | Inline code (use triple backticks for code blocks)       |
+| `> quote`               | Blockquote                                               |
+| `---`                   | Horizontal rule                                          |
+| `| col1 | col2 |`       | Table row (use --- for header separator)                 |
