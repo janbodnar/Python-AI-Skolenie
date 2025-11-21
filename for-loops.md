@@ -16,6 +16,16 @@ for row in nums:
 
 Iteracia vnorenych zoznamov.
 
+## Funckia sum
+
+```python
+vals = [1, 2, 3]
+print(sum(vals))
+```
+
+Funkcia `sum` vypocita celkovu *sumu*.
+
+
 
 ## Podtitulok
 
