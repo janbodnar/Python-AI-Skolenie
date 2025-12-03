@@ -475,15 +475,15 @@ Compare uv with popular Python package managers:
 
 | Feature                  | uv           | pip       | poetry    | conda     |
 |--------------------------|--------------|-----------|-----------|-----------|
-| Speed                    | Fastest      | Slow      | Medium    | Slow      |
-| Lockfile                 | Yes          | No*       | Yes       | Yes       |
+| Speed                    | 10-100x pip  | Baseline  | ~2x pip   | Slow      |
+| Lockfile                 | Yes          | No¹       | Yes       | Yes       |
 | Python version mgmt      | Yes          | No        | No        | Yes       |
 | Virtual env management   | Yes          | No        | Yes       | Yes       |
 | Cross-platform lockfile  | Yes          | N/A       | No        | No        |
 | pip compatibility        | Full         | N/A       | Partial   | Partial   |
-| Dependency resolution    | Fast         | Slow      | Medium    | Slow      |
+| Dependency resolution    | Parallel     | Sequential| Moderate  | Sequential|
 
-*pip-tools provides lockfile functionality for pip  
+¹ pip-tools provides lockfile functionality for pip  
 
 uv provides the best balance of speed, compatibility, and modern features  
 for most Python projects.  
