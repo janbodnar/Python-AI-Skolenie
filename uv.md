@@ -577,7 +577,11 @@ Migrate an existing pip-based project to uv:
 uv init
 
 # Step 2: Add dependencies from requirements.txt
-uv add $(cat requirements.txt | grep -v '^#' | tr '\n' ' ')
+# Use uv pip for compatibility with requirements.txt
+uv pip install -r requirements.txt
+
+# Or manually add key packages to pyproject.toml
+uv add requests pandas numpy
 
 # Step 3: Generate lockfile
 uv lock
@@ -594,12 +598,14 @@ python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
-# New uv workflow
+# New uv workflow (pip-compatible)
 uv venv
 uv pip install -r requirements.txt
+
 # Or migrate fully to pyproject.toml
 uv init
-uv add -r requirements.txt
+# Manually add packages to pyproject.toml using uv add
+uv add requests numpy pandas
 ```
 
 ### Migration from Poetry
@@ -613,8 +619,8 @@ poetry export -f requirements.txt > requirements.txt
 # Initialize uv project
 uv init
 
-# Add dependencies
-uv add -r requirements.txt
+# Install dependencies using pip compatibility mode
+uv pip install -r requirements.txt
 
 # Remove Poetry lockfile (optional, keep pyproject.toml)
 rm poetry.lock
