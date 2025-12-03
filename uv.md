@@ -44,11 +44,12 @@ Use the official installation script to install uv on Linux or macOS:
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-After installation, restart your terminal or run the following to add uv  
-to your PATH:  
+After installation, restart your terminal or source the shell configuration  
+to add uv to your PATH:  
 
 ```bash
-source $HOME/.local/bin/env  # or source $HOME/.cargo/env
+# Reload shell profile
+source ~/.bashrc  # or ~/.zshrc for zsh users
 ```
 
 ### Windows
