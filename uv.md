@@ -48,7 +48,7 @@ After installation, restart your terminal or run the following to add uv
 to your PATH:  
 
 ```bash
-source $HOME/.local/bin/env
+source $HOME/.local/bin/env  # or source $HOME/.cargo/env
 ```
 
 ### Windows
@@ -615,8 +615,10 @@ uv init
 # Add dependencies
 uv add -r requirements.txt
 
-# Remove Poetry files (optional)
-rm poetry.lock pyproject.toml
+# Remove Poetry lockfile (optional, keep pyproject.toml)
+rm poetry.lock
+
+# Generate uv lockfile
 uv lock
 ```
 
