@@ -30,7 +30,101 @@ multiple tools into one unified command-line interface. Key features include:
 uv simplifies Python development by consolidating multiple tools into one  
 fast, reliable package manager with predictable dependency resolution.  
 
+
+## 🚀 Project & Environment Setup  
+
+Setting up projects and environments is the first step in any workflow. These commands help you initialize  
+new projects, manage virtual environments, and control Python versions seamlessly.  
+
+| Command | Description |
+|---------|-------------|
+| `uv init my-project` | Initialize a new Python project with `pyproject.toml` and basic structure. |
+| `uv venv my-env` | Create a standalone virtual environment in the current directory. |
+| `uv python install 3.12` | Install a specific Python version (e.g., 3.12). |
+| `uv python list` | List all installed Python versions managed by `uv`. |
+| `uv python pin 3.11` | Pin a project to use a specific Python version. |
+
 ---
+
+## 📦 Package Management  
+Managing dependencies is at the heart of Python development. These commands let you add, 
+update, and control packages with precision, whether from PyPI or GitHub.  
+
+| Command | Description |
+|---------|-------------|
+| `uv add requests` | Add a dependency to your project. |
+| `uv add pandas numpy matplotlib` | Add multiple dependencies at once. |
+| `uv add "requests==2.31.0"` | Install an exact version of a package. |
+| `uv add "numpy>=1.24.0,<2.0.0"` | Install a package within a version range. |
+| `uv add "git+https://github.com/psf/requests.git@v2.31.0"` | Install directly from a Git repository. |
+
+---
+
+## 🏃 Running Code  
+
+Once dependencies are installed, you’ll want to run scripts or tests inside the correct  
+environment. These commands ensure your code executes with the right packages and Python version.  
+
+| Command | Description |
+|---------|-------------|
+| `uv run python script.py` | Run a Python script inside the uv-managed environment. |
+| `uv run --with requests python -c "import requests; ..."` | Run inline code with temporary dependencies. |
+| `uv run pytest` | Run tests with dependencies resolved automatically. |
+
+---
+
+## 🔒 Dependency Resolution  
+Reproducibility is key in modern development. These commands help you lock dependencies,  
+sync environments, and maintain compatibility with traditional `requirements.txt` workflows.  
+
+| Command | Description |
+|---------|-------------|
+| `uv lock` | Generate or update the lockfile (`uv.lock`) for reproducible builds. |
+| `uv sync` | Install dependencies from the lockfile. |
+| `uv pip install -r requirements.txt` | Install dependencies from a traditional `requirements.txt`. |
+| `uv pip compile pyproject.toml -o requirements.txt` | Generate a `requirements.txt` file from `pyproject.toml`. |
+| `uv pip sync requirements.txt` | Sync environment to match a `requirements.txt`. |
+
+---
+
+## 🛠 Tool Runner (CLI Tools)  
+
+`uvx` makes it easy to run Python tools without installing them globally. This is perfect  
+for formatters, linters, and test runners that you want isolated per project.  
+
+| Command | Description |
+|---------|-------------|
+| `uvx black src/` | Run Black formatter without global installation. |
+| `uvx ruff check .` | Run Ruff linter on the current project. |
+| `uvx pytest tests/` | Run Pytest in an isolated environment. |
+| `uvx --from "black==23.12.0" black src/` | Run a specific version of a tool. |
+
+---
+
+## ⚡ Cache & Maintenance  
+Over time, caches can grow large or become corrupted. These commands help you inspect  
+and clean the cache to keep your environment healthy and efficient.  
+
+| Command | Description |
+|---------|-------------|
+| `uv cache dir` | Show the location of the uv cache. |
+| `uv cache clean` | Clear the entire cache. |
+| `uv cache clean requests` | Clear cache for a specific package. |
+
+---
+
+## 🧑‍💻 CI/CD & Docker  
+
+Automation is where `uv` shines. These commands integrate smoothly into CI/CD pipelines  
+and Docker builds, ensuring fast, reproducible environments for deployment.  
+
+| Command | Description |
+|---------|-------------|
+| `uv sync --frozen --no-dev` | Install dependencies in CI/CD pipelines without dev packages. |
+| `uv run pytest` | Run tests in CI/CD pipelines. |
+| `uv` commands in Dockerfiles | Use uv for faster dependency installation in container builds. |
+
+
 
 ## Installation
 
