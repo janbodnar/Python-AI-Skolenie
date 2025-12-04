@@ -12,18 +12,18 @@ file_name = "test_data.csv"
 with open(file_name, "w", encoding="utf-8") as f:
 
     # Write the header
-    f.write("id,first_name,last_name,address,email,dob\n")
+    f.write("id;first_name;last_name;address;email;dob\n")
 
     for i in range(1, 100_001):
 
         _id = i
         first_name = fake.first_name()
         last_name = fake.last_name()
-        address = fake.address().replace("\n", ", ")
+        address = fake.address().replace("\n", ",")
         email = fake.email()
         dob = fake.date_of_birth(minimum_age=18, maximum_age=90) 
 
-        row = f"{_id},{first_name},{last_name},{address},{email},{dob}\n"
+        row = f"{_id};{first_name};{last_name};{address};{email};{dob}\n"
         f.write(row)
     
 print(f"Generated {file_name} with 100,000 rows.")
