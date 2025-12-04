@@ -1,5 +1,120 @@
 # Priklady
 
+## Users data
+
+```SQL
+CREATE TABLE users (
+    id INTEGER PRIMARY KEY,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    occupation TEXT,
+    salary REAL
+);
+
+-- Individual INSERT statements for 100 rows
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (1, 'Liam', 'Miller', 'Software Engineer', 95000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (2, 'Olivia', 'Davis', 'Data Scientist', 110000.50);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (3, 'Noah', 'Wilson', 'UX Designer', 82000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (4, 'Emma', 'Moore', 'Product Manager', 130000.75);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (5, 'Oliver', 'Taylor', 'Marketing Specialist', 65000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (6, 'Ava', 'Anderson', 'Financial Analyst', 90000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (7, 'Elijah', 'Thomas', 'Systems Administrator', 75000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (8, 'Charlotte', 'Jackson', 'HR Manager', 78000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (9, 'William', 'White', 'Sales Representative', 60000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (10, 'Sophia', 'Harris', 'Project Coordinator', 72000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (11, 'James', 'Martin', 'Civil Engineer', 88000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (12, 'Amelia', 'Garcia', 'Chemist', 70000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (13, 'Benjamin', 'Rodriguez', 'Network Technician', 62000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (14, 'Isabella', 'Lee', 'Copywriter', 55000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (15, 'Lucas', 'Perez', 'Mechanical Engineer', 92000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (16, 'Mia', 'Hall', 'Registered Nurse', 71000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (17, 'Henry', 'Allen', 'Electrician', 58000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (18, 'Evelyn', 'Young', 'Librarian', 45000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (19, 'Alexander', 'King', 'Pilot', 150000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (20, 'Harper', 'Scott', 'Interior Designer', 68000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (21, 'Ethan', 'Baker', 'Web Developer', 85000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (22, 'Abigail', 'Green', 'Physical Therapist', 77000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (23, 'Daniel', 'Adams', 'Geologist', 74000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (24, 'Emily', 'Nelson', 'Art Director', 98000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (25, 'Jacob', 'Carter', 'Lawyer', 120000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (26, 'Madison', 'Mitchell', 'Teacher', 52000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (27, 'Michael', 'Roberts', 'Biologist', 76000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (28, 'Luna', 'Campbell', 'Veterinarian', 80000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (29, 'Logan', 'Parker', 'Construction Manager', 94000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (30, 'Avery', 'Evans', 'Journalist', 59000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (31, 'Sebastian', 'Edwards', 'Chef', 48000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (32, 'Chloe', 'Collins', 'Paralegal', 51000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (33, 'Jack', 'Stewart', 'Police Officer', 63000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (34, 'Grace', 'Sanchez', 'Pharmacist', 105000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (35, 'Jackson', 'Morris', 'Insurance Agent', 54000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (36, 'Scarlett', 'Rogers', 'Statistician', 97000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (37, 'Aiden', 'Reed', 'Firefighter', 61000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (38, 'Zoey', 'Cook', 'Speech Pathologist', 79000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (39, 'Gabriel', 'Morgan', 'Auditor', 83000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (40, 'Lily', 'Bell', 'Realtor', 73000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (41, 'Samuel', 'Murphy', 'Dentist', 140000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (42, 'Layla', 'Bailey', 'Massage Therapist', 40000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (43, 'Carter', 'Rivera', 'Plumber', 57000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (44, 'Zoe', 'Cooper', 'Market Researcher', 69000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (45, 'David', 'Richardson', 'Aerospace Engineer', 115000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (46, 'Nora', 'Cox', 'Medical Assistant', 47000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (47, 'Joseph', 'Howard', 'HR Specialist', 66000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (48, 'Stella', 'Ward', 'Curator', 53000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (49, 'Matthew', 'Torres', 'Electrician', 64000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (50, 'Hannah', 'Peterson', 'Dietitian', 67000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (51, 'Ryan', 'Gray', 'IT Support Specialist', 50000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (52, 'Eliana', 'Ramirez', 'Forensic Scientist', 81000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (53, 'Leo', 'James', 'Actuary', 108000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (54, 'Penelope', 'Watson', 'Event Planner', 49000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (55, 'Jaxon', 'Brooks', 'Architect', 102000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (56, 'Victoria', 'Kelly', 'Occupational Therapist', 75500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (57, 'Adam', 'Sanders', 'Financial Advisor', 93000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (58, 'Hazel', 'Price', 'Marketing Manager', 96000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (59, 'Julian', 'Bennett', 'Professor', 112000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (60, 'Aurora', 'Wood', 'Social Worker', 56000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (61, 'Theodore', 'Barnes', 'Data Analyst', 78500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (62, 'Skylar', 'Ross', 'Graphic Designer', 60500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (63, 'Caleb', 'Henderson', 'Drilling Engineer', 125000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (64, 'Violet', 'Coleman', 'Speech Therapist', 70500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (65, 'Asher', 'Jenkins', 'Machine Operator', 42000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (66, 'Savannah', 'Perry', 'Real Estate Appraiser', 69500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (67, 'Eli', 'Powell', 'Stockbroker', 135000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (68, 'Brooklyn', 'Long', 'Veterinary Technician', 46000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (69, 'Dominic', 'Patterson', 'Physical Trainer', 41000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (70, 'Emilia', 'Hughes', 'School Counselor', 64500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (71, 'Grayson', 'Flores', 'Automotive Technician', 53500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (72, 'Isabelle', 'Washington', 'Technical Writer', 77500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (73, 'Owen', 'Butler', 'Electrician', 61500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (74, 'Natalia', 'Simmons', 'Operations Manager', 101000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (75, 'Aaron', 'Foster', 'Laboratory Technician', 58500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (76, 'Eleanor', 'Gonzales', 'Urban Planner', 84000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (77, 'Connor', 'Bryant', 'Accountant', 79500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (78, 'Allison', 'Alexander', 'Museum Technician', 44000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (79, 'Landon', 'Russell', 'Chef', 52500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (80, 'Audrey', 'Griffin', 'Dental Hygienist', 65500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (81, 'Cole', 'Diaz', 'Welder', 45500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (82, 'Clara', 'Hayes', 'Marketing Coordinator', 59500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (83, 'Christian', 'Myers', 'Petroleum Engineer', 145000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (84, 'Samantha', 'Ford', 'Travel Agent', 43000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (85, 'Adrian', 'Hamilton', 'Forester', 62500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (86, 'Madeline', 'Graham', 'Photographer', 51500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (87, 'Hunter', 'Sullivan', 'Paramedic', 63500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (88, 'Gabriella', 'Wallace', 'Interior Designer', 74500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (89, 'Jeremiah', 'Woods', 'Aerospace Technician', 87000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (90, 'Alice', 'Cole', 'Librarian', 47500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (91, 'Elias', 'West', 'Financial Manager', 118000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (92, 'Serenity', 'Jordan', 'Copy Editor', 56500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (93, 'Robert', 'Owens', 'Electrician', 68500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (94, 'Kinsley', 'Fisher', 'Technical Support Analyst', 71500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (95, 'Jonah', 'Gomez', 'Civil Engineering Technician', 76500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (96, 'Kylie', 'Murray', 'Public Relations Specialist', 70000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (97, 'Josiah', 'Harrison', 'Web Designer', 89000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (98, 'Annabelle', 'Gibson', 'Museum Archivist', 49500.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (99, 'Isaiah', 'Mcdaniel', 'Security Analyst', 99000.00);
+INSERT INTO users (id, first_name, last_name, occupation, salary) VALUES (100, 'Ruby', 'Chambers', 'School Administrator', 91000.00);
+```
+
+
 ## Generate SQLite data
 
 ```python
