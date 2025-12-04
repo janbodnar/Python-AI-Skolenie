@@ -1,6 +1,45 @@
 # Priklady
 
 
+
+## Analyze data by AI
+
+```python
+from openai import OpenAI
+import os
+import pandas as pd
+
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ.get("OPENROUTER_API_KEY"),
+)
+
+# Read the data from users2.xlsx
+df = pd.read_excel('users2.xlsx')
+data_str = df.to_string()
+
+query = f"Generate a report from the data provided.\n\nData:\n{data_str}"
+
+chat_completion = client.chat.completions.create(
+    messages=[
+        {
+            "role": "user",
+            "content": query,
+        }
+    ],
+    model='amazon/nova-2-lite-v1:free',
+    max_completion_tokens=8000
+)
+
+# Get the response
+response = chat_completion.choices[0].message.content
+
+with open('report.md', 'w', encoding='utf-8') as f:
+    f.write(response)
+```
+
+
 ## Analyze data
 
 ```python
