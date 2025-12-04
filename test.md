@@ -1,5 +1,31 @@
 # Priklady
 
+
+## Analyze data
+
+```python
+import pandas as pd
+
+# Read the Excel file
+df = pd.read_excel('users2.xlsx')
+
+# Extract the salary column
+salary = df['salary']
+
+# Calculate statistics
+mean_salary = salary.mean()
+min_salary = salary.min()
+max_salary = salary.max()
+sum_salary = salary.sum()
+
+# Print the results
+print(f"Mean salary: {mean_salary}")
+print(f"Minimum salary: {min_salary}")
+print(f"Maximum salary: {max_salary}")
+print(f"Sum of salaries: {sum_salary}")
+```
+
+
 ## Users data
 
 ```SQL
