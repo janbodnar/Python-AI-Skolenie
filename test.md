@@ -32,6 +32,52 @@ conn.close()
 ```
 
 
+Sentiment analysis from database data:
+
+```python
+from openai import OpenAI
+import os
+import sqlite3
+
+
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ.get("OPENROUTER_API_KEY"),
+)
+
+# Load reviews from database
+conn = sqlite3.connect('reviews.db')
+cursor = conn.cursor()
+cursor.execute('SELECT id, review FROM reviews')
+reviews = cursor.fetchall()
+conn.close()
+
+
+for key, value in reviews:
+
+    content = 'Na škále od 0 do 1, napíš sentiment nasledujúceho filmu. Uveď len číslo. '
+    content += value
+
+    chat_completion = client.chat.completions.create(
+        messages=[
+            {
+                "role": "user",
+                "content": content,
+            }
+        ],
+        temperature=0.7,
+        top_p=0.9,
+        model='amazon/nova-2-lite-v1:free',
+        max_completion_tokens=1000
+    )
+
+    # print(chat_completion.choices[0].message.content)
+    output = chat_completion.choices[0].message.content
+    print(key, value, output)
+```
+
+
 
 ## Sentiment analyza
 
