@@ -443,3 +443,32 @@ for model in models.data:
 This is equivalent to running `ollama list` from the command line. You can use  
 this to dynamically select models in your application based on what is  
 currently installed.  
+
+## Data analysis with Phi4-mini
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:11434/v1",
+    api_key="ollama"
+)
+
+file_name = 'users2.csv'
+
+data = open(file_name, 'r', encoding='utf-8').read()
+
+prompt = f"""Generate a report containing minimum,maximum,sum, and average of salaries 
+from the CSV data provided.\n\nData:\n{data}"""
+
+chat_completion = client.chat.completions.create(
+    model='phi4-mini',
+    messages=[
+        {"role": "user", "content": prompt}
+    ]
+)
+
+print(chat_completion.choices[0].message.content)
+```
+
+
