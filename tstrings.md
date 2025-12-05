@@ -577,3 +577,258 @@ and structured access to template components.
 For projects requiring type safety, security-conscious string handling,  
 or advanced template processing, t-strings offer a powerful new tool  
 that builds on Python's tradition of readable and maintainable code.  
+
+
+
+Here are **20 genuinely advanced, realistic, and interesting** t-string examples that go far beyond the basics and showcase what a real Python 3.14+ `Template` object (as described in the fictional-but-plausible PEP) could enable in production code.
+
+All examples assume:
+
+```python
+from string.templatelib import t, Template
+```
+
+### 1. Type-enforced placeholders (static checking catches mismatches)
+
+```python
+from typing import Annotated
+import typing as t
+
+# Type checker will error if you pass wrong type
+config = t"Server {host:str} listening on port {port:int} with timeout {timeout:float}s"
+config = config.bind(host="db.example.com", port=5432, timeout=30.0)  # OK
+# config = config.bind(host=123, port="abc")  # mypy/pyright error!
+```
+
+### 2. Delayed rendering with .render() and custom renderers
+
+```python
+tmpl = t"User {user_id:int} logged in from {ip:str} at {ts:datetime}"
+
+# Render normally
+print(tmpl.bind(user_id=42, ip="1.2.3.4", ts=datetime.now()))
+
+# Render with redaction for logs
+safe_log = tmpl.bind(user_id=42, ip="1.2.3.4", ts=datetime.now()) \
+               .render(redact=["ip"])  # → "User 42 logged in from <REDACTED> at ..."
+```
+
+### 3. Template composition (nesting without immediate str conversion)
+
+```python
+header = t"=== {title.upper()} ==="
+row    = t"| {name:<20} | {score:>6} |"
+
+table = t"""
+{header}
+{'\n'.join(rows)}
+{header}
+"""
+
+rows = [row.bind(name=n, score=s) for n, s in [("Alice", 99), ("Bob", 87)]]
+print(table.bind(title="Leaderboard", rows=rows))
+```
+
+### 4. Internationalization-ready templates
+
+```python
+from babel import Locale
+
+welcome_en = t"Hello {name}, you have {count} new messages"
+welcome_fr = t"Bonjour {name}, vous avez {count} nouveaux messages"
+
+def i18n_render(template: Template, locale: Locale, **kwargs):
+    return template.bind(**kwargs).render(locale=locale)
+
+i18n_render(welcome_fr, Locale('fr'), name="Marie", count=5)
+# → "Bonjour Marie, vous avez 5 nouveaux messages"
+```
+
+### 5. SQL query builder with automatic parameterization
+
+```python
+query = t"""
+SELECT {columns:csv}
+FROM {table:identifier}
+WHERE active = {active:bool}
+  AND created_at > {since:datetime}
+"""
+
+stmt = query.bind(
+    columns=["id", "name", "email"],
+    table="users",
+    active=True,
+    since=datetime(2025, 1, 1)
+).to_sql()  # returns (sql_string, params_tuple) for psycopg2 etc.
+
+# → ("SELECT id, name, email FROM users WHERE active = %s AND created_at > %s", (True, datetime(...)))
+```
+
+### 6. HTML escaping by default, opt-in raw
+
+```python
+html = t"""
+<h1>Welcome {user.name}</h1>
+<p>Your balance: ${amount:.2f}</p>
+{raw:unsafe dangerous_html}
+"""
+
+safe = html.bind(user=current_user, amount=1234.56, dangerous_html="<script>alert(1)</script>")
+# → <script> tag gets escaped automatically, only {raw:unsafe ...} bypasses
+```
+
+### 7. Structured logging with template introspection
+
+```python
+log_tmpl = t"Payment of ${amount:,.2f} from {user.email} to {merchant} (id={payment_id})"
+
+event = log_tmpl.bind(amount=199.99, user=user, merchant="Acme Corp", payment_id="pay_123")
+
+logger.info(event)  # logger extracts fields automatically for JSON logs
+# → {"amount": 199.99, "user_email": "bob@example.com", "merchant": "Acme Corp", ...}
+```
+
+### 8. Template inheritance / blocks (Jinja-like)
+
+```python
+base = t"""
+<!DOCTYPE html>
+<html>
+  <title>{block title}Default Title{/block}</title>
+  <body>{block body}Empty{/block}</body>
+</html>
+"""
+
+page = base.extend(
+    title="My Shop",
+    body=t"<h1>Welcome</h1>{content}"
+).extend(content=t"Featured: {product.name}")
+```
+
+### 9. Validation pipelines before rendering
+
+```python
+login_msg = t"Login attempt for {username} from {ip}"
+
+validated = login_msg.bind(username="admin", ip="10.0.0.5") \
+    .validate(
+        username=lambda s: 3 <= len(s) <= 32,
+        ip=lambda s: s != "127.0.0.1" or raise SecurityError("Localhost login blocked")
+    )
+```
+
+### 10. Currency-aware formatting with locale
+
+```python
+price_tmpl = t"Price: {amount:currency}"
+
+eur = price_tmpl.bind(amount=1234.56).render(locale="de_DE")   # → "Price: 1.234,56 €"
+usd = price_tmpl.bind(amount=1234.56).render(locale="en_US")   # → "Price: $1,234.56"
+```
+
+### 11. Template diffing for audit trails
+
+```python
+old = t"User {name} has role {role}"
+new = t"User {name} has role {new_role}"
+
+diff = old.diff(new.bind(name="Alice", role="user", new_role="admin"))
+# → shows only role changed from "user" → "admin"
+```
+
+### 12. Lazy translation lookup at render time
+
+```python
+msg = t"Welcome back, {user.name}! You have {count} unread messages."
+
+# No translation happens at bind time
+deferred = msg.bind(user=current_user, count=7)
+
+print(deferred.render(language="es"))  # looks up Spanish translation at render time
+```
+
+### 13. Template signing for tamper detection (e.g. email links)
+
+```python
+url = t"https://example.com/verify?token={token}&user={user_id:int}"
+
+signed = url.bind(token="abc123", user_id=42).sign(secret_key=b"my-secret")
+# → appends &sig=HMAC(...)
+# .verify(signature) → True/False
+```
+
+### 14. Rich display in Jupyter
+
+```python
+tmpl = t"DataFrame has {len(df)} rows and columns {list(df.columns)}"
+tmpl.bind(df=my_dataframe)._repr_html_()  # shows pretty template + preview table
+```
+
+### 15. Conditional blocks inside template
+
+```python
+email = t"""
+Hello {user.name},
+
+{if user.is_premium}
+Thank you for being a premium member!
+{else}
+Upgrade now for only $9.99/month!
+{/if}
+"""
+
+email.bind(user=current_user).render()
+```
+
+### 16. Automatic PII redaction in error reports
+
+```python
+error_tmpl = t"Failed to charge card {card_last4} for user {user.email}"
+
+report = error_tmpl.bind(card_last4="4242", user=user) \
+                   .render(pii_redaction=True)
+# → "Failed to charge card XXXX for user <REDACTED>"
+```
+
+### 17. Template caching by structure (for performance)
+
+```python
+# Same structure → same cached Template object
+tmpl1 = t"SELECT * FROM users WHERE id = {user_id:int}"
+tmpl2 = t"SELECT * FROM users WHERE id = {user_id:int}"
+
+assert tmpl1 is tmpl2  # interned at parse time → huge perf win in hot paths
+```
+
+### 18. Integration with FastAPI/OpenAPI schema generation
+
+```python
+description = t"Returns user {user_id:int} with fields {','.join(fields):csv}"
+
+# OpenAPI generator can extract allowed fields and types automatically
+```
+
+### 19. Building CLI tables with auto column width
+
+```python
+row = t"{name:<{max_name_width}}  {score:>6}  {percent:>6.1%}"
+
+table = t.join([header] + [row.bind(**r, max_name_width=20) for r in rows])
+```
+
+### 20. Secure shell command construction
+
+```python
+cmd = t"rsync -avz {src:path} {user:str}@{host:str}@{host:str}:{dest:path}"
+
+safe_cmd = cmd.bind(
+    src="/data/backups",
+    user="backup",
+    host="backup01.example.com",
+    dest="/var/backups"
+).escape_shell()  # properly quotes everything, prevents injection
+```
+
+These examples show how t-strings (if they existed as described) would enable **type safety, security, observability, performance, and composability** in ways that f-strings and `str.format()` simply cannot.
+
+They turn string interpolation from a dumb text operation into a **first-class structured template system** — exactly the kind of evolution Python developers have been asking for in large codebases.
