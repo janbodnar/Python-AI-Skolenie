@@ -1,5 +1,113 @@
 # Priklady
 
+
+## Blocking 
+
+```python
+import requests
+from bs4 import BeautifulSoup
+
+def fetch_title(url):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raise an error for bad status codes
+        soup = BeautifulSoup(response.text, 'html.parser')
+        title = soup.title.string.strip() if soup.title else "No title found"
+        return title
+    except requests.RequestException as e:
+        return f"Error fetching {url}: {str(e)}"
+
+websites = [
+    "https://www.sme.sk",
+    "https://www.pravda.sk",
+    "https://dennikn.sk",
+    "https://www.pluska.sk",
+    "https://www.hnonline.sk",
+    "https://www.cas.sk",
+    "https://www.aktuality.sk",
+    "https://www.topky.sk",
+    "https://www.noviny.sk",
+    "https://www.teraz.sk",
+    "https://www.zoznam.sk",
+    "https://www.azet.sk",
+    "https://www.trend.sk",
+    "https://noveslovo.sk",
+    "https://korzar.sme.sk",
+    "https://www.sita.sk",
+    "https://www.ujszo.com",
+    "https://spectator.sme.sk",
+    "https://www.dobrenoviny.sk",
+    "https://sport.aktuality.sk",
+    "https://www.atlas.sk",
+    "https://www.ta3.com",
+    "https://www.parlamentnelisty.sk"
+]
+
+for site in websites:
+    title = fetch_title(site)
+    print(f"Title of {site}: {title}")
+```
+
+
+
+## Non blocking
+
+```python
+import asyncio
+import aiohttp
+from bs4 import BeautifulSoup
+
+async def fetch_title(session, url):
+    try:
+        async with session.get(url) as response:
+            response.raise_for_status()  # Raise an error for bad status codes
+            text = await response.text()
+            soup = BeautifulSoup(text, 'html.parser')
+            title = soup.title.string.strip() if soup.title else "No title found"
+            return title
+    except aiohttp.ClientError as e:
+        return f"Error fetching {url}: {str(e)}"
+
+async def main():
+    websites = [
+        "https://www.sme.sk",
+        "https://www.pravda.sk",
+        "https://dennikn.sk",
+        "https://www.pluska.sk",
+        "https://www.hnonline.sk",
+        "https://www.cas.sk",
+        "https://www.aktuality.sk",
+        "https://www.topky.sk",
+        "https://www.noviny.sk",
+        "https://www.teraz.sk",
+        "https://www.zoznam.sk",
+        "https://www.azet.sk",
+        "https://www.trend.sk",
+        "https://noveslovo.sk",
+        "https://korzar.sme.sk",
+        "https://www.sita.sk",
+        "https://www.ujszo.com",
+        "https://spectator.sme.sk",
+        "https://www.dobrenoviny.sk",
+        "https://sport.aktuality.sk",
+        "https://www.atlas.sk",
+        "https://www.ta3.com",
+        "https://www.parlamentnelisty.sk"
+    ]
+    
+    async with aiohttp.ClientSession() as session:
+        tasks = [fetch_title(session, site) for site in websites]
+        titles = await asyncio.gather(*tasks)
+        
+        for site, title in zip(websites, titles):
+            print(f"Title of {site}: {title}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+
+
 ## Generate test data
 
 ```python
