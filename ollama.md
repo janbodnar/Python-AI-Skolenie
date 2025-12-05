@@ -1,1 +1,261 @@
+# Ollama
 
+## Introduction
+
+**Ollama** is an open-source tool designed to run, manage, and interact with large language  
+models (LLMs) locally on your machine. It enables developers, researchers, and hobbyists to  
+deploy powerful AI models without relying on cloud-based services, giving complete control  
+over data privacy and usage.
+
+Ollama simplifies the complexities of running LLMs by handling model downloads, memory  
+management, and inference in an easy-to-use command-line interface. Whether you want to  
+experiment with popular models like LLaMA, Mistral, or custom-trained models, Ollama  
+provides a seamless experience.
+
+### Why Developers Use Ollama
+
+- **Privacy and Control**: Run models locally without sending data to external servers.  
+- **Cost Efficiency**: Avoid recurring cloud API costs for inference.  
+- **Experimentation**: Easily try different models and configurations.  
+- **Offline Access**: Use AI capabilities without an internet connection.  
+- **Customization**: Create and run custom models with Modelfiles.  
+
+### Supported Platforms
+
+Ollama runs on the following operating systems:  
+
+- **macOS** (Apple Silicon and Intel)  
+- **Windows** (Windows 10 and later)  
+- **Linux** (Ubuntu, Debian, Fedora, and other distributions)  
+
+### Local and Cloud Mode
+
+Ollama is primarily designed for **local execution**, allowing you to run LLMs directly  
+on your hardware. However, it also supports deployment in cloud environments when you  
+need to scale or share access with a team. The REST API enables integration with any  
+application, whether running locally or in the cloud.
+
+---
+
+## Installation
+
+### Prerequisites
+
+Before installing Ollama, ensure your system meets the following requirements:  
+
+- **RAM**: At least 8 GB (16 GB or more recommended for larger models)  
+- **Disk Space**: 10 GB minimum for the application and models  
+- **GPU (Optional)**: NVIDIA GPU with CUDA support for faster inference  
+
+### macOS Installation
+
+On macOS, you can install Ollama using the official installer or Homebrew.  
+
+**Using the official installer:**  
+
+1. Download the installer from [ollama.com/download](https://ollama.com/download)  
+2. Open the downloaded `.dmg` file  
+3. Drag Ollama to your Applications folder  
+4. Launch Ollama from Applications  
+
+**Using Homebrew:**  
+
+```bash
+brew install ollama
+```
+
+**Verify the installation:**  
+
+```bash
+ollama --version
+```
+
+### Windows Installation
+
+On Windows, download and run the official installer.  
+
+1. Download the installer from [ollama.com/download](https://ollama.com/download)  
+2. Run the `.exe` installer  
+3. Follow the installation wizard  
+4. Ollama starts automatically as a background service  
+
+**Verify the installation in PowerShell or Command Prompt:**  
+
+```bash
+ollama --version
+```
+
+### Linux Installation
+
+On Linux, use the official installation script for a quick setup.  
+
+**Using the installation script:**  
+
+```bash
+curl -fsSL https://ollama.com/install.sh | sh
+```
+
+This script downloads and installs Ollama, sets up the service, and configures  
+the necessary permissions.  
+
+**Start the Ollama service:**  
+
+```bash
+systemctl start ollama
+```
+
+**Verify the installation:**  
+
+```bash
+ollama --version
+```
+
+**For GPU support on Linux**, ensure you have the NVIDIA drivers and CUDA toolkit  
+installed. Ollama will automatically detect and use your GPU.  
+
+---
+
+## Common Commands
+
+Ollama provides a straightforward CLI for managing models and running inference.  
+Below is a table of the most frequently used commands:  
+
+| Command                  | Description                                      |
+|--------------------------|--------------------------------------------------|
+| `ollama run <model>`     | Run a model interactively                        |
+| `ollama list`            | List all available models                        |
+| `ollama pull <model>`    | Download a model from Ollama's registry          |
+| `ollama ps`              | Show running models and processes                |
+| `ollama stop <model>`    | Stop a running model                             |
+| `ollama create <model>`  | Create a new model from a Modelfile              |
+| `ollama delete <model>`  | Remove a model from local storage                |
+
+### Examples
+
+**Run a model interactively:**  
+
+```bash
+ollama run llama2
+```
+
+This starts an interactive session where you can type prompts and receive responses.  
+
+**Pull a model from the registry:**  
+
+```bash
+ollama pull mistral
+```
+
+**List installed models:**  
+
+```bash
+ollama list
+```
+
+**Delete a model:**  
+
+```bash
+ollama delete llama2
+```
+
+---
+
+## Python Examples
+
+Ollama exposes a REST API on `http://localhost:11434` that you can use to integrate  
+with Python applications. The following examples demonstrate how to interact with  
+the API using the `requests` library.  
+
+### REST API Example
+
+This example shows how to send a prompt to a running Ollama model and receive  
+a streamed response.  
+
+```python
+import requests
+
+response = requests.post(
+    "http://localhost:11434/api/generate",
+    json={"model": "llama2", "prompt": "Hello there!"}
+)
+
+for line in response.iter_lines():
+    if line:
+        print(line.decode("utf-8"))
+```
+
+The `/api/generate` endpoint accepts a JSON payload with the model name and prompt.  
+The response is streamed line by line, allowing you to process tokens as they arrive.  
+Each line contains a JSON object with the generated text fragment.  
+
+### Non-Streaming Request
+
+If you prefer to receive the complete response at once, you can disable streaming  
+by setting `stream` to `false`.  
+
+```python
+import requests
+import json
+
+response = requests.post(
+    "http://localhost:11434/api/generate",
+    json={
+        "model": "llama2",
+        "prompt": "What is the capital of France?",
+        "stream": False
+    }
+)
+
+data = response.json()
+print(data["response"])
+```
+
+This approach is simpler when you do not need real-time output and prefer to work  
+with the complete response.  
+
+### Chat Endpoint Example
+
+Ollama also provides a `/api/chat` endpoint for multi-turn conversations. This  
+endpoint accepts a list of messages with roles (`system`, `user`, `assistant`).  
+
+```python
+import requests
+import json
+
+messages = [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "What is machine learning?"}
+]
+
+response = requests.post(
+    "http://localhost:11434/api/chat",
+    json={
+        "model": "llama2",
+        "messages": messages,
+        "stream": False
+    }
+)
+
+data = response.json()
+print(data["message"]["content"])
+```
+
+The chat endpoint maintains context across messages, making it suitable for  
+building conversational applications.  
+
+### Listing Available Models
+
+You can query the API to list all locally available models.  
+
+```python
+import requests
+
+response = requests.get("http://localhost:11434/api/tags")
+data = response.json()
+
+for model in data["models"]:
+    print(f"Model: {model['name']}, Size: {model['size']}")
+```
+
+This is useful for dynamically selecting models in your application based on  
+what is currently installed.  
