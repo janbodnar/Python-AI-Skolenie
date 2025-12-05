@@ -269,6 +269,10 @@ This allows you to use the official OpenAI Python library to interact with your
 local Ollama models. This approach provides a familiar interface for developers  
 already using the OpenAI SDK.  
 
+Note: The examples below use `llama2` as the model name. Replace this with the  
+name of the model you have installed (e.g., `mistral`, `codellama`, `llama3`).  
+Run `ollama list` to see your available models.  
+
 ### Simple Chat
 
 This example shows how to configure the OpenAI client to connect to your local  
