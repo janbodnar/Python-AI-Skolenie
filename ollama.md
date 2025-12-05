@@ -446,6 +446,8 @@ currently installed.
 
 ## Data analysis with Phi4-mini
 
+The phi4-mini model makes mistakes. It is not ready yet. But the progress is visible. 
+
 ```python
 from openai import OpenAI
 
