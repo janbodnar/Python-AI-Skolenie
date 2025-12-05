@@ -259,3 +259,153 @@ for model in data["models"]:
 
 This is useful for dynamically selecting models in your application based on  
 what is currently installed.  
+
+---
+
+## Python Examples with OpenAI Library
+
+Ollama provides an OpenAI-compatible API endpoint at `http://localhost:11434/v1`.  
+This allows you to use the official OpenAI Python library to interact with your  
+local Ollama models. This approach provides a familiar interface for developers  
+already using the OpenAI SDK.  
+
+### Simple Chat
+
+This example shows how to configure the OpenAI client to connect to your local  
+Ollama server and send a basic chat completion request.  
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:11434/v1",
+    api_key="ollama"
+)
+
+response = client.chat.completions.create(
+    model="llama2",
+    messages=[
+        {"role": "user", "content": "Hello there!"}
+    ]
+)
+
+print(response.choices[0].message.content)
+```
+
+The `base_url` points to Ollama's OpenAI-compatible endpoint. The `api_key` can  
+be any non-empty string since Ollama does not require authentication for local  
+access. The response object follows the OpenAI API structure.  
+
+### Chat with System Prompt
+
+You can include a system message to set the behavior and persona of the model.  
+This example demonstrates a multi-turn conversation setup.  
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:11434/v1",
+    api_key="ollama"
+)
+
+messages = [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "What is the capital of France?"}
+]
+
+response = client.chat.completions.create(
+    model="llama2",
+    messages=messages
+)
+
+print(response.choices[0].message.content)
+```
+
+The system message sets the context for the conversation. You can extend the  
+messages list to build multi-turn conversations by appending user and assistant  
+messages.  
+
+### Streaming Response
+
+Streaming allows you to receive the model's response token by token as it is  
+generated. This provides a more responsive user experience for long outputs.  
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:11434/v1",
+    api_key="ollama"
+)
+
+stream = client.chat.completions.create(
+    model="llama2",
+    messages=[
+        {"role": "user", "content": "Tell me a short story."}
+    ],
+    stream=True
+)
+
+for chunk in stream:
+    if chunk.choices[0].delta.content is not None:
+        print(chunk.choices[0].delta.content, end="", flush=True)
+
+print()
+```
+
+Setting `stream=True` returns an iterator that yields chunks as they arrive.  
+Each chunk contains a delta with the new content. This approach is useful for  
+chat interfaces where you want to display text as it is generated.  
+
+### Temperature and Other Parameters
+
+You can adjust generation parameters such as temperature, top_p, and max_tokens  
+to control the model's output behavior.  
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:11434/v1",
+    api_key="ollama"
+)
+
+response = client.chat.completions.create(
+    model="llama2",
+    messages=[
+        {"role": "user", "content": "Write a creative poem about the moon."}
+    ],
+    temperature=0.9,
+    max_tokens=200
+)
+
+print(response.choices[0].message.content)
+```
+
+Temperature controls randomness in the output. Higher values (e.g., 0.9) produce  
+more creative responses, while lower values (e.g., 0.2) produce more focused and  
+deterministic outputs. The `max_tokens` parameter limits the response length.  
+
+### List Available Models
+
+You can query the available models using the OpenAI client's models endpoint.  
+This returns all models that are installed locally in Ollama.  
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="http://localhost:11434/v1",
+    api_key="ollama"
+)
+
+models = client.models.list()
+
+for model in models.data:
+    print(f"Model: {model.id}")
+```
+
+This is equivalent to running `ollama list` from the command line. You can use  
+this to dynamically select models in your application based on what is  
+currently installed.  
