@@ -1,5 +1,228 @@
 # Priklady
 
+## Gradio example
+
+```python
+import os
+import httpx
+import openai
+import gradio as gr
+
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+SYSTEM_PROMPT = "You are a helpful AI assistant."
+# Default network timeout in seconds
+DEFAULT_TIMEOUT_S = 30
+
+# Initialize OpenAI client with OpenRouter base URL
+client = openai.AsyncOpenAI(api_key=OPENROUTER_API_KEY,
+                            base_url="https://openrouter.ai/api/v1")
+
+
+# This example demonstrates how to set up a Gradio chat interface
+# that interacts with OpenRouter's chat completions API via OpenAI library.
+
+
+async def call_openai_stream(model, messages, temperature=0.7):
+    """
+    Call OpenRouter chat completions with streaming via OpenAI library.
+    """
+    stream = await client.chat.completions.create(
+        model=model,
+        messages=messages,
+        temperature=temperature,
+        stream=True,
+    )
+    async for chunk in stream:
+        if chunk.choices and chunk.choices[0].delta.content:
+            yield chunk.choices[0].delta.content
+
+
+def _history_to_messages(history, system_prompt):
+    """
+    Convert Gradio Chatbot history to OpenAI messages format with a system prompt.
+
+    Supports Chatbot(type="messages") history [{"role": "...", "content": ...}, ...].
+    """
+    messages = []
+    if system_prompt:
+        messages.append({"role": "system", "content": system_prompt})
+
+    if not history:
+        return messages
+
+    # History is a list of dicts with role and content
+    for m in history:
+        role = m.get("role")
+        content = m.get("content")
+        if role in ("user", "assistant", "system"):
+            messages.append({"role": role, "content": content})
+        else:
+            # Skip unknown roles to be safe
+            continue
+    return messages
+
+
+with gr.Blocks(title="OpenRouter Gradio Chat", theme=gr.themes.Ocean()) as demo:
+    gr.Markdown("# OpenRouter Chat")
+    with gr.Row():
+        with gr.Column(scale=3):
+            model_dropdown = gr.Dropdown(
+                label="Model (loaded from OpenRouter)",
+                choices=["Loading..."],
+                value="Loading...",
+                interactive=True,
+            )
+            temperature = gr.Slider(
+                minimum=0.0,
+                maximum=2.0,
+                step=0.1,
+                value=0.7,
+                label="Temperature",
+            )
+        with gr.Column(scale=4):
+            system_prompt_box = gr.Textbox(
+                label="System Prompt",
+                value=SYSTEM_PROMPT,
+                lines=3,
+                placeholder="You are a helpful AI assistant.",
+            )
+
+    chat = gr.Chatbot(
+        label="Conversation",
+        height=500,
+        type="messages",
+    )
+
+    # Custom aligned input row with Send and Terminate buttons
+    # Using compact row to keep controls on one line; scales ensure alignment.
+    with gr.Row(variant="compact"):
+        user_input = gr.Textbox(
+            placeholder="Ask me anything...",
+            lines=2,
+            scale=8,
+            show_label=False,
+            container=True,
+        )
+        with gr.Column(scale=1):
+            send_btn = gr.Button("Send", variant="primary")
+        with gr.Column(scale=1):
+            stop_btn = gr.Button("Terminate", variant="stop")
+
+    # Wire up events: Enter on textbox or Send button triggers respond_fn.
+    # Gradio Chatbot(type="messages") requires returning a list of {"role","content"} dicts.
+    async def _respond(message, history, model, system_prompt, temperature):
+        if model == "Loading...":
+            # Models not loaded yet, yield current history unchanged
+            yield history or []
+            return
+
+        # history is a list of {"role": "...", "content": ...} dicts from Chatbot(type="messages")
+        # Build role/content messages including system
+        messages = _history_to_messages(history or [], system_prompt or SYSTEM_PROMPT)
+        if message and message.strip():
+            messages.append({"role": "user", "content": message})
+
+        # Initialize the assistant message in the chat history
+        # We'll update this progressively as we receive streaming chunks
+        initial_messages = messages.copy()
+        assistant_message = {"role": "assistant", "content": ""}
+        initial_messages.append(assistant_message)
+
+        # Call model with streaming
+        stream_gen = call_openai_stream(
+            model=model, messages=messages, temperature=temperature
+        )
+
+        # Process the streaming response
+        full_response = ""
+        async for chunk in stream_gen:
+            full_response += chunk
+            # Update the assistant message content with the accumulated response
+            updated_messages = initial_messages[:-1]  # Remove the last message
+            updated_messages.append(
+                {"role": "assistant", "content": full_response}
+            )  # Add updated message
+            yield updated_messages  # Yield the updated messages for real-time display
+
+    send_event = send_btn.click(
+        _respond,
+        inputs=[user_input, chat, model_dropdown, system_prompt_box, temperature],
+        outputs=chat,
+        queue=True,
+        api_name=False,
+    )
+    # Submit on Shift+Enter in textbox (since it's multiline)
+    submit_event = user_input.submit(
+        _respond,
+        inputs=[user_input, chat, model_dropdown, system_prompt_box, temperature],
+        outputs=chat,
+        queue=True,
+        api_name=False,
+    )
+
+    stop_btn.click(
+        None,  # No action on stop button click
+        None,  # No additional input
+        None,  # No output
+        cancels=[send_event, submit_event],
+    )
+
+    async def fetch_models():
+        """
+        Fetch the available model IDs from OpenRouter.
+        Returns a list of model identifiers.
+        """
+        if not OPENROUTER_API_KEY:
+            # no key found: exit with error
+            print("OPENROUTER_API_KEY not set, exiting...")
+            exit(1)
+        url = f"https://openrouter.ai/api/v1/models"
+        async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT_S) as client:
+            r = await client.get(url, headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+            })
+            r.raise_for_status()
+            data = r.json()
+        models = []
+        # Extract model IDs from the response
+        for m in data.get("data", []):
+            mid = m.get("id")
+            if isinstance(mid, str):
+                models.append(mid)
+        # Sort models alphabetically for easier selection
+        return sorted(models)
+
+    async def load_models():
+        """
+        Update the model dropdown options by fetching from OpenRouter API.
+        This is called on demo launch to populate models.
+        """
+        try:
+            models = await fetch_models()
+            if models:
+                # Default to a reasonable commonly-available model if present
+                default = (
+                    "anthropic/claude-3.5-haiku"
+                    if "anthropic/claude-3.5-haiku" in models
+                    else models[0] if models else "No models found"
+                )
+                print(f"Fetched models: {len(models)} models, default: {default}")
+                return gr.Dropdown(choices=models, value=default)
+            else:
+                return gr.Dropdown(choices=["No models found"], value="No models found")
+        except Exception as e:
+            error_msg = f"Error: {str(e)}"
+            print(error_msg)
+            return gr.Dropdown(choices=[error_msg], value=error_msg)
+
+    demo.load(load_models, inputs=None, outputs=model_dropdown)
+
+if __name__ == "__main__":
+    # 0.0.0.0 allows LAN access; change as preferred
+    demo.queue().launch(server_name="localhost", server_port=7861)
+```
+
 
 ## Classification
 
