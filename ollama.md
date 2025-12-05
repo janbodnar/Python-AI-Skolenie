@@ -224,13 +224,13 @@ import json
 
 messages = [
     {"role": "system", "content": "You are a helpful assistant."},
-    {"role": "user", "content": "What is machine learning?"}
+    {"role": "user", "content": "What is the capital of France?"}
 ]
 
 response = requests.post(
     "http://localhost:11434/api/chat",
     json={
-        "model": "llama2",
+        "model": "phi4-mini",
         "messages": messages,
         "stream": False
     }
