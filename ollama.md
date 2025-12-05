@@ -243,6 +243,36 @@ print(data["message"]["content"])
 The chat endpoint maintains context across messages, making it suitable for  
 building conversational applications.  
 
+## Streaming reqeust
+
+```python
+import requests
+import json
+
+messages = [
+    {"role": "system", "content": "You are a helpful assistant."},
+    {"role": "user", "content": "What is the capital of France? Answer in one sentence."}
+]
+
+response = requests.post(
+    "http://localhost:11434/api/chat",
+    json={
+        "model": "phi4-mini",
+        "messages": messages,
+        "stream": True
+    },
+    stream=True
+)
+
+for line in response.iter_lines():
+    if line:
+        data = json.loads(line)
+        if "message" in data and "content" in data["message"]:
+            print(data["message"]["content"], end="", flush=True)
+print()  # New line at the end
+```
+
+
 ### Listing Available Models
 
 You can query the API to list all locally available models.  
