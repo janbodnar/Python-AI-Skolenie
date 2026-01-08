@@ -519,7 +519,14 @@ PandasAI can perform comprehensive dataset exploration automatically.
 
 ```python
 import pandas as pd
+import pandasai as pai
 from pandasai import Agent
+from pandasai_litellm.litellm import LiteLLM
+import os
+
+# Configure LLM
+llm = LiteLLM(model="gpt-3.5-turbo", api_key=os.getenv("OPENAI_API_KEY"))
+pai.config.set({"llm": llm})
 
 df = pd.DataFrame({
     'customer_id': range(1, 101),
@@ -530,29 +537,45 @@ df = pd.DataFrame({
 
 agent = Agent(df)
 
-# Get comprehensive overview
+# 1. Comprehensive overview
 response = agent.chat(
     "Provide a comprehensive summary including shape, data types, "
-    "missing values, and basic statistics"
+    "missing values, and basic statistics. "
+    "Return the result as a string using: "
+    "result = {'type': 'string', 'value': summary}"
 )
 print(response)
 
-# Identify outliers
-response = agent.chat("Find any outliers in the purchase_amount column")
+# 2. Identify outliers
+response = agent.chat(
+    "Find any outliers in the purchase_amount column. "
+    "Return the result as a dataframe using: "
+    "result = {'type': 'dataframe', 'value': output_df}"
+)
 print(response)
 
-# Distribution analysis
-agent.chat("Show the distribution of customers by region with a pie chart")
+# 3. Distribution analysis (pie chart)
+agent.chat(
+    "Show the distribution of customers by region with a pie chart. "
+    "Save the plot to a file and return only the file path."
+)
 
-# Statistical insights
-response = agent.chat("What is the age distribution? Show quartiles")
+# 4. Statistical insights
+response = agent.chat(
+    "What is the age distribution? Show quartiles. "
+    "Return the result as a dataframe using: "
+    "result = {'type': 'dataframe', 'value': output_df}"
+)
 print(response)
 ```
 
-This example shows how PandasAI can automate common EDA tasks that would  
-normally require multiple lines of Pandas code. The agent generates descriptive  
-statistics, identifies anomalies, and creates visualizations to help you  
-understand your data quickly.  
+This example highlights how PandasAI streamlines exploratory data analysis by  
+handling tasks that would typically require several separate Pandas operations.  
+Instead of writing manual code for summaries, anomaly detection, or plotting,  
+the agent interprets natural‑language instructions and produces structured  
+outputs, cleaned data, and visualizations. It turns common EDA workflows into a  
+conversational process, helping you move from raw data to meaningful insights  
+with far less effort.  
 
 
 ## Best Practices
