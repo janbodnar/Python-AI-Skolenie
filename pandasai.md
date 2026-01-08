@@ -251,17 +251,26 @@ language queries.
 
 ```python
 import pandas as pd
+import pandasai as pai
 from pandasai import Agent
+from pandasai_litellm.litellm import LiteLLM
+import os
 
-df = pd.DataFrame({
-    'product': ['Laptop', 'Mouse', 'Keyboard', 'Monitor'],
-    'price': [1200, 25, 75, 350],
-    'units_sold': [50, 200, 150, 80]
-})
+# Configure PandasAI globally to use LiteLLM with OpenAI
+llm = LiteLLM(model="gpt-3.5-turbo", api_key=os.getenv("OPENAI_API_KEY"))
+pai.config.set({"llm": llm})
+
+df = pd.DataFrame(
+    {
+        "employee": ["Alice", "Bob", "Charlie", "Diana"],
+        "department": ["Sales", "IT", "Sales", "HR"],
+        "salary": [75000, 85000, 70000, 65000],
+    }
+)
+
 
 agent = Agent(df)
-
-response = agent.chat("What is the total revenue for each product?")
+response = agent.chat("What is the average salary by department?")
 print(response)
 ```
 
