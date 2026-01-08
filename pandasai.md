@@ -238,9 +238,6 @@ Use `df.chat()` for simple, fast, and isolated queries during exploratory work.
 Use `Agent(df)` when you need context retention, multi‑step analysis,  
 extensibility, or integration into a larger system.  
 
-Here’s a clear, documentation‑friendly explanation of **what a SmartDataframe is** in
-PandasAI 3.x and **how to detect whether a DataFrame is one**.
-
 
 ## SmartDataframe in PandasAI
 
