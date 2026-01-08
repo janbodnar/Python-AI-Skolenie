@@ -186,6 +186,33 @@ exploring data. Each query is handled independently, making this method well
 suited for exploratory analysis or notebook‑style workflows where minimal setup  
 is preferred.
 
+PandasAI automatically adds the `.chat()` method only to DataFrames that it  
+creates through its own I/O helper functions. These helpers return a  
+**SmartDataframe**, which includes natural‑language querying capabilities.  
+DataFrames created directly with pandas (such as `pd.DataFrame()` or  
+`pd.read_csv()`) do not receive this functionality unless wrapped manually with  
+an `Agent`. The table below lists all PandasAI loaders that produce a wrapped  
+DataFrame ready for conversational analysis.  
+
+### Auto‑Wrapping Data Loaders in PandasAI 3.x
+
+| Category   | Helper Function(s)            | Notes                                      |
+|------------|-------------------------------|---------------------------------------------|
+| CSV        | `pai.read_csv()`              | Loads CSV files into a SmartDataframe       |
+| JSON       | `pai.read_json()`             | Supports standard JSON structures           |
+| Excel      | `pai.read_excel()`            | Reads `.xls` and `.xlsx` files              |
+| Parquet    | `pai.read_parquet()`          | For columnar Parquet datasets               |
+| SQL        | `pai.read_sql()`              | Executes SQL queries and wraps results      |
+|            | `pai.read_sql_table()`        | Reads entire SQL tables                     |
+|            | `pai.read_sql_query()`        | Runs SQL queries and returns wrapped output |
+| Clipboard  | `pai.read_clipboard()`        | Wraps data copied from the system clipboard |
+| Pickle     | `pai.read_pickle()`           | Loads pickled DataFrames                    |
+| Feather    | `pai.read_feather()`          | Reads Apache Feather format                 |
+| ORC        | `pai.read_orc()`              | Loads ORC columnar files                    |
+| HTML       | `pai.read_html()`             | Returns a list of wrapped DataFrames        |
+| XML        | `pai.read_xml()`              | Parses XML into a wrapped DataFrame         |
+
+
 ### Agent‑Based Workflow (`Agent(df)`)
 
 The Agent‑based approach creates a persistent object that holds the DataFrame,  
@@ -211,8 +238,46 @@ Use `df.chat()` for simple, fast, and isolated queries during exploratory work.
 Use `Agent(df)` when you need context retention, multi‑step analysis,  
 extensibility, or integration into a larger system.  
 
+Here’s a clear, documentation‑friendly explanation of **what a SmartDataframe is** in
+PandasAI 3.x and **how to detect whether a DataFrame is one**.
 
 
+## SmartDataframe in PandasAI
+
+A **SmartDataframe** is PandasAI’s enhanced DataFrame wrapper that adds  
+natural‑language capabilities on top of a standard pandas DataFrame. When you  
+load data using PandasAI’s own helper functions (such as `pai.read_csv()` or  
+`pai.read_excel()`), the library automatically wraps the underlying pandas  
+DataFrame in a SmartDataframe. This wrapper preserves all normal pandas  
+operations while adding the `.chat()` method, enabling conversational queries  
+powered by an LLM. SmartDataframes behave like regular DataFrames but include  
+additional metadata, configuration, and logic required for PandasAI’s agent  
+system.
+
+### How to Detect a SmartDataframe
+
+You can determine whether an object is a SmartDataframe by checking its class or  
+by verifying the presence of the `.chat()` method. The examples below show the  
+most common detection patterns:  
+
+```python
+import pandasai
+
+# Method 1: Check the class name
+type(df).__name__ == "SmartDataframe"
+
+# Method 2: Check using isinstance
+from pandasai.smart_dataframe import SmartDataframe
+isinstance(df, SmartDataframe)
+
+# Method 3: Check for the chat method
+hasattr(df, "chat")
+```
+
+A SmartDataframe will return `True` for at least one of these checks, while a  
+regular pandas DataFrame will not. This makes it easy to confirm whether a  
+DataFrame has been auto‑wrapped by PandasAI or whether it needs to be wrapped  
+manually using an `Agent`.  
 
 ## Basic Usage
 
