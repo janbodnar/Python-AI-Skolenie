@@ -178,13 +178,6 @@ response = sdf.chat("Your question here")
 **LLM Configuration**: Specify which language model to use  
 
 ```python
-from pandasai.llm import OpenAI
-
-llm = OpenAI(api_token="your-token")
-agent = Agent(df, config={'llm': llm})
-```
-
-```python
 # Configure PandasAI globally to use LiteLLM with OpenAI
 
 llm = LiteLLM(model="gpt-3.5-turbo", api_key=os.getenv("OPENAI_API_KEY"))
