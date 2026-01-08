@@ -414,6 +414,97 @@ per month showing revenue and expenses side by side.
 This example demonstrates a more sophisticated workflow combining multiple  
 operations.  
 
+- every step returns a valid PandasAI 3.x output type  
+- no `"json"` or unsupported types  
+- plots return file paths  
+- DataFrame‑modifying steps return `"dataframe"`  
+- numeric analysis returns `"number"`  
+- pattern extraction returns `"string"`  
+
+Here’s the full working script:
+
+```python
+import pandas as pd
+import pandasai as pai
+from pandasai import Agent
+from pandasai_litellm.litellm import LiteLLM
+import os
+
+# Configure LLM
+llm = LiteLLM(model="gpt-3.5-turbo", api_key=os.getenv("OPENAI_API_KEY"))
+pai.config.set({"llm": llm})
+
+# Sample dataset
+df = pd.DataFrame({
+    'date': ['2024-01-01', '2024-01-02', '2024-01-03', '2024-01-04',
+             '2024-01-05', '2024-01-06', '2024-01-07'],
+    'temperature': [22.5, 23.1, None, 24.8, 25.2, 23.9, 22.8],
+    'humidity': [65, 68, 70, None, 72, 69, 66],
+    'sales': [1200, 1450, 1380, 1520, 1680, 1590, 1420]
+})
+
+agent = Agent(df)
+
+# Step 1: Identify missing values
+response = agent.chat(
+    "Count missing values in each column. "
+    "Return a dataframe using: "
+    "result = {'type': 'dataframe', 'value': output_df}"
+)
+print("Missing values:", response)
+
+# Step 2: Clean the data
+response = agent.chat(
+    "Fill missing temperature and humidity values with the mean. "
+    "Return the updated dataframe using: "
+    "result = {'type': 'dataframe', 'value': df}"
+)
+print("Data cleaned:", response)
+
+# Step 3: Correlation analysis
+response = agent.chat(
+    "Calculate the correlation coefficient between temperature and sales. "
+    "Return it using: result = {'type': 'number', 'value': correlation}"
+)
+print("Correlation analysis:", response)
+
+# Step 4: Pattern detection
+response = agent.chat(
+    "Which day had the highest sales and what was the temperature? "
+    "Return a string using: "
+    "result = {'type': 'string', 'value': answer}"
+)
+print("Pattern found:", response)
+
+# Step 5: Visualization
+response = agent.chat(
+    "Create a line plot showing temperature and sales over time. "
+    "Save it to a file and return only the file path."
+)
+print("Plot saved to:", response)
+```
+
+
+PandasAI 3.x requires every LLM‑generated code block to return a dictionary  
+describing the output type and value. The structure must follow:  
+
+```python
+result = {"type": "<output_type>", "value": <payload>}
+```
+
+Only the output types listed below are supported. Any other type will raise an  
+`InvalidOutputValueMismatch` error.
+
+| Output Type | Description | Expected Value |
+|-------------|-------------|----------------|
+| `dataframe` | A pandas DataFrame returned after a transformation or analysis | A pandas DataFrame object |
+| `number`    | A numeric result such as a correlation coefficient or summary statistic | An `int` or `float` |
+| `string`    | A textual answer, explanation, or summary | A Python string |
+| `plot`      | A visualization saved to disk | A file path string (e.g., `'/tmp/plot.png'`) |
+
+
+
+
 ```python
 import pandas as pd
 from pandasai import Agent
