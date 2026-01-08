@@ -513,9 +513,13 @@ Only the output types listed below are supported. Any other type will raise an
 
 
 
-## Automated Exploratory Data Analysis
+## Automated Exploratory Data Analysis (EDA)
 
-PandasAI can perform comprehensive dataset exploration automatically.  
+PandasAI transforms exploratory data analysis into a conversational workflow.  
+Instead of writing multiple Pandas commands, you can ask high‑level questions and  
+let the agent generate summaries, detect anomalies, clean data, and produce  
+visualizations on demand. It streamlines the early stages of analysis so you can  
+focus on interpreting insights rather than assembling code.  
 
 ```python
 import pandas as pd
