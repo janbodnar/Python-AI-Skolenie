@@ -75,6 +75,7 @@ Install PandasAI using pip:
 
 ```bash
 pip install pandasai
+pip install pandasai-litellm
 ```
 
 ### Required Dependencies
