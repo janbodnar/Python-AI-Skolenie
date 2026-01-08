@@ -113,20 +113,6 @@ import os
 os.environ['OPENAI_API_KEY'] = 'your-api-key-here'
 ```
 
-### Complete Setup Example
-
-```bash
-# Create a virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install required packages
-pip install pandasai openai pandas matplotlib plotly
-
-# Set your API key
-export OPENAI_API_KEY='sk-...'
-```
-
 
 ## Core Concepts
 
