@@ -412,7 +412,7 @@ per month showing revenue and expenses side by side.
 ## Advanced Example: Data Cleaning and Analysis
 
 This example demonstrates a more sophisticated workflow combining multiple  
-operations.  
+operations. 
 
 - every step returns a valid PandasAI 3.x output type  
 - no `"json"` or unsupported types  
@@ -484,6 +484,14 @@ response = agent.chat(
 print("Plot saved to:", response)
 ```
 
+This workflow demonstrates how PandasAI can handle complex analytical tasks:  
+
+1. **Data Quality Assessment**: Identifies missing values  
+2. **Data Cleaning**: Fills gaps with statistical methods  
+3. **Statistical Analysis**: Calculates correlations  
+4. **Pattern Detection**: Finds relationships in the data  
+5. **Visualization**: Creates meaningful charts  
+
 
 PandasAI 3.x requires every LLM‑generated code block to return a dictionary  
 describing the output type and value. The structure must follow:  
@@ -503,55 +511,6 @@ Only the output types listed below are supported. Any other type will raise an
 | `plot`      | A visualization saved to disk | A file path string (e.g., `'/tmp/plot.png'`) |
 
 
-
-
-```python
-import pandas as pd
-from pandasai import Agent
-
-df = pd.DataFrame({
-    'date': ['2024-01-01', '2024-01-02', '2024-01-03', '2024-01-04', 
-             '2024-01-05', '2024-01-06', '2024-01-07'],
-    'temperature': [22.5, 23.1, None, 24.8, 25.2, 23.9, 22.8],
-    'humidity': [65, 68, 70, None, 72, 69, 66],
-    'sales': [1200, 1450, 1380, 1520, 1680, 1590, 1420]
-})
-
-agent = Agent(df)
-
-# Step 1: Identify data quality issues
-response = agent.chat("How many missing values are in each column?")
-print("Missing values:", response)
-
-# Step 2: Clean the data
-response = agent.chat("Fill missing temperature and humidity values with the mean")
-print("Data cleaned:", response)
-
-# Step 3: Analyze relationships
-response = agent.chat(
-    "Is there a correlation between temperature and sales? Show the correlation coefficient"
-)
-print("Correlation analysis:", response)
-
-# Step 4: Find patterns
-response = agent.chat("Which day had the highest sales and what was the temperature?")
-print("Pattern found:", response)
-
-# Step 5: Visualize trends
-agent.chat("Create a line plot showing temperature and sales over time")
-```
-
-This workflow demonstrates how PandasAI can handle complex analytical tasks:  
-
-1. **Data Quality Assessment**: Identifies missing values  
-2. **Data Cleaning**: Fills gaps with statistical methods  
-3. **Statistical Analysis**: Calculates correlations  
-4. **Pattern Detection**: Finds relationships in the data  
-5. **Visualization**: Creates meaningful charts  
-
-Expected output: The agent provides answers to each query, fills missing values  
-with column means, calculates correlation coefficients, identifies the peak  
-sales day, and generates a dual-axis line chart showing trends.  
 
 
 ## Automated Exploratory Data Analysis
