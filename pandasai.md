@@ -166,15 +166,6 @@ agent = Agent(df, config={'llm': llm})
 response = agent.chat("Your question here")
 ```
 
-**SmartDataframe** (legacy): Earlier API for single DataFrame queries  
-
-```python
-from pandasai import SmartDataframe
-
-sdf = SmartDataframe(df, config={'llm': llm})
-response = sdf.chat("Your question here")
-```
-
 **LLM Configuration**: Specify which language model to use  
 
 ```python
