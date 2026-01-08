@@ -322,7 +322,13 @@ PandasAI excels at translating questions into data operations.
 
 ```python
 import pandas as pd
+import pandasai as pai
 from pandasai import Agent
+from pandasai_litellm.litellm import LiteLLM
+import os
+
+llm = LiteLLM(model="gpt-3.5-turbo", api_key=os.getenv("OPENAI_API_KEY"))
+pai.config.set({"llm": llm})
 
 df = pd.DataFrame({
     'employee': ['Alice', 'Bob', 'Charlie', 'Diana'],
@@ -367,7 +373,13 @@ PandasAI can create charts and graphs from natural language requests.
 
 ```python
 import pandas as pd
+import pandasai as pai
 from pandasai import Agent
+from pandasai_litellm.litellm import LiteLLM
+import os
+
+llm = LiteLLM(model="gpt-3.5-turbo", api_key=os.getenv("OPENAI_API_KEY"))
+pai.config.set({"llm": llm})
 
 df = pd.DataFrame({
     'month': ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
@@ -377,7 +389,13 @@ df = pd.DataFrame({
 
 agent = Agent(df)
 
-agent.chat("Create a bar chart showing revenue and expenses by month")
+response = agent.chat(
+    "Create a bar chart showing revenue and expenses by month. "
+    "Save the plot to a file and return only the file path."
+)
+
+print(response)
+
 ```
 
 This command generates appropriate plotting code using matplotlib or plotly,  
