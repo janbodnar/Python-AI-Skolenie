@@ -198,6 +198,14 @@ llm = OpenAI(api_token="your-token")
 agent = Agent(df, config={'llm': llm})
 ```
 
+```python
+# Configure PandasAI globally to use LiteLLM with OpenAI
+
+llm = LiteLLM(model="gpt-3.5-turbo", api_key=os.getenv("OPENAI_API_KEY"))
+pai.config.set({"llm": llm})
+```
+
+
 
 ## Basic Usage
 
