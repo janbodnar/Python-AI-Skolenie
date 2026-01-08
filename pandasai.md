@@ -205,6 +205,43 @@ llm = LiteLLM(model="gpt-3.5-turbo", api_key=os.getenv("OPENAI_API_KEY"))
 pai.config.set({"llm": llm})
 ```
 
+## PandasAI Usage Approaches
+
+### DataFrame‑Bound Chat (`df.chat()`)
+
+This approach attaches PandasAI capabilities directly to a DataFrame, enabling  
+natural‑language queries without creating an explicit agent. It is lightweight  
+and ideal for quick, one‑off interactions such as filtering, summarizing, or  
+exploring data. Each query is handled independently, making this method well  
+suited for exploratory analysis or notebook‑style workflows where minimal setup  
+is preferred.
+
+### Agent‑Based Workflow (`Agent(df)`)
+
+The Agent‑based approach creates a persistent object that holds the DataFrame,  
+the LLM, configuration, and conversational context. It supports multi‑turn  
+reasoning, custom tools, multiple datasets, and more complex workflows. This  
+method is better suited for applications, pipelines, or scenarios where queries  
+build on each other and require structured, reusable logic.  
+
+### Comparison Table
+
+| Feature                 | `df.chat()`                         | `Agent(df)`                     |
+|-------------------------|--------------------------------------|---------------------------------|
+| Ease of use             | Easiest, minimal setup               | More explicit and modular       |
+| Context retention       | Limited                              | Strong multi‑turn memory        |
+| Multiple DataFrames     | Not ideal                            | Fully supported                 |
+| Custom tools/extensions | Limited                              | Designed for it                 |
+| Production readiness    | Good for quick tasks                 | Better for complex apps         |
+| Code style              | Implicit                             | Explicit and structured         |
+
+### Choosing an Approach
+
+Use `df.chat()` for simple, fast, and isolated queries during exploratory work.  
+Use `Agent(df)` when you need context retention, multi‑step analysis,  
+extensibility, or integration into a larger system.  
+
+
 
 
 ## Basic Usage
