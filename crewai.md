@@ -88,6 +88,34 @@ This creates a simple single-agent system where the research assistant
 performs information gathering tasks. The agent has clear boundaries  
 defined by its role and goal, making it focused and effective.  
 
+Explicit setting of LLM model:
+
+```python
+from crewai import Agent, Task, Crew, LLM
+import os
+
+# Explicit LLM
+llm = LLM(model="gpt-4o-mini", api_key=os.getenv("API_KEY"))
+
+agent = Agent(
+    role="Helper",
+    goal="Answer questions simply",
+    backstory="You are a helpful assistant that provides simple and clear answers.",
+    llm=llm
+)
+
+task = Task(
+    description="Say hello.",
+    expected_output="A short greeting.",
+    agent=agent
+)
+
+crew = Crew(agents=[agent], tasks=[task])
+result = crew.kickoff()
+
+print(result)
+```
+
 ## Multiple Agents Collaboration
 
 CrewAI's true power emerges when multiple agents collaborate on complex tasks.  
