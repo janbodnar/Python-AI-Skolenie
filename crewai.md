@@ -67,7 +67,7 @@ between CrewAI and MCP.
 | **Information Passing** | Output of one task becomes input to the next. | The LLM maintains context and decides what to do next. |
 | **Determinism** | High (unless delegation is used). | Lower; behavior depends on LLM reasoning. |
 | **Complexity Handling** | Great for predictable multi‑agent systems. | Great for open‑ended tasks requiring adaptive tool use. |
-| **Mental Model** | “Workflow engine with LLM‑powered steps.” | “LLM with a toolbox that chooses its own actions.” |
+| **Mental Model** | Workflow engine with LLM‑powered steps. | LLM with a toolbox that chooses its own actions. |
 
 
 ## Basic Agent Creation
