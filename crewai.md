@@ -92,10 +92,10 @@ Explicit setting of LLM model:
 
 ```python
 from crewai import Agent, Task, Crew, LLM
-import os
+import os 
 
 # Explicit LLM
-llm = LLM(model="gpt-4o-mini", api_key=os.getenv("API_KEY"))
+llm = LLM(model="gpt-4.1-mini", api_key=os.getenv("OPENAI_API_KEY"))
 
 agent = Agent(
     role="Helper",
@@ -113,6 +113,7 @@ task = Task(
 crew = Crew(agents=[agent], tasks=[task])
 result = crew.kickoff()
 
+print(agent.llm.model)
 print(result)
 ```
 
