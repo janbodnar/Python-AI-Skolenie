@@ -50,15 +50,10 @@ automatically.
 **Process**: The workflow that determines how tasks are executed  
 **Tools**: External capabilities agents can use to complete tasks  
 
-Here’s a clear, structured comparison table that highlights the core differences
-between **CrewAI** and **MCP**. I’ll keep it crisp and readable so you can use it
-as a reference or drop it directly into documentation.
-
----
 
 ## Comparison Table: CrewAI vs. MCP
 
-Here’s a clear, structured comparison table that highlights the core differences
+Here’s a clear, structured comparison table that highlights the core differences  
 between CrewAI and MCP. 
 
 | Aspect | **CrewAI** | **MCP (Model Context Protocol)** |
@@ -74,15 +69,6 @@ between CrewAI and MCP.
 | **Complexity Handling** | Great for predictable multi‑agent systems. | Great for open‑ended tasks requiring adaptive tool use. |
 | **Mental Model** | “Workflow engine with LLM‑powered steps.” | “LLM with a toolbox that chooses its own actions.” |
 
----
-
-If you want, I can also create:
-
-- a diagram showing the flow differences  
-- a side‑by‑side code example (CrewAI vs. MCP)  
-- a recommendation guide for when to use which  
-
-Just tell me what direction you want to explore next.
 
 ## Basic Agent Creation
 
