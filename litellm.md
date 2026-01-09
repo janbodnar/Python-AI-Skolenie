@@ -54,7 +54,7 @@ date of birth string
 """
 
 response = completion(
-  model="openrouter/qwen/qwen3-coder:free",
+  model="openrouter/mistralai/devstral-2512:free",
   messages=[{ "content": query,"role": "user"}]
 )
 
