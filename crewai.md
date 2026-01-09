@@ -117,6 +117,120 @@ print(agent.llm.model)
 print(result)
 ```
 
+## CSV finder & analyst
+
+A simple multi‑agent workflow can be a great way to demonstrate how CrewAI  
+coordinates different roles to complete a task. The following example shows  
+how one agent searches for CSV files while another agent analyzes them,  
+creating a clear and practical division of responsibilities.  
+
+```python
+import os
+import pandas as pd
+from crewai import Agent, Task, Crew, LLM
+from crewai.tools import BaseTool
+
+
+# -----------------------------
+# Tools
+# -----------------------------
+
+class FindCSVFilesTool(BaseTool):
+    name: str = "find_csv_files"
+    description: str = "Searches a directory for CSV files and returns their paths."
+
+    def _run(self, directory: str):
+        csv_files = [
+            os.path.join(directory, f)
+            for f in os.listdir(directory)
+            if f.endswith(".csv")
+        ]
+        return csv_files
+
+
+class AnalyzeCSVTool(BaseTool):
+    name: str = "analyze_csv"
+    description: str = "Loads a CSV file and returns a basic analytical summary."
+
+    def _run(self, file_path: str):
+        df = pd.read_csv(file_path)
+        summary = {
+            "file": file_path,
+            "rows": len(df),
+            "columns": list(df.columns),
+            "numeric_summary": df.describe().to_dict()
+        }
+        return summary
+
+
+# -----------------------------
+# LLM
+# -----------------------------
+
+llm = LLM(model="gpt-4.1-mini", api_key=os.getenv("OPENAI_API_KEY"))
+
+
+# -----------------------------
+# Agents
+# -----------------------------
+
+finder_agent = Agent(
+    role="CSV Finder",
+    goal="Locate all CSV files in a given directory",
+    backstory="You specialize in scanning file systems.",
+    tools=[FindCSVFilesTool()],
+    llm=llm
+)
+
+analyst_agent = Agent(
+    role="CSV Analyst",
+    goal="Analyze CSV files and summarize their contents",
+    backstory="You are skilled at basic data analysis.",
+    tools=[AnalyzeCSVTool()],
+    llm=llm
+)
+
+# -----------------------------
+# Tasks
+# -----------------------------
+
+task_find = Task(
+    description="Search the './data' directory for CSV files.",
+    expected_output="A list of CSV file paths.",
+    agent=finder_agent
+)
+
+task_analyze = Task(
+    description=(
+        "For each CSV file found, analyze it using the analyze_csv tool "
+        "and produce a readable summary."
+    ),
+    expected_output="A human-friendly summary of each CSV file.",
+    agent=analyst_agent
+)
+
+# -----------------------------
+# Crew
+# -----------------------------
+
+crew = Crew(
+    agents=[finder_agent, analyst_agent],
+    tasks=[task_find, task_analyze],
+    verbose=True
+)
+
+result = crew.kickoff()
+print(result)
+```
+
+This setup begins with a file‑searching agent that scans a directory and  
+returns every CSV file it finds. A second agent then loads each file,  
+extracts structural information, and produces a basic analytical summary.  
+Together, they form a small but effective pipeline that highlights how  
+CrewAI agents can collaborate, pass information between tasks, and perform  
+useful data processing steps in sequence.  
+
+
 ## Multiple Agents Collaboration
 
 CrewAI's true power emerges when multiple agents collaborate on complex tasks.  
