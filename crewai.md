@@ -70,6 +70,7 @@ agent = Agent(
 
 task = Task(
     description="Research the benefits of renewable energy",
+    expected_output="A clear, concise summary of the main benefits of renewable energy.",
     agent=agent
 )
 
