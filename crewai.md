@@ -50,6 +50,40 @@ automatically.
 **Process**: The workflow that determines how tasks are executed  
 **Tools**: External capabilities agents can use to complete tasks  
 
+Here’s a clear, structured comparison table that highlights the core differences
+between **CrewAI** and **MCP**. I’ll keep it crisp and readable so you can use it
+as a reference or drop it directly into documentation.
+
+---
+
+## Comparison Table: CrewAI vs. MCP
+
+Here’s a clear, structured comparison table that highlights the core differences
+between CrewAI and MCP. 
+
+| Aspect | **CrewAI** | **MCP (Model Context Protocol)** |
+|-------|------------|----------------------------------|
+| **Execution Model** | Task‑driven. You define a sequence of tasks that run in order. | Agent‑driven. The LLM decides which tools to call and when. |
+| **Control Flow** | Deterministic unless delegation is enabled. | Dynamic and emergent; the LLM orchestrates tool usage. |
+| **Agent Behavior** | Agents execute only the tasks assigned to them. | The LLM chooses tools freely; no fixed task list. |
+| **Tool Usage** | Tools are tied to specific agents and used within tasks. | Tools are exposed to the LLM, which decides how to chain them. |
+| **Workflow Design** | You design the pipeline explicitly. | The LLM designs the pipeline implicitly at runtime. |
+| **Best For** | Structured workflows, pipelines, multi‑step processes. | Flexible, exploratory, autonomous tool‑calling scenarios. |
+| **Information Passing** | Output of one task becomes input to the next. | The LLM maintains context and decides what to do next. |
+| **Determinism** | High (unless delegation is used). | Lower; behavior depends on LLM reasoning. |
+| **Complexity Handling** | Great for predictable multi‑agent systems. | Great for open‑ended tasks requiring adaptive tool use. |
+| **Mental Model** | “Workflow engine with LLM‑powered steps.” | “LLM with a toolbox that chooses its own actions.” |
+
+---
+
+If you want, I can also create:
+
+- a diagram showing the flow differences  
+- a side‑by‑side code example (CrewAI vs. MCP)  
+- a recommendation guide for when to use which  
+
+Just tell me what direction you want to explore next.
+
 ## Basic Agent Creation
 
 The foundation of any CrewAI system starts with creating individual agents.  
