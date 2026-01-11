@@ -195,12 +195,65 @@ program retrieves and prints the model’s combined plain-text output using
 the convenience property `response.output_text`.
 
  
+## Analyze CSV data
 
+The script analyze_csv.py reads the CSV file at users_data.csv, counts the data rows   
+(excluding the header), and loads the full CSV text into a single natural-language prompt   
+requesting a basic data analysis. It initializes an OpenAI client, constructs the prompt  
+(asking for dataset structure, basic statistics, patterns, data-quality observations,  
+and recommendations), then sends that prompt to the Responses API and captures the model’s reply. 
 
+```python
+from openai import OpenAI
+import csv
 
-## Next Steps
+client = OpenAI()
 
-* Review usage limits and pricing in the dashboard
-* Explore different models for cost vs. quality
-* Store secrets securely (e.g., Windows Credential Manager or .env files)
+csv_file_path = "data/users_data.csv"
+
+# Read CSV data
+with open(csv_file_path, 'r') as file:
+    csv_content = file.read()
+
+# Count rows for context
+with open(csv_file_path, 'r') as file:
+    csv_reader = csv.reader(file)
+    row_count = sum(1 for row in csv_reader) - 1  # Subtract header row
+
+# Prepare prompt for LLM
+prompt = f"""Please analyze the following CSV dataset containing {row_count} user records.
+
+CSV Data:
+{csv_content}
+
+Please provide:
+1. A summary of the dataset structure and key columns
+2. Basic statistics (e.g., age distribution, gender breakdown, country distribution)
+3. Any interesting patterns or insights you notice
+4. Data quality observations (missing values, outliers, etc.)
+5. Recommendations for further analysis
+
+Keep your analysis clear and concise."""
+
+print(f"Analyzing {row_count} records with streaming output...")
+print("-" * 80)
+
+# Stream the response from the model
+with client.responses.stream(
+    model="gpt-5.1-mini",
+    input=prompt
+) as stream:
+    for event in stream:
+        # Print text as it is generated
+        if event.type == "response.output_text.delta":
+            print(event.delta, end="", flush=True)
+
+print("\n" + "-"*80)
+print(f"Analysis completed for {row_count} records from {csv_file_path}")
+```
+
+After the API call the script prints the model’s analysis and a short completion message.  
+It’s a simple orchestration for quick, high-level exploratory summaries rather than exhaustive  
+statistical processing—intended to run locally with configured API credentials and best used as  
+a starting point for deeper analysis.
 
