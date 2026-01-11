@@ -17,7 +17,7 @@ even for developers new to machine learning.
 
 ## Create a ChatGPT Platform Account
 
-1. Open your browser and go to [https://platform.chatgpt.com](https://platform.chatgpt.com)
+1. Open your browser and go to [https://platform.chatgpt.com](https://platform.chatgpt.com)  
    (you may be redirected to OpenAI’s developer platform).
 3. Sign in with an existing account or create a new one using email, Google, or Microsoft.
 4. Verify your email address if prompted.
