@@ -109,21 +109,20 @@ response = client.responses.create(
 print(response.output_text)
 ```
 
-
 In this script, the API key is passed explicitly when creating the `OpenAI`  
 client, which allows the SDK to authenticate requests to the OpenAI service.  
 This approach makes the authentication mechanism visible in code and can be  
 useful for quick tests or controlled environments, although it is generally  
 not recommended for production due to security concerns.  
 
+
 ## Older API
 
-
-This script uses the older Chat Completions API, which predates the newer
-Responses API. In this approach, conversations are created through
-`client.chat.completions.create()`, and the model output is accessed via the
-`choices` array. While this API is still supported for backward compatibility,
-it represents an earlier design that focuses only on chat-style text outputs.
+This script uses the older Chat Completions API, which predates the newer  
+Responses API. In this approach, conversations are created through  
+`client.chat.completions.create()`, and the model output is accessed via the  
+`choices` array. While this API is still supported for backward compatibility,  
+it represents an earlier design that focuses only on chat-style text outputs.  
 
 ```python
 from openai import OpenAI
