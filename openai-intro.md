@@ -197,11 +197,72 @@ the convenience property `response.output_text`.
  
 ## Analyze CSV data
 
-The script analyze_csv.py reads the CSV file at users_data.csv, counts the data rows   
+The script reads the CSV file at `users_data.csv`, counts the data rows   
 (excluding the header), and loads the full CSV text into a single natural-language prompt   
 requesting a basic data analysis. It initializes an OpenAI client, constructs the prompt  
 (asking for dataset structure, basic statistics, patterns, data-quality observations,  
-and recommendations), then sends that prompt to the Responses API and captures the model’s reply. 
+and recommendations), then sends that prompt to the Responses API and captures the model's reply. 
+
+```python
+from openai import OpenAI
+import csv
+
+client = OpenAI()
+
+# Read CSV file
+csv_file_path = "data/users_data.csv"
+
+# Read CSV data
+with open(csv_file_path, 'r') as file:
+    csv_content = file.read()
+
+# Count rows for context
+with open(csv_file_path, 'r') as file:
+    csv_reader = csv.reader(file)
+    row_count = sum(1 for row in csv_reader) - 1  # Subtract header row
+
+# Prepare prompt for LLM
+prompt = f"""Please analyze the following CSV dataset containing {row_count} user records.
+
+CSV Data:
+{csv_content}
+
+Please provide:
+1. A summary of the dataset structure and key columns
+2. Basic statistics (e.g., age distribution, gender breakdown, country distribution)
+3. Any interesting patterns or insights you notice
+4. Data quality observations (missing values, outliers, etc.)
+5. Recommendations for further analysis
+
+Keep your analysis clear and concise."""
+
+# Send to LLM for analysis
+print("Analyzing CSV data with LLM...")
+print("-" * 80)
+
+response = client.responses.create(
+    model="gpt-4.1-mini",
+    input=prompt
+)
+
+# Print the analysis
+print(response.output_text)
+print("-" * 80)
+print(f"\nAnalysis completed for {row_count} records from {csv_file_path}")
+```
+
+After the API call the script prints the model’s analysis and a short completion message.  
+It’s a simple orchestration for quick, high-level exploratory summaries rather than exhaustive  
+statistical processing—intended to run locally with configured API credentials and best used as  
+a starting point for deeper analysis.
+
+
+## Streaming
+
+The script reads the CSV file at `users_data.csv`, counts the data rows (excluding the header),  
+and embeds the entire CSV text into a single prompt requesting a basic data analysis  
+(structure, basic statistics, patterns, data-quality observations, and recommendations). It initializes  
+an OpenAI client and prepares a prompt that includes the dataset and explicit instructions for the analysis.
 
 ```python
 from openai import OpenAI
@@ -240,7 +301,7 @@ print("-" * 80)
 
 # Stream the response from the model
 with client.responses.stream(
-    model="gpt-5.1-mini",
+    model="gpt-5-mini",
     input=prompt
 ) as stream:
     for event in stream:
@@ -252,8 +313,8 @@ print("\n" + "-"*80)
 print(f"Analysis completed for {row_count} records from {csv_file_path}")
 ```
 
-After the API call the script prints the model’s analysis and a short completion message.  
-It’s a simple orchestration for quick, high-level exploratory summaries rather than exhaustive  
-statistical processing—intended to run locally with configured API credentials and best used as  
-a starting point for deeper analysis.
-
+Instead of waiting for a full response, the script opens a streaming responses  
+context with client.responses.stream(...) using the gpt-5-mini model, iterates over  
+streamed events, and prints text deltas in real time as the model generates them.  
+Finally, it prints a completion separator and a short message indicating the analysis  
+finished for the counted records.
