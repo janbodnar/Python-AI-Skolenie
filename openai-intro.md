@@ -116,6 +116,46 @@ This approach makes the authentication mechanism visible in code and can be
 useful for quick tests or controlled environments, although it is generally  
 not recommended for production due to security concerns.  
 
+## Older API
+
+
+This script uses the older Chat Completions API, which predates the newer
+Responses API. In this approach, conversations are created through
+`client.chat.completions.create()`, and the model output is accessed via the
+`choices` array. While this API is still supported for backward compatibility,
+it represents an earlier design that focuses only on chat-style text outputs.
+
+```python
+from openai import OpenAI
+import os
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+completion = client.chat.completions.create(
+    model="gpt-4.1-mini",
+    messages=[
+        {
+          "role": "user",
+          "content": "Is Pluto a planet?"
+        }
+    ]
+)
+
+print(completion.choices[0].message.content)
+```
+
+One reason this older API remains relevant is that many other LLM providers  
+and open-source frameworks expose chat-completion–style interfaces that are  
+conceptually similar. As a result, code written against this pattern can be  
+easier to adapt across different models and vendors.  
+
+By contrast, the modern Responses API unifies text generation, tool calls,  
+and multimodal outputs into a single, more flexible response structure.  
+Because of this broader scope, not all LLMs or platforms outside OpenAI  
+support the Responses API model, making the older chat completions pattern  
+more portable in some multi-model or cross-provider setups.  
+
+
 ## Setting roles
 
 The **role setting** defines how each message should be interpreted by the model.    
