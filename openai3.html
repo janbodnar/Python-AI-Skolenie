@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAI a Python: štruktúrované odpovede a volanie nástrojov</title>
+    <style>
+        /* Dark-first theme with a light-mode fallback */
+        :root{
+            --bg: #1a1a1a;          /* page background - warmer dark gray for eye comfort */
+            --paper: #2a2a2a;       /* content surface */
+            --text: #f0f0f0;        /* main text - soft white */
+            --muted: #cccccc;       /* paragraph / secondary text */
+            --accent: #7dd3fc;      /* links / accents */
+            --border: #404040;      /* subtle borders */
+            --code-bg: #1a1a1a;     /* code / pre background */
+            --scroll-thumb: #555555; /* default scrollbar thumb */
+            --scroll-thumb-hover: #777777; /* scrollbar hover */
+            --outer-bg: #0f0f0f;    /* darker background past the page */
+        }
+
+        /* Light-mode fallback when user prefers light scheme */
+        @media (prefers-color-scheme: light) {
+            :root{
+                --bg: #ffffff;
+                --paper: #ffffff;
+                --text: #111827;
+                --muted: #374151;
+                --accent: #0066cc;
+                --border: #e6eaf0;
+                --code-bg: #f6f8fa;
+                --scroll-thumb: #cbd5e1;
+                --scroll-thumb-hover: #94a3b8;
+                --outer-bg: #f8f9fa;
+            }
+        }
+
+        /* Main page layout: limit line length to ~80 characters */
+        html {
+            background-color: var(--outer-bg);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            font-size: 18px;
+            line-height: 1.7;
+            padding: 40px;
+            max-width: 80ch; /* ~80 characters per line */
+            margin: 20px auto;
+            color: var(--text);
+            background-color: var(--paper);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        h1, h2 { color: var(--text); }
+        h1 { border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        h2 { border-bottom: 1px solid var(--border); padding-bottom: 8px; color: var(--accent); }
+
+        pre {
+            background-color: var(--code-bg);
+            color: var(--text);
+            padding: 16px;
+            border-radius: 6px;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            position: relative;
+        }
+
+        code {
+            font-family: 'Cascadia Code', 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+            font-size: 15px;
+            background-color: rgba(255,255,255,0.02);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--text);
+        }
+
+        p { font-family: Verdana, Geneva, Tahoma, sans-serif; font-size: 19px; color: var(--muted); }
+        a { color: var(--accent); }
+        .container { padding: 0 15px; max-width: 80ch; }
+
+        /* Scrollbar styling: WebKit (Chrome, Edge, Safari) and Firefox */
+        /* WebKit-based browsers */
+        *::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: var(--paper);
+            border-radius: 8px;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background-color: var(--scroll-thumb);
+            border-radius: 10px;
+            border: 3px solid var(--paper); /* gives a padded look */
+        }
+
+        *::-webkit-scrollbar-thumb:hover {
+            background-color: var(--scroll-thumb-hover);
+        }
+
+        /* Firefox */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--scroll-thumb) var(--paper);
+        }
+
+        /* Table styles */
+        .llm-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .llm-table th, .llm-table td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid var(--border);
+        }
+
+        .llm-table th {
+            background-color: var(--code-bg);
+        }
+
+        .params-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .params-table th, .params-table td {
+            padding: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .params-table th {
+            background-color: var(--code-bg);
+        }
+
+        .comparison-table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .comparison-table th, .comparison-table td {
+            padding: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .comparison-table th {
+            background-color: var(--code-bg);
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            font-size: 14px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .copy-btn:hover {
+            opacity: 1;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .copy-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>OpenAI a Python: štruktúrované výstupy a volanie nástrojov</h1>
+
+<p>
+V tomto článku si podrobnejšie rozoberieme štruktúrované výstupy a efektívne
+volanie nástrojov pri práci s veľkými jazykovými modelmi s využitím
+populárnej knižnice openai v programovacom jazyku Python.
+</p>
+
+<h2>Štruktúrovaný výstup</h2>
+
+<p>
+Štruktúrovaný výstup je technika, ktorá umožňuje získavať odpovede od jazykového
+modelu v predvídateľnom a strojovo spracovateľnom formáte, ako je napr. JSON,
+namiesto voľného textu. Tento prístup výrazne zvyšuje spoľahlivosť integrácie
+modelov do aplikácií, pretože vývojári môžu vopred definovať presnú štruktúru,
+typy údajov a obmedzenia pre odpoveď. Model je následne vedený k tomu, aby svoje
+informácie sformuloval podľa tejto špecifikácie, čo eliminuje potrebu riskantnej
+a chybovej analýzy neštruktúrovaného textu. 
+</p>
+
+<p>
+Podpora štruktúrovaných výstupov je kľúčová pre vytváranie robustných aplikácií,
+ako sú systémy na extrakciu informácií, generovanie API volaní alebo riešenie
+problémov krok za krokom, kde je konzistentný formát nevyhnutný pre ďalšie
+spracovanie.
+</p>
+
+<p>
+Voľba <code>response_format</code> s parametrom <code>"type": "json_schema"</code> 
+v knižnici OpenAI núti model vrátiť odpoveď v striktne definovanom JSON formáte
+podľa poskytnutej schémy. Tento prístup zaisťuje, že model vráti štruktúrované a
+predvídateľné dáta, ktoré je možné priamo spracovať v kóde bez potreby
+dodatočného parsovania alebo čistenia neštandardného textového výstupu.
+</p>
+
+<p>
+Pozor, nie všetky modely podporujú štruktúrovaný výstup. V našom príklade
+používame model <code>nvidia/nemotron-3-nano-30b-a3b:free</code>, ktorý podporuje
+štruktúrovaný výstup. Takisto je možné použiť model 
+<code>mistralai/devstral-2512:free</code>. Aktuálne sú oba modely funkčné, no
+ich budúca dostupnosť nie je garantovaná. V prípade výpadku alebo ukončenia
+podpory bude potrebné prejsť na alternatívny model s podporou štruktúrovaného
+výstupu
+</p>
+
+<pre>
+from openai import OpenAI
+import os
+import json
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ.get("OPENROUTER_API_KEY"),
+)
+
+text = """
+Extract information about people mentioned in the following text. For each
+person, provide their name, age, and city of residence in a structured JSON
+format. John Doe is a software engineer living in New York. He is 30 years old
+and enjoys hiking and photography. Jane Smith is a graphic designer based in San
+Francisco. She is 28 years old and loves painting and traveling."""
+
+response = client.chat.completions.create(
+    extra_body={},
+    model="nvidia/nemotron-3-nano-30b-a3b:free",  # Model supporting structured outputs
+    messages=[
+        {
+            "role": "user",
+            "content": text
+        }
+    ],
+    response_format={
+        "type": "json_schema",
+        "json_schema": {
+            "name": "people_info",
+            "schema": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "age": {"type": "integer"},
+                        "city": {"type": "string"}
+                    },
+                    "required": ["name", "age", "city"],
+                    "additionalProperties": False
+                }
+            },
+            "strict": True
+        }
+    }
+)
+
+# Parse the JSON response
+info = json.loads(response.choices[0].message.content)
+print("Extracted info:", info)
+    </pre>
+
+<p>
+V našom prvom príklade si ukážeme, ako požiadať model, aby vrátil údaje vo
+formáte JSON a ako tieto výstupy analyzovať v Pythone. Modelu poskytneme textový
+prompt, v ktorom ho požiadame, aby extrahoval informácie o osobách spomenutých v
+texte (meno, vek, mesto).
+</p>
+
+<p>
+Použitá <code>json_schema</code> v našom príklade definuje štruktúru výstupu,
+ktorú model musí dodržať. Schéma špecifikuje, že odpoveď bude array (pole)
+objektov, pričom každý objekt musí obsahovať tri povinné vlastnosti: name typu
+string (reťazec), age typu integer (celé číslo) a city typu string (reťazec).
+</p>
+
+<p>
+Nastavenie <code>"required": ["name", "age", "city"]</code> zaisťuje, že všetky
+tri vlastnosti musia byť v každom objekte prítomné, a 
+<code>"additionalProperties": False</code> zakazuje pridávanie akýchkoľvek
+ďalších vlastností, čím sa získa čistý a presne definovaný formát. Parameter
+<code>"strict": True</code> núti model prísne dodržiavať schému a v prípade
+nemožnosti jej splnenia vráti chybu namiesto čiastočného alebo upraveného
+výstupu.
+</p>
+
+<h2>Použitie Pydantic na parsovanie štruktúrovaného výstupu</h2>
+
+<p>
+Pydantic je populárna knižnica v Pythone na overovanie dát a správanie nastavení
+prostredníctvom anotácií typu. Jej hlavnou úlohou je zabezpečiť, že
+prichádzajúce dáta (napríklad odpoveď od LLM) sú v správnom formáte a typoch,
+ako boli definované v modeli. To automaticky eliminuje chyby spôsobené
+nekonzistentnými dátami a poskytuje jasnú štruktúru pre prácu s výsledkami v
+kóde.
+</p>
+
+<p> 
+Nasledujúci príklad demonštruje použitie Pydantic na definovanie
+štruktúrovaného výstupu pre riešenie matematických rovníc krok za krokom.
+Ukazuje, ako definovať vnorené modely (<code>Step</code> a
+<code>MathResponse</code>) a ich použitie na parsovanie odpovede modelu,
+zabezpečujúc tak typovú bezpečnosť a extrakciu štruktúrovaných údajov bez
+použitia <code>response_format</code> s JSON schémou. 
+</p>
+
+
+<pre>
+from openai import OpenAI
+from pydantic import BaseModel
+from typing import List
+import os
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.environ["OPENROUTER_API_KEY"],
+)
+
+
+class Step(BaseModel):
+    explanation: str
+    output: str
+
+
+class MathResponse(BaseModel):
+    steps: List[Step]
+    final_answer: str
+
+
+prompt = """
+Solve the equation: 8x + 31 = 2.
+Return your answer as a JSON object matching this format:
+
+{
+  "steps": [
+    {"explanation": "...", "output": "..."},
+    ...
+  ],
+  "final_answer": "..."
+}
+"""
+
+response = client.chat.completions.create(
+    model="nvidia/nemotron-3-nano-30b-a3b:free",
+    messages=[{"role": "user", "content": prompt}],
+)
+
+raw_text = response.choices[0].message.content
+parsed = MathResponse.model_validate_json(raw_text)
+
+print(parsed)
+print(parsed.final_answer)
+</pre>
+
+<p>
+Po získaní odpovede od modelu ju parsujeme pomocou
+<code>MathResponse.model_validate_json()</code>, ktorý automaticky overí, že
+odpoveď zodpovedá definovanej štruktúre. Ak model vráti neplatný formát,
+Pydantic vyhodí výnimku, čím sa zabezpečí, že s dátami budeme pracovať len
+vtedy, keď sú správne štruktúrované
+</p>
+
+
+<h2>Volanie nástrojov</h2>
+
+<p>
+Volanie nástrojov umožňuje modelu volať funkcie, ktoré definujete v našom kóde.
+Model sám negeneruje kód, ale vráti JSON objekt s názvom funkcie a argumentmi,
+ktoré by sa mali použiť. To umožňuje prepojiť LLM s externými nástrojmi a API. 
+</p>
+
+<p>
+Pôvodne sa skôr používal termín „volanie funkcií“ (function calling), dnes sa 
+uprednostňuje širší pojem „volanie nástrojov“ (tool calling), pretože okrem
+funkcií môžu byť nástrojmi aj iné systémy, ako napríklad webové API.
+</p>
+
+<p>
+V našom príklade model rozhodne, že má zavolať funkciu
+<code>get_random_language</code>, my ju vykonáme a výsledok pošleme späť modelu,
+aby mohol dokončiť úlohu. Táto schopnosť premieňa LLM z pasívneho generátora
+textu na aktívneho agenta, ktorý môže interagovať s inými systémami a vykonávať
+akcie.
+</p>
+
+<pre>
+import random
+import os
+import sys
+from openai import OpenAI
+
+
+client = OpenAI(
+    api_key=os.getenv("DEEPSEEK_API_KEY"),
+    base_url="https://api.deepseek.com"
+)
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_random_language",
+            "description": "Returns a random language to translate into",
+            "parameters": {"type": "object", "properties": {}, "required": []}
+        }
+    }
+]
+
+messages = [
+    {
+        "role": "user",
+        "content": f"Pick a random language and translate this sentence into it: 'Hello, how are you?'"
+    }
+]
+
+
+def get_random_language():
+    languages = ["Spanish", "Czech", "Hungarian", "French",
+                 "German", "Italian", "Slovak", "Polish", "Russian"]
+    return random.choice(languages)
+
+
+function_registry = {"get_random_language": get_random_language}
+
+# First model call to trigger tool
+response = client.chat.completions.create(
+    model="deepseek-chat",
+    messages=messages,
+    tools=tools,
+    tool_choice="auto"
+)
+
+tool_calls = response.choices[0].message.tool_calls
+if not tool_calls:
+    print("No function called.")
+    sys.exit(1)
+
+# Extract tool call and execute it
+tool_call = tool_calls[0]
+function_name = tool_call.function.name
+tool_result = function_registry[function_name]()
+
+# Feed tool call and result back to model
+messages.append(response.choices[0].message)
+messages.append({
+    "role": "tool",
+    "tool_call_id": tool_call.id,
+    "content": f'"{tool_result}"'
+})
+
+# Final model call to complete the task
+final_response = client.chat.completions.create(
+    model="deepseek-chat",
+    messages=messages,
+    tools=tools
+)
+
+print("Language selected:", tool_result)
+print("Final translation response:")
+print(final_response.choices[0].message.content)
+</pre>
+
+<p>
+V kóde najprv definujeme schému funkcie v parametri <code>tools</code>. Táto
+schéma informuje model o dostupných nástrojoch, ich popisoch a očakávaných
+parametroch. Následne pošleme požiadavku modelu. Ak sa model rozhodne použiť
+funkciu, vráti odpoveď s <code>tool_calls</code>. My tento
+<code>tool_calls</code> objekt spracujeme, zavoláme príslušnú Python funkciu (v
+tomto prípade <code>get_random_language</code>) a výsledok pošleme späť modelu v
+ďalšom volaní.
+</p>
+
+<p>
+V tomto druhom volaní má model k dispozícii výsledok funkcie a
+môže ho použiť na sformulovanie finálnej odpovede. Tento dvojkrokový proces je
+nevyhnutný, pretože model sám o sebe nemôže spúšťať kód, iba generovať
+požiadavky na jeho spustenie.
+</p>
+
+
+<h2>Zisťovanie teploty mesta</h2>
+
+<p>
+Nasledujúci príklad predstavuje komplexnejšiu aplikáciu, ktorá ukazuje silu
+kombinácie modelov s externými API a funkciami. Táto aplikácia demonštruje
+niekoľko kľúčových konceptov programovania s AI:
+</p>
+
+<ul>
+<li><strong>Spracovanie prirodzeného jazyka (NLP)</strong> - model rozumie otázkam formulovaným v bežnej reči</li>
+<li><strong>Volanie nástrojov</strong> - model aktívne interaguje s externými službami</li>
+<li><strong>Integrácia API</strong> - kombinuje údaje z rôznych zdrojov (geokódovanie + počasie)</li>
+</ul>
+
+
+<pre>
+"""
+Temperature CLI App using OpenAI Tools API (DeepSeek)
+This app determines the temperature for any chosen city using Open-Meteo API
+"""
+
+import json
+import requests
+import os
+import sys
+import openai
+
+# Configure OpenAI client for DeepSeek
+deepseek_client = openai.OpenAI(
+    api_key=os.getenv("DEEPSEEK_API_KEY"),
+    base_url="https://api.deepseek.com/v1"
+)
+
+# Function to get coordinates for a city using Open-Meteo Geocoding API
+def geocode_city(city_name):
+    """Get latitude and longitude for a given city name."""
+
+    try:
+        url = "https://geocoding-api.open-meteo.com/v1/search"
+        params = {
+            "name": city_name,
+            "count": 1,
+            "language": "en",
+            "format": "json"
+        }
+
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+
+        data = response.json()
+        if "results" in data and len(data["results"]) > 0:
+            result = data["results"][0]
+            return {
+                "latitude": result["latitude"],
+                "longitude": result["longitude"],
+                "name": result.get("name", city_name),
+                "country": result.get("country", "")
+            }
+        else:
+            raise ValueError(f"City '{city_name}' not found")
+
+    except Exception as e:
+        raise Exception("Error getting temperature") from e
+
+# Function to get weather from Open-Meteo API
+def fetch_current_weather(latitude, longitude):
+    """Get current weather for given coordinates."""
+
+    try:
+        url = "https://api.open-meteo.com/v1/forecast"
+        params = {
+            "latitude": latitude,
+            "longitude": longitude,
+            "current_weather": "true",
+            "temperature_unit": "celsius"
+        }
+
+        response = requests.get(url, params=params)
+        response.raise_for_status()
+
+        data = response.json()
+        return {
+            "temperature": data["current_weather"]["temperature"],
+            "windspeed": data["current_weather"]["windspeed"],
+            "winddirection": data["current_weather"]["winddirection"],
+            "weathercode": data["current_weather"]["weathercode"],
+            "time": data["current_weather"]["time"]
+        }
+
+    except Exception as e:
+        raise Exception("Error getting temperature") from e
+
+# Define tool schema for Tools API
+WEATHER_TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "fetch_city_weather",
+            "description": "Get the current weather for a specific city. Extract the city name from natural language queries about weather, temperature, or climate.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "city_name": {
+                        "type": "string",
+                        "description": "The name of the city to get weather for. Extract this from natural language queries like 'What's the weather in Paris?' or 'How hot is it in Tokyo?'"
+                    }
+                },
+                "required": ["city_name"]
+            }
+        }
+    }
+]
+
+# Combined function that uses both geocoding and weather APIs
+def fetch_city_weather(city_name):
+    """Get weather for a city using city name."""
+
+    try:
+        # Get coordinates
+        city_info = geocode_city(city_name)
+
+        # Get weather
+        weather_data = fetch_current_weather(city_info["latitude"], city_info["longitude"])
+
+        # Combine results
+        return {
+            "city": city_info["name"],
+            "country": city_info["country"],
+            "coordinates": {
+                "latitude": city_info["latitude"],
+                "longitude": city_info["longitude"]
+            },
+            "temperature": weather_data["temperature"],
+            "windspeed": weather_data["windspeed"],
+            "winddirection": weather_data["winddirection"],
+            "weathercode": weather_data["weathercode"],
+            "time": weather_data["time"]
+        }
+
+    except Exception as e:
+        raise Exception("Error getting city weather") from e
+
+# Process natural language queries using Tools API
+def resolve_weather_query(query):
+    """Process natural language query using Tools API."""
+
+    try:
+        messages = [
+            {
+                "role": "system",
+                "content": (
+                    "You are a weather assistant. When the user asks about weather or temperature, "
+                    "identify the most likely city name and call the function fetch_city_weather "
+                    "with parameter {\"city_name\": \"...\"}. Do not answer directly."
+                ),
+            },
+            {"role": "user", "content": query},
+        ]
+
+        response = deepseek_client.chat.completions.create(
+            model="deepseek-chat",
+            messages=messages,
+            tools=WEATHER_TOOLS,
+            tool_choice={"type": "function", "function": {"name": "fetch_city_weather"}}
+        )
+
+        msg = response.choices[0].message
+
+        # Expect a tool call
+        if getattr(msg, "tool_calls", None):
+            for tc in msg.tool_calls:
+                if getattr(tc, "type", "") == "function" and getattr(tc, "function", None):
+                    fn = tc.function
+                    if fn.name == "fetch_city_weather":
+                        args = json.loads(fn.arguments or "{}")
+                        city_name = args.get("city_name")
+                        if city_name:
+                            return fetch_city_weather(city_name)
+
+        raise ValueError("No tool call produced or city name not found")
+
+    except Exception as e:
+        raise Exception("Error processing query") from e
+
+# Weather code descriptions
+WEATHER_CODE_DESCRIPTIONS = {
+    0: "Clear sky",
+    1: "Mainly clear",
+    2: "Partly cloudy",
+    3: "Overcast",
+    45: "Fog",
+    48: "Depositing rime fog",
+    51: "Light drizzle",
+    53: "Moderate drizzle",
+    55: "Dense drizzle",
+    61: "Slight rain",
+    63: "Moderate rain",
+    65: "Heavy rain",
+    71: "Slight snow fall",
+    73: "Moderate snow fall",
+    75: "Heavy snow fall",
+    77: "Snow grains",
+    80: "Slight rain showers",
+    81: "Moderate rain showers",
+    82: "Violent rain showers",
+    85: "Slight snow showers",
+    86: "Heavy snow showers",
+    95: "Thunderstorm",
+    96: "Thunderstorm with slight hail",
+    99: "Thunderstorm with heavy hail"
+}
+
+def describe_weather_code(code):
+    """Get weather description from weather code."""
+    return WEATHER_CODE_DESCRIPTIONS.get(code, "Unknown")
+
+def format_weather_report(data):
+    """Format the weather data for display."""
+    weather_desc = describe_weather_code(data["weathercode"])
+
+    output = f"""
+╔══════════════════════════════════════════════════════════════╗
+║                    WEATHER REPORT                            ║
+╠══════════════════════════════════════════════════════════════╣
+║ City: {data['city']}, {data['country']}
+║ Coordinates: {data['coordinates']['latitude']:.2f}°N, {data['coordinates']['longitude']:.2f}°E
+║ Time: {data['time']}
+║ Temperature: {data['temperature']}°C
+║ Weather: {weather_desc}
+║ Wind: {data['windspeed']} km/h at {data['winddirection']}°
+╚══════════════════════════════════════════════════════════════╝
+"""
+    return output
+
+def main():
+
+    print("Temperature CLI App with OpenAI DeepSeek (Tools API)")
+    print("=" * 50)
+
+    # Check if OpenAI API key is set
+    if not os.getenv("DEEPSEEK_API_KEY"):
+        print("Error: DEEPSEEK_API_KEY environment variable not set")
+        print("Please set your OpenAI API key: export DEEPSEEK_API_KEY='your-key-here'")
+        sys.exit(1)
+
+    # Get user input
+    if len(sys.argv) > 1:
+        query = " ".join(sys.argv[1:])
+    else:
+        query = input("Enter city name or weather query: ").strip()
+
+    if not query:
+        print("Error: No input provided")
+        sys.exit(1)
+
+    try:
+        print(f"\nProcessing query: '{query}'...")
+
+        # Process the query
+        result = resolve_weather_query(query)
+
+        # Display results
+        print(format_weather_report(result))
+
+    except Exception as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+</pre>
+
+<p>
+Funkcia <code>geocode_city</code> komunikuje s Open‑Meteo Geocoding API, ktoré
+bezplatne poskytuje geografické súradnice pre akékoľvek mesto na svete. Táto
+funkcia je nevyhnutná, keďže väčšina meteorologických API pracuje so súradnicami
+(zemepisná šírka a dĺžka), nie s názvami miest. Geokódovanie prekladá
+zrozumiteľné názvy ako „Bratislava“ alebo „New York“ na presné súradnice ako
+48.15°N, 17.11°E.
+</p>
+
+<p>
+Funkcia <code>fetch_current_weather</code> využíva Open‑Meteo Weather API, ktoré
+poskytuje aktuálne údaje o počasí vrátane teploty, rýchlosti a smeru vetra a
+kódu počasia. API je bezplatné, nevyžaduje registráciu a vracia dáta v
+štruktúrovanom formáte <code>current_weather</code>, čo uľahčuje ich
+spracovanie.
+</p>
+
+<p>
+Funkcia <code>fetch_city_weather</code> kombinuje oba predchádzajúce kroky do
+jedného celku. Najprv získa súradnice mesta pomocou geokódovania a následne na
+ich základe získa aktuálne počasie. Vracia objekt s kľúčovými informáciami:
+názov mesta, krajinu, súradnice, teplotu, vietor a kód počasia.
+</p>
+
+<p>
+Zoznam <code>tools</code> definuje dostupné nástroje pre model. Každý nástroj má
+názov, popis a schému parametrov. V našom prípade má funkcia
+<code>fetch_city_weather</code> jeden parameter
+<code>city_name</code>, ktorý vie model automaticky extrahovať z prirodzenej
+reči. Táto schéma je kľúčová pre správne fungovanie Tools API a generovanie
+<code>tool_calls</code>.
+</p>
+
+<p>
+Kľúčová funkcia <code>resolve_weather_query</code> používa moderné Tools API.
+V požiadavke registrujeme nástroje a pomocou <code>tool_choice</code> vynútime
+použitie funkcie <code>fetch_city_weather</code>. Aplikácia následne prečíta
+<code>tool_calls</code>, získa parameter <code>city_name</code> a vykoná volanie
+Python funkcie. 
+</p>
+
+<p>
+Ak model nevygeneruje <code>tool_call</code> alebo volanie zlyhá, aplikácia
+vypíše jednoduchú chybovú správu a skončí.
+</p>
+
+<p>
+Funkcia <code>format_weather_report</code> premení surové údaje z API
+na prehľadnú textovú správu s ASCII rámčekom. Funkcia
+<code>describe_weather_code</code> používa mapu
+<code>WEATHER_CODE_DESCRIPTIONS</code> na preklad numerických kódov počasia
+na zrozumiteľné popisy.
+</p>
+
+<pre>
+python test.py "Ake je pocasie v Bratislave?"
+Temperature CLI App with OpenAI DeepSeek (Tools API)
+==================================================
+
+Processing query: 'Ake je pocasie v Bratislave?'...
+
+╔══════════════════════════════════════════════════════════════╗
+║                    WEATHER REPORT                            ║
+╠══════════════════════════════════════════════════════════════╣
+║ City: Bratislava, Slovakia
+║ Coordinates: 48.15°N, 17.11°E
+║ Time: 2026-01-11T18:45
+║ Temperature: -4.0°C
+║ Weather: Partly cloudy
+║ Wind: 28.4 km/h at 303°
+╚══════════════════════════════════════════════════════════════╝
+</pre>
+
+<p>
+DeepSeek rozumie aj Slovenčine.
+</p>
+
+
+<p>
+Všetky príklady z článku a mnohé ďalšie sú dostupné na GitHub repozitári 
+<a href="https://github.com/janbodnar/Python-AI-Skolenie">github.com/janbodnar/Python-AI-Skolenie</a>.
+</p>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const pres = document.querySelectorAll('pre');
+    pres.forEach(pre => {
+        const button = document.createElement('button');
+        button.className = 'copy-btn';
+        button.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+        `;
+        button.title = 'Copy to clipboard';
+        button.addEventListener('click', function() {
+            const text = pre.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                // Optional: show feedback
+                const originalTitle = button.title;
+                button.title = 'Copied!';
+                setTimeout(() => {
+                    button.title = originalTitle;
+                }, 1000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        });
+        pre.appendChild(button);
+    });
+});
+</script>
+
+</body>
+</html>
