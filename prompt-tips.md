@@ -45,6 +45,25 @@ To write effective AI prompts:
 
 ---
 
+## Role Setting & Personas
+
+- **Define a clear role or persona**: Use "You are..." or "Act as..." to set the AI's identity
+- **Be specific about expertise**: Specify the level and type of expertise (e.g., "senior developer", "beginner-friendly tutor")
+- **Include relevant context for the role**: Give background information that fits the persona
+- **Use professional roles**: Teacher, consultant, critic, analyst, researcher, coach, mentor
+- **Try creative personas**: Historical figures, fictional characters, or industry experts
+- **Combine roles when useful**: "Act as both a code reviewer and security expert"
+- **Set role-appropriate constraints**: A teacher should explain simply; an expert can use technical jargon
+- **Maintain consistency**: Keep the same role throughout a conversation for coherent responses
+- **Use roles to shape output style**: Different roles naturally produce different tones and formats
+- **Examples of effective role prompts**:
+  - "You are an experienced Python developer reviewing code for best practices"
+  - "Act as a patient teacher explaining concepts to a beginner"
+  - "You are a technical writer creating clear documentation"
+  - "Act as a skeptical code reviewer looking for potential bugs"
+
+---
+
 ## Iteration & Refinement
 
 - Iterate and refine: Don't accept the first answer; make changes to your prompt for improvement
@@ -115,6 +134,3 @@ To write effective AI prompts:
 - **Exaggerate**: Use hyperbole to hype up the message.
 - **Downplay**: Make the tone more mild and reserved.
 - **Glamorize**: Make the content more appealing or glamorous.
-
-
-
