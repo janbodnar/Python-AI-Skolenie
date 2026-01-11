@@ -314,7 +314,7 @@ print(f"Analysis completed for {row_count} records from {csv_file_path}")
 ```
 
 Instead of waiting for a full response, the script opens a streaming responses  
-context with client.responses.stream(...) using the gpt-5-mini model, iterates over  
+context with `client.responses.stream` using the `gpt-5-mini` model, iterates over  
 streamed events, and prints text deltas in real time as the model generates them.  
 Finally, it prints a completion separator and a short message indicating the analysis  
 finished for the counted records.
