@@ -118,6 +118,12 @@ not recommended for production due to security concerns.
 
 ## Setting roles
 
+The **role setting** defines how each message should be interpreted by the model.    
+The `system` role is used to establish high-level instructions or behavior, guiding   
+the model to act as an expert in astronomy and programming. The `user` role represents  
+the actual question being asked. By separating instructions (`system`) from queries (`user`),  
+the model can more reliably follow constraints and produce relevant, context-aware answers. 
+
 ```python
 from openai import OpenAI
 
@@ -149,11 +155,7 @@ the model to process context in a dialogue-like format. Once the request is proc
 program retrieves and prints the model’s combined plain-text output using  
 the convenience property `response.output_text`.
 
-The **role setting** defines how each message should be interpreted by the model.    
-The `system` role is used to establish high-level instructions or behavior, guiding   
-the model to act as an expert in astronomy and programming. The `user` role represents  
-the actual question being asked. By separating instructions (`system`) from queries (`user`),  
-the model can more reliably follow constraints and produce relevant, context-aware answers.  
+ 
 
 
 
