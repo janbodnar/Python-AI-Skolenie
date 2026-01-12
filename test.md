@@ -1,5 +1,24 @@
 # Priklady
 
+
+## Prompt for extracting data
+
+```
+read data from the test.db SQLite database and its users table and write it into user_data4.csv file. We have this columns:
+
+CREATE TABLE users (
+id INTEGER PRIMARY KEY AUTOINCREMENT,
+first_name TEXT NOT NULL,
+last_name TEXT NOT NULL,
+email TEXT NOT NULL UNIQUE,
+occupation TEXT NOT NULL,
+salary REAL NOT NULL,
+created_at TEXT NOT NULL
+);
+
+use fetch_users_data.py file
+```
+
 ## Gradio example
 
 ```python
