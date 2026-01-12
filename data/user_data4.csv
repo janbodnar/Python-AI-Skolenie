@@ -1,0 +1,21 @@
+id,first_name,last_name,email,occupation,salary,created_at
+1,Jana,Nováková,jana.novakova@gmail.com,Software Engineer,3200.0,2026-01-01
+2,Peter,Kováč,peter.kovac@example.com,Data Analyst,2800.0,2026-01-02
+3,Lucia,Horváthová,lucia.horvathova@example.com,Project Manager,3500.0,2026-01-03
+4,Martin,Tóth,martin.toth@example.com,UX Designer,3000.0,2026-01-04
+5,Simona,Varga,simona.varga@example.com,QA Engineer,2700.0,2026-01-05
+6,Marek,Polák,marek.polak@example.com,DevOps Engineer,3400.0,2026-01-06
+7,Zuzana,Bartošová,zuzana.bartosova@example.com,HR Specialist,2500.0,2026-01-07
+8,Tomáš,Urban,tomas.urban@example.com,Business Analyst,2900.0,2026-01-08
+9,Barbora,Králová,barbora.kralova@simplemail.com,Marketing Manager,3300.0,2026-01-09
+10,Jozef,Šimek,jozef.simek@example.com,System Administrator,3100.0,2026-01-10
+11,Michaela,Dudová,michaela.dudova@example.com,Content Writer,2200.0,2026-01-11
+12,Richard,Bielik,richard.bielik@example.com,Product Owner,3600.0,2026-01-12
+13,Katarína,Farkašová,katarina.farkasova@gmail.com,Accountant,2600.0,2026-01-13
+14,Andrej,Gregor,andrej.gregor@example.com,Network Engineer,3200.0,2026-01-14
+15,Veronika,Kučerová,veronika.kucerova@gmail.com,Graphic Designer,2400.0,2026-01-15
+16,Patrik,Holub,patrik.holub@gmail.com,Mobile Developer,3300.0,2026-01-16
+17,Eva,Švecová,eva.svecova@example.com,Recruiter,2300.0,2026-01-17
+18,Roman,Marek,roman.marek@simplemail.com,Database Administrator,3400.0,2026-01-18
+19,Monika,Blažeková,monika.blazekova@example.com,Scrum Master,3100.0,2026-01-19
+20,Filip,Klein,filip.klein@example.com,Web Developer,3000.0,2026-01-20
