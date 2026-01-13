@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 import os 
 import psycopg 
 
-# pip instsall python-dotenv 
+# pip install python-dotenv 
 
 load_dotenv()
 host = os.getenv("DB_HOST")
