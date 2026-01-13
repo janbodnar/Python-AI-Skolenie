@@ -1,5 +1,8 @@
 # Priklady
 
+## Install PostgreSQL driver
+
+`pip install "psycopg[binary,pool]"`
 
 ## PandasAI with OpenRouter
 
