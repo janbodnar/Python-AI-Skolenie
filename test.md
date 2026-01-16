@@ -1,3 +1,9 @@
+
+```
+Imagine I am a total beginner in Python, generate an introductory tutorial for me with lots of Python code examples
+```
+
+
 # Priklady
 
 The `config.yaml` file: 
