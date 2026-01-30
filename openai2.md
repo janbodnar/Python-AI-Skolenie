@@ -151,7 +151,9 @@ info = json.loads(response.choices[0].message.content)
 print("Extracted info:", info["people"])
 ```
 
-This example demonstrates using Pydantic models to define structured output for solving math equations step-by-step. It shows how to define nested models (`Step` and `MathResponse`) and use them to parse the model's response, ensuring type safety and structured data extraction without requiring `response_format` with JSON schema.
+This example demonstrates using Pydantic models to define structured output for solving math equations step-by-step.  
+It shows how to define nested models (`Step` and `MathResponse`) and use them to parse the model's response, ensuring  
+type safety and structured data extraction without requiring `response_format` with JSON schema.
 
 ```python
 from openai import OpenAI
@@ -315,7 +317,7 @@ from rich.table import Table
 from openai import OpenAI
 
 
-DEFAULT_MODEL = "openrouter/sonoma-sky-alpha"
+DEFAULT_MODEL = "gpt-4.1-mini"
 
 CATEGORIES = ["billing", "technical", "account", "shipping", "other"]
 
@@ -338,18 +340,6 @@ def parse_args():
     parser.add_argument("--model", type=str, default=DEFAULT_MODEL,
                         help=f"LLM model (default: {DEFAULT_MODEL})")
     return parser.parse_args()
-
-
-def get_client():
-    api_key = os.environ.get("OPENROUTER_API_KEY")
-    if not api_key:
-        print("Missing OPENROUTER_API_KEY environment variable.")
-        sys.exit(1)
-    client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=api_key,
-    )
-    return client
 
 
 def classify_tickets(client, model, tickets):
@@ -375,15 +365,23 @@ def classify_tickets(client, model, tickets):
             "json_schema": {
                 "name": "ticket_classifications",
                 "schema": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "ticket": {"type": "string"},
-                            "category": {"type": "string"}
-                        },
-                        "required": ["ticket", "category"]
-                    }
+                    "type": "object",
+                    "properties": {
+                        "classifications": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "ticket": {"type": "string"},
+                                    "category": {"type": "string"}
+                                },
+                                "required": ["ticket", "category"],
+                                "additionalProperties": False
+                            }
+                        }
+                    },
+                    "required": ["classifications"],
+                    "additionalProperties": False
                 },
                 "strict": True
             }
@@ -391,12 +389,12 @@ def classify_tickets(client, model, tickets):
     )
 
     import json
-    return json.loads(response.choices[0].message.content)
+    return json.loads(response.choices[0].message.content)["classifications"]
 
 
 def main():
     args = parse_args()
-    client = get_client()
+    client = OpenAI()
 
     print("Task: Classify support tickets into one of", CATEGORIES)
     print("\nTickets:")
