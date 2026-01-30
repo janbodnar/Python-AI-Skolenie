@@ -266,6 +266,25 @@ for key, value in slovak_movie_reviews.items():
 ```
 
 
+## Common temerature and top_p values
+
+Here’s a table with commonly used `temperature` and `top_p` values for different tasks with GPT models:
+
+| Task Type         | temperature | top_p | Description                                      |
+|-------------------|-------------|-------|--------------------------------------------------|
+| Creative Writing  | 0.7–1.0     | 0.9–1 | More randomness and diversity for creativity      |
+| Factual QA        | 0.0–0.3     | 0.8–1 | Deterministic, focused, less risk of hallucination|
+| Summarization     | 0.3–0.7     | 0.8–1 | Balanced, concise, and relevant output           |
+| Code Generation   | 0.2–0.5     | 0.8–1 | Accurate, less creative, more reliable code       |
+| Brainstorming     | 0.8–1.0     | 0.9–1 | Highly creative, many ideas, less repetition      |
+| Translation       | 0.3–0.7     | 0.8–1 | Balanced, accurate, and fluent translations       |
+
+For creative writing, typical values are:
+- `temperature = 0.7–1.0`
+- `top_p = 0.9–1.0`
+
+
+
 ## Classification
 
 This section demonstrates a small Python script that classifies multiple short customer  
