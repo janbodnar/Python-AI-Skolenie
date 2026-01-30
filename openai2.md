@@ -99,10 +99,7 @@ from openai import OpenAI
 import os
 import json
 
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=os.environ.get("OPENROUTER_API_KEY"),
-)
+client = OpenAI()
 
 text = """
 Extract information about people mentioned in the following text. For each
@@ -113,7 +110,7 @@ Francisco. She is 28 years old and loves painting and traveling."""
 
 response = client.chat.completions.create(
     extra_body={},
-    model="mistralai/mistral-small-3.2-24b-instruct:free",  # Model supporting structured outputs
+    model="gpt-5",  # Model supporting structured outputs
     messages=[
         {
             "role": "user",
@@ -125,17 +122,24 @@ response = client.chat.completions.create(
         "json_schema": {
             "name": "people_info",
             "schema": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "name": {"type": "string"},
-                        "age": {"type": "integer"},
-                        "city": {"type": "string"}
-                    },
-                    "required": ["name", "age", "city"],
-                    "additionalProperties": False
-                }
+                "type": "object",
+                "properties": {
+                    "people": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "name": {"type": "string"},
+                                "age": {"type": "integer"},
+                                "city": {"type": "string"}
+                            },
+                            "required": ["name", "age", "city"],
+                            "additionalProperties": False
+                        }
+                    }
+                },
+                "required": ["people"],
+                "additionalProperties": False
             },
             "strict": True
         }
@@ -144,7 +148,7 @@ response = client.chat.completions.create(
 
 # Parse the JSON response
 info = json.loads(response.choices[0].message.content)
-print("Extracted info:", info)
+print("Extracted info:", info["people"])
 ```
 
 This example demonstrates using Pydantic models to define structured output for solving math equations step-by-step. It shows how to define nested models (`Step` and `MathResponse`) and use them to parse the model's response, ensuring type safety and structured data extraction without requiring `response_format` with JSON schema.
