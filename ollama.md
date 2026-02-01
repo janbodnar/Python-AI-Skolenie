@@ -421,6 +421,39 @@ Temperature controls randomness in the output. Higher values (e.g., 0.9) produce
 more creative responses, while lower values (e.g., 0.2) produce more focused and  
 deterministic outputs. The `max_tokens` parameter limits the response length.  
 
+## Structured output
+
+Structured Output is a mechanism that forces an AI model to provide responses  
+in a specific, predictable format—typically JSON—rather than plain conversational text.
+
+It ensures the output adheres to a strict "schema" (a blueprint of keys and data types),  
+making the data immediately readable by computers for automation, databases, or app integration.
+
+```python
+from ollama import chat
+
+
+text = """
+Extract information about people mentioned in the following text. For each
+person, provide their name, age, and city of residence in a structured JSON
+format. John Doe is a software engineer living in New York. He
+is 30 years old and enjoys hiking and photography. Jane Smith is a graphic
+designer based in San Francisco. She is 28 years old and loves painting and
+traveling."""
+
+response = chat(
+  model='ministral-3:3b',
+  messages=[{'role': 'user', 'content': text}],
+  format='json'
+)
+
+print(response.message.content)
+```
+
+This code demonstrates how to use Structured Output with a local LLM (via Ollama).  
+Instead of getting a rambling paragraph, the format='json' parameter forces the  
+model to return data that your code can immediately parse and use.
+
 ### List Available Models
 
 You can query the available models using the OpenAI client's models endpoint.  
@@ -444,33 +477,58 @@ This is equivalent to running `ollama list` from the command line. You can use
 this to dynamically select models in your application based on what is  
 currently installed.  
 
-## Data analysis with Phi4-mini
+## Grounding
 
-The phi4-mini model makes mistakes. It is not ready yet. But the progress is visible. 
+Grounding is the ability to use current data from web search by models to ensure  
+data validity and correctness. 
 
 ```python
-from openai import OpenAI
+import ollama
 
-client = OpenAI(
-    base_url="http://localhost:11434/v1",
-    api_key="ollama"
-)
+response = ollama.web_search("What are Vedas?", max_results=6)
 
-file_name = 'users2.csv'
+for result in response.results:
+    print('--- Search Result ---')
+    print(f"Title: {result.title}")
+    print(f"URL: {result.url}")
+    print(f"Content: {result.content}\n")
+    print("---------------\n")
 
-data = open(file_name, 'r', encoding='utf-8').read()
+print(f"Total Results: {len(response.results)}")
+```
 
-prompt = f"""Generate a report containing minimum,maximum,sum, and average of salaries 
-from the CSV data provided.\n\nData:\n{data}"""
+```python
+from ollama import web_fetch
 
-chat_completion = client.chat.completions.create(
-    model='phi4-mini',
-    messages=[
-        {"role": "user", "content": prompt}
-    ]
-)
+result = web_fetch('https://docs.ollama.com/api/introduction')
+print(result.content)
+```
 
-print(chat_completion.choices[0].message.content)
+
+## Data analysis 
+
+The `ministral-3:3b` model makes mistakes. It is not ready yet. But the progress is visible. 
+
+```python
+import ollama
+
+file_name = 'users.csv'
+
+with open(file_name, 'r', encoding='utf-8') as file:
+    data = file.read()
+
+    prompt = f"""Generate a report containing minimum, maximum,sum, and average of salaries 
+    from the CSV data provided. Please provide the results in JSON format.\n\nData:\n{data}"""
+
+    response = ollama.chat(
+        model='ministral-3:3b',
+        format='json',
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
+    )
+
+    print(response['message']['content'])
 ```
 
 
