@@ -13,6 +13,62 @@ Tento priklad iteruje vnorene zoznamy
 - Provide follow up questions
 - Suggest defaults
 
+
+Think of an AI prompt like a recipe or a brief for a freelancer. The more specific the constraints,  
+the less likely you are to get a "hallucinated" or generic mess. 
+
+To get the best results, a high-quality prompt usually consists of these five basic parameters:
+
+### 1. The Persona (Who are you?)
+
+Assigning a role sets the tone, vocabulary, and expertise level.
+
+* *Example:* "Act as a senior software engineer" vs. "Act as a five-year-old."
+
+### 2. The Task (What do you want?)
+
+Be direct and use action verbs. Clearly define the goal.
+
+* *Example:* "Summarize this article," "Write a Python script," or "Brainstorm five marketing slogans."
+
+### 3. Context & Constraints (What are the rules?)
+
+This is where you provide the "meat." Give the AI the background info it needs and set boundaries on what it *cannot* do.
+
+* *Example:* "Use a professional tone," "Keep it under 200 words," or "Do not use technical jargon."
+
+### 4. Format (How should it look?)
+
+Tell the AI exactly how to structure the output so you don't have to reformat it yourself.
+
+* *Example:* A bulleted list, a Markdown table, a JSON object, or a three-paragraph email.
+
+### 5. Exemplars (Show, don't just tell)
+
+Providing a single example (often called "one-shot prompting") dramatically improves accuracy.
+
+* *Example:* "Format the data like this: Name: [Name], Age: [Age]."
+
+
+### The "Perfect Prompt" Framework
+
+If you combine these, your prompt structure looks like this:
+
+| Parameter | Application |
+| --- | --- |
+| **Persona** | You are an expert career coach. |
+| **Task** | Rewrite my resume bullet points to be more impact-oriented. |
+| **Context** | I am applying for a Project Manager role at a tech startup. |
+| **Constraint** | Use the "Action Verb + Task + Result" formula. |
+| **Format** | Present the changes in a "Before vs. After" table. |
+
+> **Quick Tip:** If the AI's first response is "meh," don't start over. Just give it a follow-up
+> instruction like, "Make it punchier" or "Add more data points."
+
+
+
+
+
 ## Major Human Revolutions
 
 The following table presents a chronological overview of the major revolutions that   
