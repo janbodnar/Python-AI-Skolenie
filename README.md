@@ -2,10 +2,6 @@
 
 Python AI Skolenie, kontakt jan.bodnar@gmail.com
 
-
-
-Tento priklad iteruje vnorene zoznamy
-
 <img src="neutwork.jpeg" alt="Neural Network Image" style="width:50%;" />
 
 ## Prompts
