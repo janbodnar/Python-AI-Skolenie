@@ -116,54 +116,79 @@ of innovation from prehistory to the present.
 
 
 ```mermaid
-flowchart LR
+flowchart TB
 
-A["AI CONTEXT
-Everything the model uses"] --> B1["1. Prompt Context"]
-A --> B2["2. Agent Context"]
-A --> B3["3. Memory Context"]
-A --> B4["4. External Context"]
-A --> B5["5. Environment Context"]
-A --> B6["6. Implicit Context"]
+%% ---------------------------------------------------------
+%% Root Node
+%% ---------------------------------------------------------
+A["AI CONTEXT\n(Everything the model uses)"]:::core
 
-%% Prompt Context
-B1 --> C1["System / Developer Instructions"]
-B1 --> C2["User Messages"]
-B1 --> C3["Assistant Messages"]
+%% ---------------------------------------------------------
+%% High-level Context Types (forced vertical grouping)
+%% ---------------------------------------------------------
+A --> B1
+A --> B2
+A --> B3
+A --> B4
+A --> B5
+A --> B6
 
-%% Agent Context
-B2 --> D1["Tools / Skills / Functions"]
-B2 --> D2["Agent Config Files
-AGENTS.md, YAML"]
-B2 --> D3["Execution State
-plans, scratchpads"]
+:::group
+B1["Prompt Context"]:::layer
+B2["Agent Context"]:::layer
+B3["Memory Context"]:::layer
+B4["External Context"]:::layer
+B5["Environment Context"]:::layer
+B6["Implicit Context"]:::layer
+:::
 
-%% Memory Context
-B3 --> E1["Short‑Term Memory
-chat history"]
-B3 --> E2["Long‑Term Memory
-preferences, facts"]
-B3 --> E3["Semantic Memory
-RAG embeddings"]
+%% ---------------------------------------------------------
+%% Prompt Context Components
+%% ---------------------------------------------------------
+B1 --> C1["System / Developer Instructions"]:::comp
+B1 --> C2["User Messages"]:::comp
+B1 --> C3["Assistant Messages"]:::comp
 
-%% External Context
-B4 --> F1["Appended Files
-PDFs, code, docs"]
-B4 --> F2["URLs / Web Content"]
-B4 --> F3["Databases / Knowledge Graphs"]
+%% ---------------------------------------------------------
+%% Agent Context Components
+%% ---------------------------------------------------------
+B2 --> D1["Tools / Skills / Functions"]:::comp
+B2 --> D2["Agent Config Files\n(AGENTS.md, YAML)"]:::comp
+B2 --> D3["Execution State\n(plans, scratchpads)"]:::comp
 
-%% Environment Context
-B5 --> G1["Runtime Environment
-browser, OS"]
-B5 --> G2["User Metadata
-location, time"]
-B5 --> G3["Session Metadata
-model settings"]
+%% ---------------------------------------------------------
+%% Memory Context Components
+%% ---------------------------------------------------------
+B3 --> E1["Short‑Term Memory\n(chat history)"]:::comp
+B3 --> E2["Long‑Term Memory\n(preferences, facts)"]:::comp
+B3 --> E3["Semantic Memory\n(RAG embeddings)"]:::comp
 
-%% Implicit Context
-B6 --> H1["World Knowledge
-pretraining"]
-B6 --> H2["Statistical Priors"]
-B6 --> H3["Inferred Intent"]
+%% ---------------------------------------------------------
+%% External Context Components
+%% ---------------------------------------------------------
+B4 --> F1["Appended Files\n(PDFs, code, docs)"]:::comp
+B4 --> F2["URLs / Web Content"]:::comp
+B4 --> F3["Databases / Knowledge Graphs"]:::comp
+
+%% ---------------------------------------------------------
+%% Environment Context Components
+%% ---------------------------------------------------------
+B5 --> G1["Runtime Environment\n(browser, OS)"]:::comp
+B5 --> G2["User Metadata\n(location, time)"]:::comp
+B5 --> G3["Session Metadata\n(model settings)"]:::comp
+
+%% ---------------------------------------------------------
+%% Implicit Context Components
+%% ---------------------------------------------------------
+B6 --> H1["World Knowledge\n(pretraining)"]:::comp
+B6 --> H2["Statistical Priors"]:::comp
+B6 --> H3["Inferred Intent"]:::comp
+
+%% ---------------------------------------------------------
+%% Styling
+%% ---------------------------------------------------------
+classDef core fill:#1f4b99,stroke:#0d2a63,stroke-width:2px,color:#fff;
+classDef layer fill:#e8eef9,stroke:#1f4b99,stroke-width:1.5px,color:#1f2a44;
+classDef comp fill:#ffffff,stroke:#7a8ba3,stroke-width:1px,color:#1f2a44;
 ```
 
