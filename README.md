@@ -132,26 +132,26 @@ B1 --> C3[Assistant Messages]
 
 %% Agent Context
 B2 --> D1[Tools / Skills / Functions]
-B2 --> D2[Agent Config Files<br/>(AGENTS.md, YAML)]
-B2 --> D3[Execution State<br/>(plans, scratchpads)]
+B2 --> D2[Agent Config Files<br>(AGENTS.md, YAML)]
+B2 --> D3[Execution State<br>(plans, scratchpads)]
 
 %% Memory Context
-B3 --> E1[Short‑Term Memory<br/>(chat history)]
-B3 --> E2[Long‑Term Memory<br/>(preferences, facts)]
-B3 --> E3[Semantic Memory<br/>(RAG embeddings)]
+B3 --> E1[Short‑Term Memory<br>(chat history)]
+B3 --> E2[Long‑Term Memory<br>(preferences, facts)]
+B3 --> E3[Semantic Memory<br>(RAG embeddings)]
 
 %% External Context
-B4 --> F1[Appended Files<br/>(PDFs, code, docs)]
+B4 --> F1[Appended Files<br>(PDFs, code, docs)]
 B4 --> F2[URLs / Web Content]
 B4 --> F3[Databases / Knowledge Graphs]
 
 %% Environment Context
-B5 --> G1[Runtime Environment<br/>(browser, OS)]
-B5 --> G2[User Metadata<br/>(location, time)]
-B5 --> G3[Session Metadata<br/>(model settings)]
+B5 --> G1[Runtime Environment<br>(browser, OS)]
+B5 --> G2[User Metadata<br>(location, time)]
+B5 --> G3[Session Metadata<br>(model settings)]
 
 %% Implicit Context
-B6 --> H1[World Knowledge<br/>(pretraining)]
+B6 --> H1[World Knowledge<br>(pretraining)]
 B6 --> H2[Statistical Priors]
 B6 --> H3[Inferred Intent]
 ```
