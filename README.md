@@ -115,7 +115,7 @@ of innovation from prehistory to the present.
 | **Crush**       | Glamorous, session-based CLI agent with LSP support and multi-model flexibility. | [Crush](https://github.com/charmbracelet/crush) |
 
 
-
+```mermaid
 flowchart TD
 
 A[AI CONTEXT<br/>(Everything the model uses)] --> B1[1. Prompt Context]
@@ -154,4 +154,5 @@ B5 --> G3[Session Metadata<br/>(model settings)]
 B6 --> H1[World Knowledge<br/>(pretraining)]
 B6 --> H2[Statistical Priors]
 B6 --> H3[Inferred Intent]
+```
 
