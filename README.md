@@ -118,7 +118,7 @@ of innovation from prehistory to the present.
 ```mermaid
 flowchart TD
 
-A[AI CONTEXT<br/>(Everything the model uses)] --> B1[1. Prompt Context]
+A[AI CONTEXT<br>(Everything the model uses)] --> B1[1. Prompt Context]
 A --> B2[2. Agent Context]
 A --> B3[3. Memory Context]
 A --> B4[4. External Context]
