@@ -116,7 +116,7 @@ of innovation from prehistory to the present.
 
 
 ```mermaid
-flowchart TD
+flowchart LR
 
 A["AI CONTEXT
 Everything the model uses"] --> B1["1. Prompt Context"]
