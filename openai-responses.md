@@ -377,10 +377,5 @@ $ uv run python data_analysis.py
 
 Model vráti odpoveď vo formáte JSON obsahujúcu požadované štatistiky o platoch. V prípade sumy a priemeru platov sa model pomýlil. Na takúto úlohu je potrebné teda použiť väčší model.
 
-Všetky príklady z článku a mnohé ďalšie sú dostupné na GitHub repozitári [github.com/janbodnar/Python-AI-Skolenie](https://github.com/janbodnar/Python-AI-Skolenie).
 
-V nasledujúcich článkoch by som sa chcel venovať pokročilejším témam, ako je tvorba agentov, fine tuning modelov, tvorba RAG systému, MCP serverov, alebo hlbšej práci s dokumentmi.
 
----
-
-> **Poznámka:** Pôvodný HTML obsah obsahoval JavaScript pre tlačidlá "Copy to clipboard" a CSS štýly pre tmavý/svetlý režim. Tieto interaktívne a vizuálne prvky neboli do Markdown formátu prevedené, keďže Markdown nepodporuje priame vkladanie JavaScriptu ani komplexného CSS. Pre zachovanie týchto funkcií by bolo potrebné použiť rozšírený Markdown renderer alebo pridať tieto prvky manuálne po konverzii.
