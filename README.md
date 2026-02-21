@@ -1,14 +1,16 @@
 # Python-AI-Skolenie
 
-Python AI Skolenie, kontakt jan.bodnar@gmail.com
+Kurz *Úvod do veľkých jazykových modelov a AI v dátovej analýze*, kontakt jan.bodnar@gmail.com
 
-urz je určený najmä pre dátových analytikov, vývojárov, študentov technických odborov  
+Kurz je určený najmä pre dátových analytikov, vývojárov, študentov technických odborov  
 a všetkých, ktorí chcú prakticky využívať AI pri každodennej práci s dátami. Po absolvovaní  
 kurzu budete schopní rýchlejšie a presnejšie analyzovať dáta, vyvíjať riešenia na báze  
 umelej inteligencie a vytvárať prehľadné vizualizácie a reporty s minimálnym množstvom kódu. 
 
+Kurz predpokladá znalosť základov jazyka Python
 
-## Osnovy: Úvod do veľkých jazykových modelov a AI v dátovej analýze
+
+## Osnovy
 
 ### 1. Úvod do veľkých jazykových modelov (LLM)
 - Čo sú LLM a prečo sú dôležité
