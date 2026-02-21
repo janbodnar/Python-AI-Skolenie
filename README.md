@@ -2,6 +2,54 @@
 
 Python AI Skolenie, kontakt jan.bodnar@gmail.com
 
+urz je určený najmä pre dátových analytikov, vývojárov, študentov technických odborov  
+a všetkých, ktorí chcú prakticky využívať AI pri každodennej práci s dátami. Po absolvovaní  
+kurzu budete schopní rýchlejšie a presnejšie analyzovať dáta, vyvíjať riešenia na báze  
+umelej inteligencie a vytvárať prehľadné vizualizácie a reporty s minimálnym množstvom kódu. 
+
+
+## Osnovy: Úvod do veľkých jazykových modelov a AI v dátovej analýze
+
+### 1. Úvod do veľkých jazykových modelov (LLM)
+- Čo sú LLM a prečo sú dôležité
+- Prehľad populárnych modelov (napr. GPT — OpenAI, Gemini — Google)
+- Typy úloh: generovanie textu, sumarizácia, odpovedanie na otázky (Q&A)
+- Základy prompt engineeringu
+
+### 2. Úvod do dátovej analýzy s AI
+- Koncept a výhody automatizovanej dátovej analýzy s podporou AI
+- Prehľad moderných nástrojov a platforiem integrujúcich AI
+- Etické aspekty, riziká a výzvy pri používaní AI v analýze dát
+
+### 3. Príprava a asistovaná analýza dát
+- Načítanie, čistenie a predspracovanie dát s knižnicou Pandas
+- Interaktívne čistenie a transformácia: Data Wrangler vo VS Code
+- Inteligentná analýza dokumentov: NotebookLM
+- Google AI Studio: multimodálne úlohy a pokročilý prompt engineering
+
+### 4. Jupyter Notebooks a PandasAI
+- Práca v Jupyter Notebooks pre interaktívnu analýzu
+- Inštalácia a základné použitie knižnice PandasAI
+- Generovanie kódu a odpovedí priamo v Pandas DataFrame
+- Praktické príklady: sumarizácia, filtrovanie, transformácie bez zložitého kódu
+
+### 5. Použitie AI asistentov pre vizualizáciu
+- Automatické generovanie a optimalizácia kódu pre vizualizácie
+- Interaktívne a statické vizualizácie: Matplotlib, Seaborn
+- Ako zadávať inštrukcie AI asistentom pre vizualizačné úlohy
+
+### 6. SQL a databázy s podporou AI
+- Pripojenie k relačným databázam (napr. PostgreSQL)
+- Práca s dátami vo VS Code pomocou pluginov
+- Generovanie, optimalizácia a interpretácia SQL dotazov s pomocou AI
+
+### 7. Automatizácia reportingu a prezentácia výsledkov
+- Tvorba jednoduchých interaktívnych dashboardov (napr. Streamlit)
+- Automatické generovanie textových zhrnutí a analytických postrehov pomocou LLM
+- Tipy na efektívnu komunikáciu a prezentáciu výsledkov
+
+
+
 <img src="neutwork.jpeg" alt="Neural Network Image" style="width:50%;" />
 
 ## Prompts
