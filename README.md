@@ -112,35 +112,6 @@ If you combine these, your prompt structure looks like this:
 > instruction like, "Make it punchier" or "Add more data points."
 
 
-
-
-
-## Major Human Revolutions
-
-The following table presents a chronological overview of the major revolutions that   
-have shaped human history, highlighting the pivotal shifts in cognition, technology,  
-science, and society that transformed how people live, work, and understand the world.  
-Each entry captures a moment when new capabilities or ways of thinking unlocked dramatic  
-changes in culture, economics, and human potential, illustrating the accelerating pace  
-of innovation from prehistory to the present.  
-
-| Revolution | Approx. Date | Summary |
-|-----------|--------------|---------|
-| **Cognitive Revolution** | ~70,000 BCE | Emergence of complex language, symbolic thought, and shared myths, enabling large‑scale cooperation, rapid innovation, and the cultural foundations of human societies. |
-| **Agricultural Revolution** | ~10,000 BCE | Transition from nomadic foraging to settled farming, creating food surpluses, population growth, labor specialization, and the rise of villages and early cities. |
-| **Bronze Age Technological Revolution** | ~3300 BCE | Development of bronze tools and weapons; advances in writing, metallurgy, and transportation that expanded trade and supported early complex societies. |
-| **Iron Age Technological Revolution** | ~1200–500 BCE | Widespread use of iron tools and weapons, boosting agricultural productivity, infrastructure building, and the growth of larger interconnected civilizations. |
-| **Printing Revolution** | 15th century | Gutenberg’s movable‑type press enabled mass book production, lowering the cost of knowledge and accelerating literacy, science, religion, and cultural exchange. |
-| **Scientific Revolution** | 16th–17th centuries | Rise of empirical observation, experimentation, and mathematical reasoning, leading to major breakthroughs in physics, astronomy, biology, and chemistry. |
-| **Industrial Revolution** | 18th–19th centuries | Mechanization, steam power, and factory production transformed economies, increased productivity, drove urbanization, and reshaped global trade and labor. |
-| **Chemical Revolution** | Late 18th century | Establishment of modern chemistry—elements, reactions, conservation of mass—enabling advances in medicine, materials, agriculture, and industry. |
-| **Electrical Revolution** | 19th–early 20th centuries | Harnessing electricity for lighting, communication, and power, enabling telegraphs, telephones, electric motors, and modern infrastructure. |
-| **Digital Revolution** | Mid‑20th century to present | Computers, semiconductors, and the internet reshaped information, communication, work, and industry through automation and global connectivity. |
-| **Biotechnology Revolution** | Late 20th century to present | Advances in genetics, DNA sequencing, and gene editing (e.g., CRISPR) enabling precise biological manipulation for medicine, agriculture, and synthetic biology. |
-| **AI Revolution** | 21st century to present | Rapid progress in machine learning and large‑scale computation enabling systems that perform cognitive tasks, analyze data, generate content, and automate knowledge work. |
-
-
-
 ## Top Terminal-Based AI CLI Tools (Actively Maintained)
 
 | Tool Name       | Description                                                                 | GitHub Link |
@@ -165,80 +136,4 @@ of innovation from prehistory to the present.
 | **Crush**       | Glamorous, session-based CLI agent with LSP support and multi-model flexibility. | [Crush](https://github.com/charmbracelet/crush) |
 
 
-```mermaid
-flowchart TB
-
-%% ---------------------------------------------------------
-%% Root Node
-%% ---------------------------------------------------------
-A["AI CONTEXT\n(Everything the model uses)"]:::core
-
-%% ---------------------------------------------------------
-%% High-level Context Types (forced vertical grouping)
-%% ---------------------------------------------------------
-A --> B1
-A --> B2
-A --> B3
-A --> B4
-A --> B5
-A --> B6
-
-:::group
-B1["Prompt Context"]:::layer
-B2["Agent Context"]:::layer
-B3["Memory Context"]:::layer
-B4["External Context"]:::layer
-B5["Environment Context"]:::layer
-B6["Implicit Context"]:::layer
-:::
-
-%% ---------------------------------------------------------
-%% Prompt Context Components
-%% ---------------------------------------------------------
-B1 --> C1["System / Developer Instructions"]:::comp
-B1 --> C2["User Messages"]:::comp
-B1 --> C3["Assistant Messages"]:::comp
-
-%% ---------------------------------------------------------
-%% Agent Context Components
-%% ---------------------------------------------------------
-B2 --> D1["Tools / Skills / Functions"]:::comp
-B2 --> D2["Agent Config Files\n(AGENTS.md, YAML)"]:::comp
-B2 --> D3["Execution State\n(plans, scratchpads)"]:::comp
-
-%% ---------------------------------------------------------
-%% Memory Context Components
-%% ---------------------------------------------------------
-B3 --> E1["Short‑Term Memory\n(chat history)"]:::comp
-B3 --> E2["Long‑Term Memory\n(preferences, facts)"]:::comp
-B3 --> E3["Semantic Memory\n(RAG embeddings)"]:::comp
-
-%% ---------------------------------------------------------
-%% External Context Components
-%% ---------------------------------------------------------
-B4 --> F1["Appended Files\n(PDFs, code, docs)"]:::comp
-B4 --> F2["URLs / Web Content"]:::comp
-B4 --> F3["Databases / Knowledge Graphs"]:::comp
-
-%% ---------------------------------------------------------
-%% Environment Context Components
-%% ---------------------------------------------------------
-B5 --> G1["Runtime Environment\n(browser, OS)"]:::comp
-B5 --> G2["User Metadata\n(location, time)"]:::comp
-B5 --> G3["Session Metadata\n(model settings)"]:::comp
-
-%% ---------------------------------------------------------
-%% Implicit Context Components
-%% ---------------------------------------------------------
-B6 --> H1["World Knowledge\n(pretraining)"]:::comp
-B6 --> H2["Statistical Priors"]:::comp
-B6 --> H3["Inferred Intent"]:::comp
-
-%% ---------------------------------------------------------
-%% Styling
-%% ---------------------------------------------------------
-classDef core fill:#1f4b99,stroke:#0d2a63,stroke-width:2px,color:#fff;
-classDef layer fill:#e8eef9,stroke:#1f4b99,stroke-width:1.5px,color:#1f2a44;
-classDef comp fill:#ffffff,stroke:#7a8ba3,stroke-width:1px,color:#1f2a44;
-```
 
