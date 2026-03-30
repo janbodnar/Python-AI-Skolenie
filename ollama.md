@@ -1,10 +1,8 @@
 # Ollama – Spúšťanie veľkých jazykových modelov lokálne
 
-## Úvod do Ollamy
-
 **Ollama** je open-source nástroj navrhnutý na spúšťanie, správu a interakciu s veľkými  
 jazykovými modelmi (LLM) priamo na vašom počítači. Umožňuje vývojárom, výskumníkom aj  
-hobby nadšencom nasadzovať výkonné AI modely bez závislosti na cloudových službách, čím 
+hobby nadšencom nasadzovať výkonné AI modely bez závislosti na cloudových službách, čím  
 získavajú úplnú kontrolu nad súkromím dát a ich využitím.
 
 Ollama zjednodušuje komplexnosť spúšťania LLM tým, že automaticky vybavuje sťahovanie modelov,  
