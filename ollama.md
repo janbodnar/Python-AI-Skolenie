@@ -1,4 +1,4 @@
-# Kapitola: Ollama – Spúšťanie veľkých jazykových modelov lokálne
+# Ollama – Spúšťanie veľkých jazykových modelov lokálne
 
 ## Úvod do Ollamy
 
