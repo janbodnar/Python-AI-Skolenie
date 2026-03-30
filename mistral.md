@@ -1,4 +1,4 @@
-# Kapitola: Mistral AI – Európska odpoveď na dominanciu amerického AI  
+# Mistral AI – Európska odpoveď na dominanciu amerického AI  
 
 V ére, keď umelú inteligenciu ovládajú americké giganty ako OpenAI, Google  
 a Anthropic, sa z Paríža zrodila spoločnosť, ktorá dokázala konkurovať  
@@ -421,7 +421,6 @@ if response.choices[0].message.tool_calls:
 | **Multimodálne úlohy s obrázkami** | Pixtral Large | Silné vizuálne schopnosti |  
 | **Maximálny výkon za každú cenu** | Claude Opus 4.6 alebo GPT-5 | Mistral tu stále zaostáva |  
 
----
 
 ## Zhrnutie kapitoly  
 
