@@ -1,175 +1,153 @@
-# Ollama
+# Kapitola: Ollama – Spúšťanie veľkých jazykových modelov lokálne
 
-## Introduction
+## Úvod do Ollamy
 
-**Ollama** is an open-source tool designed to run, manage, and interact with large language  
-models (LLMs) locally on your machine. It enables developers, researchers, and hobbyists to  
-deploy powerful AI models without relying on cloud-based services, giving complete control  
-over data privacy and usage.
+**Ollama** je open-source nástroj navrhnutý na spúšťanie, správu a interakciu s veľkými  
+jazykovými modelmi (LLM) priamo na vašom počítači. Umožňuje vývojárom, výskumníkom aj  
+hobby nadšencom nasadzovať výkonné AI modely bez závislosti na cloudových službách, čím 
+získavajú úplnú kontrolu nad súkromím dát a ich využitím.
 
-Ollama simplifies the complexities of running LLMs by handling model downloads, memory  
-management, and inference in an easy-to-use command-line interface. Whether you want to  
-experiment with popular models like LLaMA, Mistral, or custom-trained models, Ollama  
-provides a seamless experience.
+Ollama zjednodušuje komplexnosť spúšťania LLM tým, že automaticky vybavuje sťahovanie modelov,  
+správu pamäte a inferenciu prostredníctvom jednoduchého príkazového riadku. Či už chcete   
+experimentovať s populárnymi modelmi ako **LLaMA**, **Mistral**, alebo vlastnými trénovanými  
+modelmi, Ollama poskytuje bezproblémové prostredie.
 
-### Why Developers Use Ollama
+## Prečo vývojári používajú Ollamu
 
-- **Privacy and Control**: Run models locally without sending data to external servers.  
-- **Cost Efficiency**: Avoid recurring cloud API costs for inference.  
-- **Experimentation**: Easily try different models and configurations.  
-- **Offline Access**: Use AI capabilities without an internet connection.  
-- **Customization**: Create and run custom models with Modelfiles.  
-
-### Supported Platforms
-
-Ollama runs on the following operating systems:  
-
-- **macOS** (Apple Silicon and Intel)  
-- **Windows** (Windows 10 and later)  
-- **Linux** (Ubuntu, Debian, Fedora, and other distributions)  
-
-### Local and Cloud Mode
-
-Ollama is primarily designed for **local execution**, allowing you to run LLMs directly  
-on your hardware. However, it also supports deployment in cloud environments when you  
-need to scale or share access with a team. The REST API enables integration with any  
-application, whether running locally or in the cloud.
+| Výhoda | Popis |
+|--------|-------|
+| **Súkromie a kontrola** | Modely bežia lokálne, dáta neopúšťajú váš počítač |
+| **Úspora nákladov** | Žiadne mesačné poplatky za cloudové API |
+| **Experimentovanie** | Jednoduché testovanie rôznych modelov a konfigurácií |
+| **Offline prístup** | AI funkcie dostupné aj bez internetu |
+| **Prispôsobenie** | Vlastné modely vytvorené pomocou Modelfiles |
 
 ---
 
-## Installation
+## Podporované platformy
 
-### Prerequisites
+Ollama je dostupná pre všetky hlavné operačné systémy:
 
-Before installing Ollama, ensure your system meets the following requirements:  
+- **macOS** (Apple Silicon aj Intel)
+- **Windows** (Windows 10 a novšie)
+- **Linux** (Ubuntu, Debian, Fedora a ďalšie distribúcie)
 
-- **RAM**: At least 8 GB (16 GB or more recommended for larger models)  
-- **Disk Space**: 10 GB minimum for the application and models  
-- **GPU (Optional)**: NVIDIA GPU with CUDA support for faster inference  
+### Lokálny vs. Cloud režim
 
-### macOS Installation
+Ollama je primárne navrhnutá na **lokálne spustenie**, čo znamená, že LLM bežia priamo  
+na vašom hardvéri. Podporuje však aj nasadenie v cloudových prostrediach, keď potrebujete 
+škálovať výkon alebo zdieľať prístup s tímom. REST API umožňuje integráciu s akoukoľvek  
+aplikáciou, či už beží lokálne alebo v cloude.
 
-On macOS, you can install Ollama using the official installer or Homebrew.  
+## Inštalácia Ollamy
 
-**Using the official installer:**  
+### Systémové požiadavky
 
-1. Download the installer from [ollama.com/download](https://ollama.com/download)  
-2. Open the downloaded `.dmg` file  
-3. Drag Ollama to your Applications folder  
-4. Launch Ollama from Applications  
+Pred inštaláciou sa uistite, že váš systém spĺňa tieto požiadavky:
 
-**Using Homebrew:**  
+| Komponent | Požiadavka |
+|-----------|------------|
+| **RAM** | Minimálne 8 GB (16 GB+ odporúčané pre väčšie modely) |
+| **Disk** | Minimálne 10 GB pre aplikáciu a modely |
+| **GPU** | Voliteľné: NVIDIA GPU s CUDA podporou pre rýchlejšiu inferenciu |
 
+### Inštalácia na macOS
+
+**Oficiálny inštalátor:**
+1. Stiahnite inštalátor z [ollama.com/download](https://ollama.com/download)
+2. Otvorte stiahnutý `.dmg` súbor
+3. Presuňte Ollamu do priečinka Applications
+4. Spustite Ollamu z Applications
+
+**Pomocou Homebrew:**
 ```bash
 brew install ollama
 ```
 
-**Verify the installation:**  
-
+**Overenie inštalácie:**
 ```bash
 ollama --version
 ```
 
-### Windows Installation
+### Inštalácia na Windows
 
-On Windows, download and run the official installer.  
+1. Stiahnite inštalátor z [ollama.com/download](https://ollama.com/download)
+2. Spustite `.exe` inštalátor
+3. Postupujte podľa inštalačného sprievodcu
+4. Ollama sa automaticky spustí ako služba na pozadí
 
-1. Download the installer from [ollama.com/download](https://ollama.com/download)  
-2. Run the `.exe` installer  
-3. Follow the installation wizard  
-4. Ollama starts automatically as a background service  
-
-**Verify the installation in PowerShell or Command Prompt:**  
-
+**Overenie inštalácie (PowerShell alebo Command Prompt):**
 ```bash
 ollama --version
 ```
 
-### Linux Installation
+### Inštalácia na Linux
 
-On Linux, use the official installation script for a quick setup.  
-
-**Using the installation script:**  
-
+**Pomocou inštalačného skriptu:**
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
 ```
 
-This script downloads and installs Ollama, sets up the service, and configures  
-the necessary permissions.  
+Tento skript stiahne a nainštaluje Ollamu, nastaví službu a nakonfiguruje potrebné oprávnenia.
 
-**Start the Ollama service:**  
-
+**Spustenie služby:**
 ```bash
 systemctl start ollama
 ```
 
-**Verify the installation:**  
-
+**Overenie inštalácie:**
 ```bash
 ollama --version
 ```
 
-**For GPU support on Linux**, ensure you have the NVIDIA drivers and CUDA toolkit  
-installed. Ollama will automatically detect and use your GPU.  
+> **Tip pre Linux:** Pre GPU podporu sa uistite, že máte nainštalované NVIDIA ovládače a CUDA toolkit.
+>  Ollama ich automaticky detekuje a využije.
 
 ---
 
-## Common Commands
+## Základné príkazy Ollamy
 
-Ollama provides a straightforward CLI for managing models and running inference.  
-Below is a table of the most frequently used commands:  
+Ollama poskytuje jednoduché CLI (Command Line Interface) na správu modelov a spúšťanie inferencie.
 
-| Command                  | Description                                      |
-|--------------------------|--------------------------------------------------|
-| `ollama run <model>`     | Run a model interactively                        |
-| `ollama list`            | List all available models                        |
-| `ollama pull <model>`    | Download a model from Ollama's registry          |
-| `ollama ps`              | Show running models and processes                |
-| `ollama stop <model>`    | Stop a running model                             |
-| `ollama create <model>`  | Create a new model from a Modelfile              |
-| `ollama delete <model>`  | Remove a model from local storage                |
+| Príkaz | Popis |
+|--------|-------|
+| `ollama run <model>` | Spustí model interaktívne |
+| `ollama list` | Zoznam všetkých dostupných modelov |
+| `ollama pull <model>` | Stiahne model z registry Ollamy |
+| `ollama ps` | Zobrazí bežiace modely a procesy |
+| `ollama stop <model>` | Zastaví bežiaci model |
+| `ollama create <model>` | Vytvorí nový model z Modelfile |
+| `ollama delete <model>` | Odstráni model z lokálneho úložiska |
 
-### Examples
+### Príklady použitia
 
-**Run a model interactively:**  
-
+**Spustenie modelu interaktívne:**
 ```bash
 ollama run llama2
 ```
 
-This starts an interactive session where you can type prompts and receive responses.  
-
-**Pull a model from the registry:**  
-
+**Stiahnutie modelu z registry:**
 ```bash
 ollama pull mistral
 ```
 
-**List installed models:**  
-
+**Zoznam nainštalovaných modelov:**
 ```bash
 ollama list
 ```
 
-**Delete a model:**  
-
+**Odstránenie modelu:**
 ```bash
 ollama delete llama2
 ```
 
 ---
 
-## Python Examples
+## Integrácia s Pythonom
 
-Ollama exposes a REST API on `http://localhost:11434` that you can use to integrate  
-with Python applications. The following examples demonstrate how to interact with  
-the API using the `requests` library.  
+Ollama expose REST API na adrese `http://localhost:11434`, ktoré môžete využiť na integráciu s Python aplikáciami.  
 
-### REST API Example
-
-This example shows how to send a prompt to a running Ollama model and receive  
-a streamed response.  
+### REST API Príklad
 
 ```python
 import requests
@@ -184,14 +162,9 @@ for line in response.iter_lines():
         print(line.decode("utf-8"))
 ```
 
-The `/api/generate` endpoint accepts a JSON payload with the model name and prompt.  
-The response is streamed line by line, allowing you to process tokens as they arrive.  
-Each line contains a JSON object with the generated text fragment.  
+Endpoint `/api/generate` prijíma JSON payload s názvom modelu a promptom. Odpoveď je streamovaná riadok po riadku.  
 
 ### Non-Streaming Request
-
-If you prefer to receive the complete response at once, you can disable streaming  
-by setting `stream` to `false`.  
 
 ```python
 import requests
@@ -210,13 +183,7 @@ data = response.json()
 print(data["response"])
 ```
 
-This approach is simpler when you do not need real-time output and prefer to work  
-with the complete response.  
-
-### Chat Endpoint Example
-
-Ollama also provides a `/api/chat` endpoint for multi-turn conversations. This  
-endpoint accepts a list of messages with roles (`system`, `user`, `assistant`).  
+### Chat Endpoint Príklad
 
 ```python
 import requests
@@ -240,10 +207,7 @@ data = response.json()
 print(data["message"]["content"])
 ```
 
-The chat endpoint maintains context across messages, making it suitable for  
-building conversational applications.  
-
-## Streaming reqeust
+### Streaming Chat Response
 
 ```python
 import requests
@@ -269,13 +233,10 @@ for line in response.iter_lines():
         data = json.loads(line)
         if "message" in data and "content" in data["message"]:
             print(data["message"]["content"], end="", flush=True)
-print()  # New line at the end
+print()
 ```
 
-
-### Listing Available Models
-
-You can query the API to list all locally available models.  
+### Zoznam dostupných modelov cez API
 
 ```python
 import requests
@@ -287,26 +248,14 @@ for model in data["models"]:
     print(f"Model: {model['name']}, Size: {model['size']}")
 ```
 
-This is useful for dynamically selecting models in your application based on  
-what is currently installed.  
-
 ---
 
-## Python Examples with OpenAI Library
+## Použitie OpenAI Knížnice s Ollamou
 
-Ollama provides an OpenAI-compatible API endpoint at `http://localhost:11434/v1`.  
-This allows you to use the official OpenAI Python library to interact with your  
-local Ollama models. This approach provides a familiar interface for developers  
-already using the OpenAI SDK.  
+Ollama poskytuje OpenAI-kompatibilný API endpoint na `http://localhost:11434/v1`. To vám umožňuje používať  
+oficiálnu OpenAI Python knižnicu na interakciu s lokálnymi modelmi.
 
-Note: The examples below use `llama2` as the model name. Replace this with the  
-name of the model you have installed (e.g., `mistral`, `codellama`, `llama3`).  
-Run `ollama list` to see your available models.  
-
-### Simple Chat
-
-This example shows how to configure the OpenAI client to connect to your local  
-Ollama server and send a basic chat completion request.  
+### Jednoduchý Chat
 
 ```python
 from openai import OpenAI
@@ -326,14 +275,7 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-The `base_url` points to Ollama's OpenAI-compatible endpoint. The `api_key` can  
-be any non-empty string since Ollama does not require authentication for local  
-access. The response object follows the OpenAI API structure.  
-
-### Chat with System Prompt
-
-You can include a system message to set the behavior and persona of the model.  
-This example demonstrates a multi-turn conversation setup.  
+### Chat so System Promptom
 
 ```python
 from openai import OpenAI
@@ -356,14 +298,7 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-The system message sets the context for the conversation. You can extend the  
-messages list to build multi-turn conversations by appending user and assistant  
-messages.  
-
-### Streaming Response
-
-Streaming allows you to receive the model's response token by token as it is  
-generated. This provides a more responsive user experience for long outputs.  
+### Streaming Odpoveď
 
 ```python
 from openai import OpenAI
@@ -384,18 +319,10 @@ stream = client.chat.completions.create(
 for chunk in stream:
     if chunk.choices[0].delta.content is not None:
         print(chunk.choices[0].delta.content, end="", flush=True)
-
 print()
 ```
 
-Setting `stream=True` returns an iterator that yields chunks as they arrive.  
-Each chunk contains a delta with the new content. This approach is useful for  
-chat interfaces where you want to display text as it is generated.  
-
-### Temperature and Other Parameters
-
-You can adjust generation parameters such as temperature, top_p, and max_tokens  
-to control the model's output behavior.  
+### Teplota a Ďalšie Parametre
 
 ```python
 from openai import OpenAI
@@ -417,21 +344,24 @@ response = client.chat.completions.create(
 print(response.choices[0].message.content)
 ```
 
-Temperature controls randomness in the output. Higher values (e.g., 0.9) produce  
-more creative responses, while lower values (e.g., 0.2) produce more focused and  
-deterministic outputs. The `max_tokens` parameter limits the response length.  
+| Parameter | Popis |
+|-----------|-------|
+| `temperature` | Kontroluje náhodnosť (0.2 = deterministické, 0.9 = kreatívne) |
+| `max_tokens` | Obmedzuje dĺžku odpovede |
+| `top_p` | Alternatíva k temperature pre sampling |
 
-## Structured output
+---
 
-Structured Output is a mechanism that forces an AI model to provide responses  
-in a specific, predictable format—typically JSON—rather than plain conversational text.
+## Štruktúrovaný Výstup (Structured Output)
 
-It ensures the output adheres to a strict "schema" (a blueprint of keys and data types),  
-making the data immediately readable by computers for automation, databases, or app integration.
+Štruktúrovaný výstup je mechanizmus, ktorý núti AI model poskytovať odpovede v špecifickom,  
+predvídateľnom formáte – typicky JSON – namiesto obyčajného konverzačného textu.  
+
+Zabezpečuje, že výstup dodržiava prísnu **schému** (blueprint kľúčov a dátových typov), čo robí  
+dáta okamžite čitateľné pre počítače na automatizáciu, databázy alebo integráciu aplikácií.  
 
 ```python
 from ollama import chat
-
 
 text = """
 Extract information about people mentioned in the following text. For each
@@ -442,93 +372,29 @@ designer based in San Francisco. She is 28 years old and loves painting and
 traveling."""
 
 response = chat(
-  model='ministral-3:3b',
-  messages=[{'role': 'user', 'content': text}],
-  format='json'
+    model='ministral-3:3b',
+    messages=[{'role': 'user', 'content': text}],
+    format='json'
 )
 
 print(response.message.content)
 ```
 
-This code demonstrates how to use Structured Output with a local LLM (via Ollama).  
-Instead of getting a rambling paragraph, the format='json' parameter forces the  
-model to return data that your code can immediately parse and use.
+Tento kód demonštruje použitie štruktúrovaného výstupu s lokálnym LLM. Namiesto rozvláčného odstavca  
+parameter `format='json'` núti model vrátiť dáta, ktoré váš kód môže okamžite spracovať.
 
-### List Available Models
+---
 
-You can query the available models using the OpenAI client's models endpoint.  
-This returns all models that are installed locally in Ollama.  
+## Zhrnutie
 
-```python
-from openai import OpenAI
-
-client = OpenAI(
-    base_url="http://localhost:11434/v1",
-    api_key="ollama"
-)
-
-models = client.models.list()
-
-for model in models.data:
-    print(f"Model: {model.id}")
-```
-
-This is equivalent to running `ollama list` from the command line. You can use  
-this to dynamically select models in your application based on what is  
-currently installed.  
-
-## Grounding
-
-Grounding is the ability to use current data from web search by models to ensure  
-data validity and correctness. 
-
-```python
-import ollama
-
-response = ollama.web_search("What are Vedas?", max_results=6)
-
-for result in response.results:
-    print('--- Search Result ---')
-    print(f"Title: {result.title}")
-    print(f"URL: {result.url}")
-    print(f"Content: {result.content}\n")
-    print("---------------\n")
-
-print(f"Total Results: {len(response.results)}")
-```
-
-```python
-from ollama import web_fetch
-
-result = web_fetch('https://docs.ollama.com/api/introduction')
-print(result.content)
-```
+| Téma | Kľúčové body |
+|------|--------------|
+| **Čo je Ollama** | Nástroj na lokálne spúšťanie LLM modelov |
+| **Výhody** | Súkromie, úspora nákladov, offline prístup |
+| **Inštalácia** | Dostupná pre macOS, Windows, Linux |
+| **Príkazy** | `run`, `pull`, `list`, `create`, `delete` |
+| **Python integrácia** | REST API aj OpenAI-kompatibilný endpoint |
+| **Štruktúrovaný výstup** | JSON formát pre automatizáciu |
 
 
-## Data analysis 
-
-The `ministral-3:3b` model makes mistakes. It is not ready yet. But the progress is visible. 
-
-```python
-import ollama
-
-file_name = 'users.csv'
-
-with open(file_name, 'r', encoding='utf-8') as file:
-    data = file.read()
-
-    prompt = f"""Generate a report containing minimum, maximum,sum, and average of salaries 
-    from the CSV data provided. Please provide the results in JSON format.\n\nData:\n{data}"""
-
-    response = ollama.chat(
-        model='ministral-3:3b',
-        format='json',
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
-    )
-
-    print(response['message']['content'])
-```
-
-
+## Otázky a diskusia
