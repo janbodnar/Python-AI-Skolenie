@@ -187,3 +187,40 @@ for part in response.candidates[0].content.parts:
 ```
 
 
+## Get a list of articles
+
+```python
+from google import genai  
+import os
+import requests
+  
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)  
+# model = 'gemini-3.1-flash-lite'
+model = 'gemini-3.5-flash'
+
+
+def get_page(url):
+
+    resp = requests.get(url)
+    resp.raise_for_status()
+
+    return resp.text
+
+url = "https://hnonline.sk/"
+
+page_content = get_page(url)
+
+prompt = f'''
+list all titles of articles published today on the website. The HTML content of
+the page is as follows: {page_content}
+'''
+
+response = client.models.generate_content(
+    model=model,
+    contents=prompt,
+)
+
+print(response.text)
+```
+
