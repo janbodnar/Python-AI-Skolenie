@@ -243,3 +243,35 @@ response = client.models.generate_content(
 print(response.text)
 ```
 
+## Grounding
+
+```python
+from google import genai
+from google.genai import types
+from google.genai.errors import ClientError
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.1-flash-lite"
+
+
+grounding_tool = types.Tool(google_search=types.GoogleSearch())
+
+config = types.GenerateContentConfig(tools=[grounding_tool])
+
+try:
+    response = client.models.generate_content(
+        model=model,
+        contents="Who won the FO 2026?",
+        config=config,
+    )
+
+    print(response.text)
+
+except ClientError as e:
+    print(e.status)
+    print(e.message)
+```
+
