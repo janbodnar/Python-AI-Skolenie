@@ -37,8 +37,6 @@ even for developers new to machine learning.
 2. Click **Create new secret key**.
 3. Copy the key and store it securely.
 
-⚠️ Treat your API key like a password. Do not share it or commit it to source control.
-
 ## Install the OpenAI Client Library
 
 Open Command Prompt or PowerShell:
@@ -156,6 +154,46 @@ Because of this broader scope, not all LLMs or platforms outside OpenAI
 support the Responses API model, making the older chat completions pattern  
 more portable in some multi-model or cross-provider setups.  
 
+## Reasoning mode
+
+Reasoning mode is a setting that instructs an AI model to spend additional  
+computation time "thinking" before it generates a final answer.
+
+Instead of immediately outputting text, the model builds a hidden,  
+internal chain of thought to break down complex problems, plan out steps, 
+and self-correct errors. This delayed-response approach mimics human deliberation,  
+resulting in much higher accuracy for rigorous tasks like advanced coding, math, and deep logic.
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+prompt = """
+Write a bash script that takes a matrix represented as a string with
+format '[1,2],[3,4],[5,6]' and prints the transpose in the same format.
+"""
+
+response = client.responses.create(
+    model="gpt-5.4-mini",
+    reasoning={"effort": "medium"},
+    input=[
+        {
+            "role": "user",
+            "content": prompt
+        }
+    ]
+)
+
+print(response.output_text)
+```
+
+In this snippet, the inclusion of `reasoning={"effort": "medium"}` signals the API  
+to allocate additional computation for internal, step-by-step thinking before  
+outputting the final result. Instead of immediately streaming the first solution  
+that comes to mind, the model evaluates the constraints of the requested matrix format,  
+works through the transposition logic in the background, and then returns the completed, 
+highly accurate script via `response.output_text`.
 
 ## Setting roles
 
