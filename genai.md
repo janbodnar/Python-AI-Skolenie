@@ -59,11 +59,14 @@ import os
 # Initialize client with your API key  
 api_key = os.getenv("AI_STUDIO_API_KEY")
 client = genai.Client(api_key=api_key)  
+
+model = 'gemini-3.1-flash-lite'
+prompt = 'Is Pluto a planet?'
   
 # Generate content from a text prompt  
 response = client.models.generate_content(  
-    model='gemini-2.5-flash',  
-    contents='Is Pluto a planet?',  
+    model=model,  
+    contents=prompt,  
 )  
   
 print(response.text)  
