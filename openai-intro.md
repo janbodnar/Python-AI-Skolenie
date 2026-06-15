@@ -198,6 +198,23 @@ the convenience property `response.output_text`.
 
 ## Tool call
 
+A tool call (or function call) is a mechanism that allows an AI model to  
+request external data or perform actions it cannot do on its own.
+
+Instead of generating a guess, the model pauses its text generation and outputs  
+a structured request to use a specific tool you have defined (like a database query,  
+a calculator, or an API fetch). The application running the model intercepts this  
+request, executes the actual code locally, and feeds the result back to the model  
+so it can formulate a final, accurate response.
+
+To illustrate how function calling works in practice, let's look at a scenario where  
+the model delegates a decision to an external tool. In this example, we prompt the  
+model to translate a simple greeting into a randomly selected language. Rather than  
+having the model pick the language internally, we provide it with a custom 
+`get_random_language` tool. The following code demonstrates how to define this tool,  
+handle the model's execution request, and pass the local result back to the API to  
+generate the final translation:
+
 ```python
 import random
 from openai import OpenAI
@@ -239,6 +256,13 @@ while tool_calls:
 print(response.output_text)
 ```
 
+In this snippet, the initial API call triggers the model to halt generation and request  
+the `get_random_language` function. We capture this request by filtering `response.output`  
+and enter a while loop to process it. Inside the loop, we execute the tool's logic  
+locally—using Python's `random.choice()`—and feed that result back to the API. By chaining  
+the conversation via the `previous_response_id` and passing the `function_call_output`,  
+the model seamlessly resumes its workflow, applying the newly provided language to output  
+the final translated string.
  
 ## Analyze CSV data
 
