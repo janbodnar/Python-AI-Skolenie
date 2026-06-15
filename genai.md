@@ -1,4 +1,4 @@
-Welcome to the **Google GenAI SDK**  
+# Google GenAI SDK
 
 The Google GenAI SDK is the official, production-ready gateway  
 for developers to integrate Google’s most advanced generative  
@@ -74,3 +74,29 @@ tool, or a multimodal reasoning application, the Google GenAI SDK provides
 the robust, efficient, and future-proof foundation you need to bring your  
 ideas to life. We invite you to dive in, explore the official quickstart  
 guide, and start building the next generation of AI-powered applications.  
+
+## Thinking level
+
+```python
+from google import genai
+from google.genai import types
+import os
+  
+# Initialize client with your API key  
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)  
+model = 'gemini-3.1-flash-lite'
+  
+# Generate content from a text prompt  
+response = client.models.generate_content(  
+    model=model,  
+    contents='Is Pluto a planet?',  
+    config=types.GenerateContentConfig(  
+        thinking_config=types.ThinkingConfig(thinking_level='medium')  
+    )
+)  
+  
+print(response.text)  
+```
+
+
