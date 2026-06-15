@@ -4,8 +4,8 @@ The OpenAI Python library is an official SDK that provides seamless access to Op
 from any Python 3.8+ application. It’s designed to help developers integrate powerful AI  
 capabilities—like text generation, image analysis, and chat interactions—into their own software.  
 
-Built using `httpx` and auto-generated from OpenAI’s OpenAPI specification via the **Stainless** toolchain,   
-the library ensures consistent, up-to-date access to all available endpoints and features.  
+Built using `httpx` and auto-generated from OpenAI’s OpenAPI specification via the **Stainless**  
+toolchain, the library ensures consistent, up-to-date access to all available endpoints and features.  
 
 Since its release, the OpenAI Python library has become the **de facto standard for AI programming in Python**.  
 It's widely adopted across industries, research institutions, and open-source communities.  
@@ -22,11 +22,11 @@ It's widely adopted across industries, research institutions, and open-source co
 
 ## Simple Chat 
 
-A minimal “hello world” chat that sends one user message to a model via OpenRouter and prints  
-the reply. Use this to verify your environment (API key, base_url) and confirm the client  
-returns a response.  
+A minimal chat that sends one user message to a model via OpenRouter and prints  
+the reply. Use this to verify your environment (API key, base_url) and confirm  
+the client returns a response.   
 
-Key bits: initialize OpenAI with OpenRouter `base_url`, provide a messages list, and  
+Initialize OpenAI with OpenRouter `base_url`, provide a messages list, and  
 read `choices[0].message.content`.
 
 ```python
@@ -65,19 +65,20 @@ as it arrives.
 from openai import OpenAI
 import os
 
+api_key = os.environ.get("OPENROUTER_API_KEY")
+model = 'minimax/minimax-m3'
+
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key=os.environ.get("OPENROUTER_API_KEY"),
+    api_key=api_key,
 )
 
-# Enable streaming in the completion request
-stream = client.chat.completions.create(
-    extra_body={},
-    model="z-ai/glm-4.5-air:free",
+completion = client.chat.completions.create(
+    model=model,
     messages=[
         {
-            "role": "user",
-            "content": "Is Pluto a planet?"
+          "role": "user",
+          "content": "Is Pluto a planet?"
         }
     ],
     stream=True  # Enable streaming
@@ -85,7 +86,7 @@ stream = client.chat.completions.create(
 
 # Process the stream in real-time
 print("Streaming response:")
-for chunk in stream:
+for chunk in completion:
     # Check if the chunk contains content
     if chunk.choices[0].delta.content is not None:
         # Print the content chunk without a newline
@@ -95,266 +96,18 @@ for chunk in stream:
 print()
 ```
 
-## Streaming with Gradio
-
-```python
-import os
-import json
-import typing as t
-import httpx
-import gradio as gr
-
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY") or os.getenv("OPENROUTER_KEY")
-OPENROUTER_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
-DEFAULT_SYSTEM_PROMPT = os.getenv("SYSTEM_PROMPT", "You are a helpful AI assistant.")
-# Default network timeout in seconds (user requested 30s)
-DEFAULT_TIMEOUT_S = float(os.getenv("OPENROUTER_TIMEOUT_S", "30"))
-
-
-# This example demonstrates how to set up a Gradio chat interface
-# that interacts with OpenRouter's chat completions API.
-# It includes a simple mock backend for local testing without an API key.
-
-
-def _headers() -> dict:
-    if not OPENROUTER_API_KEY:
-        return {}
-    # OpenRouter recommends setting HTTP Referer + Title for attribution
-    site_url = os.getenv("SITE_URL", "http://localhost")
-    app_name = os.getenv("APP_NAME", "Gradio OpenRouter Chat")
-    return {
-        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-        "Content-Type": "application/json",
-        "HTTP-Referer": site_url,
-        "X-Title": app_name,
-    }
-
-
-async def fetch_models() -> t.List[str]:
-    """
-    Fetch the available model IDs from OpenRouter.
-    Returns a list of model identifiers.
-    """
-    if not OPENROUTER_API_KEY:
-        # No key: return a tiny demo list with a mock backend
-        return ["mock/echo", "deepseek/deepseek-chat", "openai/gpt-4o-mini"]
-    url = f"{OPENROUTER_BASE_URL}/models"
-    async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT_S) as client:
-        r = await client.get(url, headers=_headers())
-        r.raise_for_status()
-        data = r.json()
-    models = []
-    for m in data.get("data", []):
-        mid = m.get("id")
-        if isinstance(mid, str):
-            models.append(mid)
-    # Sort models alphabetically for easier selection
-    return sorted(models)
-
-
-async def call_openrouter(
-    model: str,
-    messages: t.List[dict],
-    temperature: float = 0.7,
-    stream: bool = False,
-) -> str:
-    """
-    Call OpenRouter chat completions. If model == 'mock/echo', returns a simple echo.
-    """
-    if model == "mock/echo" or not OPENROUTER_API_KEY:
-        # Simple deterministic mock for local testing
-        user_last = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
-        return f"[mock echo] {user_last}"
-
-    url = f"{OPENROUTER_BASE_URL}/chat/completions"
-    payload = {
-        "model": model,
-        "messages": messages,
-        "temperature": temperature,
-        "stream": False,  # Gradio simple response; you can extend to streaming later
-    }
-    async with httpx.AsyncClient(timeout=DEFAULT_TIMEOUT_S) as client:
-        r = await client.post(url, headers=_headers(), json=payload)
-        r.raise_for_status()
-        data = r.json()
-
-    try:
-        return data["choices"][0]["message"]["content"]
-    except Exception:
-        return json.dumps(data, indent=2)
-
-
-def _history_to_messages(
-    history: t.Union[t.List[t.Tuple[str, str]], t.List[dict]],
-    system_prompt: str,
-) -> t.List[dict]:
-    """
-    Convert Gradio Chatbot history to OpenRouter messages format with a system prompt.
-
-    Supports both legacy tuple history [(user, assistant), ...] and
-    Chatbot(type="messages") history [{"role": "...", "content": ...}, ...].
-    """
-    messages: t.List[dict] = []
-    if system_prompt:
-        messages.append({"role": "system", "content": system_prompt})
-
-    if not history:
-        return messages
-
-    # Detect format: dict messages vs tuple pairs
-    if isinstance(history[0], dict):
-        # Already role/content; validate and append
-        for m in history:
-            role = m.get("role")
-            content = m.get("content")
-            if role in ("user", "assistant", "system"):
-                messages.append({"role": role, "content": content})
-            else:
-                # Skip unknown roles to be safe
-                continue
-    else:
-        # Expect iterable of (user, assistant) pairs
-        for item in history:
-            if isinstance(item, (list, tuple)):
-                if len(item) == 2:
-                    user_msg, assistant_msg = item
-                    if user_msg:
-                        messages.append({"role": "user", "content": user_msg})
-                    if assistant_msg:
-                        messages.append({"role": "assistant", "content": assistant_msg})
-                else:
-                    # Ignore malformed tuple lengths
-                    continue
-            else:
-                # Ignore unsupported entries
-                continue
-    return messages
-
-
-async def respond_fn(
-    message: str,
-    history: t.List[t.Tuple[str, str]],
-    model: str,
-    system_prompt: str,
-    temperature: float,
-) -> str:
-    """
-    Gradio ChatInterface respond function.
-    """
-    messages = _history_to_messages(history, system_prompt or DEFAULT_SYSTEM_PROMPT)
-    messages.append({"role": "user", "content": message})
-    reply = await call_openrouter(model=model, messages=messages, temperature=temperature, stream=False)
-    return reply
-
-
-with gr.Blocks(title="OpenRouter Gradio Chat", theme=gr.themes.Soft()) as demo:
-    gr.Markdown("# OpenRouter Chat")
-    with gr.Row():
-        with gr.Column(scale=3):
-            model_dropdown = gr.Dropdown(
-                label="Model (loaded from OpenRouter)",
-                choices=["Loading..."],
-                value="Loading...",
-                interactive=True,
-            )
-            temperature = gr.Slider(
-                minimum=0.0,
-                maximum=2.0,
-                step=0.1,
-                value=0.7,
-                label="Temperature",
-            )
-        with gr.Column(scale=4):
-            system_prompt_box = gr.Textbox(
-                label="System Prompt",
-                value=DEFAULT_SYSTEM_PROMPT,
-                lines=3,
-                placeholder="You are a helpful AI assistant.",
-            )
-
-    chat = gr.Chatbot(
-        label="Conversation",
-        height=500,
-        type="messages",
-    )
-
-    # Custom aligned input row with Send and Terminate buttons
-    # Using compact row to keep controls on one line; scales ensure alignment.
-    with gr.Row(variant="compact"):
-        user_input = gr.Textbox(
-            placeholder="Ask me anything...",
-            lines=2,
-            scale=8,
-            show_label=False,
-            container=True,
-        )
-        with gr.Column(scale=1):
-            send_btn = gr.Button("Send", variant="primary")
-        with gr.Column(scale=1):
-            stop_btn = gr.Button("Terminate", variant="stop")
-
-    # Wire up events: Enter on textbox or Send button triggers respond_fn.
-    # Gradio Chatbot(type="messages") requires returning a list of {"role","content"} dicts.
-    async def _respond(message, history, model, system_prompt, temperature):
-        # history is a list of (user, assistant) tuples from Chatbot
-        # Build role/content messages including system
-        messages = _history_to_messages(history or [], system_prompt or DEFAULT_SYSTEM_PROMPT)
-        if message and message.strip():
-            messages.append({"role": "user", "content": message})
-        # Call model and append assistant reply
-        reply = await call_openrouter(model=model, messages=messages, temperature=temperature, stream=False)
-        messages.append({"role": "assistant", "content": reply})
-        # Return full messages list to satisfy Chatbot(type="messages")
-        return messages
-
-    send_event = send_btn.click(
-        _respond,
-        inputs=[user_input, chat, model_dropdown, system_prompt_box, temperature],
-        outputs=chat,
-        queue=True,
-        api_name=False,
-    )
-    # Submit on Enter in textbox
-    submit_event = user_input.submit(
-        _respond,
-        inputs=[user_input, chat, model_dropdown, system_prompt_box, temperature],
-        outputs=chat,
-        queue=True,
-        api_name=False,
-    )
-
-    # Terminate button cancels any running jobs and re-enables inputs
-    def _noop():
-        return gr.update()
-
-    stop_btn.click(
-        _noop,
-        None,
-        None,
-        cancels=[send_event, submit_event],
-    )
-
-    async def load_models():
-        models = await fetch_models()
-        # Default to a reasonable commonly-available model if present
-        default = "openai/gpt-4o-mini" if "openai/gpt-4o-mini" in models else models[0] if models else "mock/echo"
-        return gr.Dropdown(choices=models or ["mock/echo"], value=default)
-
-    demo.load(load_models, inputs=None, outputs=model_dropdown)
-
-if __name__ == "__main__":
-    # 0.0.0.0 allows LAN access; change as preferred
-    # Gradio 4.x: queue() no longer supports concurrency_count; use default queue.
-    # Set share via env var if desired; otherwise local-only.
-    share = os.getenv("GRADIO_SHARE", "false").lower() in ("1", "true", "yes")
-    demo.queue().launch(server_name="localhost", server_port=int(os.getenv("PORT", "7860")), share=share)
-```
 
 ## Using DeepSeek 
 
 Shows how to target DeepSeek’s native API with the OpenAI-compatible SDK.  
-Configure base_url to `https://api.deepseek.com` and use the model `deepseek-chat` with your `DEEPSEEK_API_KEY`.  
-This example performs a non-streaming chat completion with a simple system+user prompt.  
+Create `DEEPSEEK_API_KEY` environment variable and configure `base_url` to  
+`https://api.deepseek.com`. 
+
+Use one of the available models: 
+
+- `deepseek-v4-flash`
+- `deepseek-v4-pro`
+
 
 ```python
 # Please install OpenAI SDK first: `pip install openai`
@@ -383,6 +136,8 @@ response = client.chat.completions.create(
 
 print(response.choices[0].message.content)
 ```
+
+This example performs a non-streaming chat completion with a simple system+user prompt.  
 
 ## Function call/tool call
 
