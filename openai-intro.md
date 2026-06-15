@@ -425,3 +425,34 @@ context with `client.responses.stream` using the `gpt-5-mini` model, iterates ov
 streamed events, and prints text deltas in real time as the model generates them.  
 Finally, it prints a completion separator and a short message indicating the analysis  
 finished for the counted records.
+
+## Web search 
+
+Native web search.
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+response = client.responses.create(
+    model="gpt-5.4",
+    tools=[{"type": "web_search"}],
+    input="What were the outcomes of the latest three matches in the Soccer World Cup 2026?",
+)
+
+print(response.output_text)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
