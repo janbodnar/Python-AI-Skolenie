@@ -210,7 +210,7 @@ so it can formulate a final, accurate response.
 To illustrate how function calling works in practice, let's look at a scenario where  
 the model delegates a decision to an external tool. In this example, we prompt the  
 model to translate a simple greeting into a randomly selected language. Rather than  
-having the model pick the language internally, we provide it with a custom 
+having the model pick the language internally, we provide it with a custom  
 `get_random_language` tool. The following code demonstrates how to define this tool,  
 handle the model's execution request, and pass the local result back to the API to  
 generate the final translation:
