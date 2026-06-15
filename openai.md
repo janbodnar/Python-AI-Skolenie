@@ -110,28 +110,25 @@ Use one of the available models:
 
 
 ```python
-# Please install OpenAI SDK first: `pip install openai`
-
 from openai import OpenAI
 import os
 
-# DEEP_SEEK_API_KEY = os.environ.get("DEEPSEEK_API_KEY")
-# print(DEEP_SEEK_API_KEY)
-
-# exit
-
+api_key = os.environ.get("DEEPSEEK_API_KEY")
+model = "deepseek-v4-flash"
+prompt = '''
+When did Napoleon become colonel and under what circumstances?
+'''
 client = OpenAI(
     base_url="https://api.deepseek.com",
-    api_key=os.environ.get("DEEPSEEK_API_KEY"),
+    api_key=api_key,
 )
 
 response = client.chat.completions.create(
-    model="deepseek-chat",
+    model=model,
     messages=[
         {"role": "system", "content": "You are a helpful assistant"},
-        {"role": "user", "content": "Is Pluto a planet?"},
-    ],
-    stream=False
+        {"role": "user", "content": prompt},
+    ]
 )
 
 print(response.choices[0].message.content)
