@@ -78,6 +78,25 @@ the robust, efficient, and future-proof foundation you need to bring your
 ideas to life. We invite you to dive in, explore the official quickstart  
 guide, and start building the next generation of AI-powered applications.  
 
+## List models
+
+```python
+from google import genai  
+import os
+  
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)  
+
+model = 'gemini-3.1-flash-lite'
+  
+# list models
+resp = client.models.list()   
+
+for model in resp:
+    print(model.name)
+```
+
+
 ## Thinking level
 
 ```python
