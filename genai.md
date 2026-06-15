@@ -118,3 +118,33 @@ response = client.models.generate_content_stream(
 for chunk in response:
     print(chunk.text, end="")
 ```
+
+## Multi-turn conversations
+
+The SDK allows to collect multiple rounds of prompts and responses into a chat,  
+giving you an easy way to keep track of the conversation history.
+
+Note: Chat functionality is only implemented as part of the SDKs. Behind the scenes,  
+it still uses the `generateContent` function. For multi-turn conversations,  
+the *full conversation history* is sent to the model with each follow-up turn.
+
+```python
+from google import genai
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+model = "gemini-3.1-flash-lite"
+
+chat = client.chats.create(model=model)
+
+response = chat.send_message("What is the capital of France?")
+print(response.text)
+
+response = chat.send_message("And of Slovakia?")
+print(response.text)
+
+for message in chat.get_history():
+    print(f"role - {message.role}", end=": ")
+    print(message.parts[0].text)
+```
