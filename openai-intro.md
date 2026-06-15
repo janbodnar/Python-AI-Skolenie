@@ -194,6 +194,49 @@ the model to process context in a dialogue-like format. Once the request is proc
 program retrieves and prints the model’s combined plain-text output using  
 the convenience property `response.output_text`.
 
+## Tool call
+
+```python
+import random
+from openai import OpenAI
+
+client = OpenAI()
+
+LANGUAGES = [
+    "Spanish", "Czech", "Hungarian", "French", "German",
+    "Italian", "Slovak", "Polish", "Russian",
+]
+
+TOOLS = [{
+    "type": "function",
+    "name": "get_random_language",
+    "parameters": {"type": "object", "properties": {}},
+}]
+
+response = client.responses.create(
+    model="gpt-5.4-mini",
+    input="Pick a random language and translate 'Hello, how are you?' into it",
+    tools=TOOLS,
+)
+
+tool_calls = [item for item in response.output if item.type == "function_call"]
+while tool_calls:
+    tc = tool_calls[0]
+    response = client.responses.create(
+        model="gpt-5.4-mini",
+        previous_response_id=response.id,
+        tools=TOOLS,
+        input=[{
+            "type": "function_call_output",
+            "call_id": tc.call_id,
+            "output": random.choice(LANGUAGES),
+        }],
+    )
+    tool_calls = [item for item in response.output if item.type == "function_call"]
+
+print(response.output_text)
+```
+
  
 ## Analyze CSV data
 
