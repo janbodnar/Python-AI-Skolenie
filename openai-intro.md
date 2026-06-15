@@ -444,7 +444,126 @@ response = client.responses.create(
 print(response.output_text)
 ```
 
+## Shell code
 
+```python
+from openai import OpenAI
+from dataclasses import dataclass
+import subprocess
+
+
+@dataclass
+class CmdResult:
+    stdout: str
+    stderr: str
+    exit_code: int | None
+    timed_out: bool
+
+
+class ShellExecutor:
+    def __init__(self, default_timeout = 60):
+        self.default_timeout = default_timeout
+
+    def run(self, cmd, timeout = None):
+        t = timeout or self.default_timeout
+        p = subprocess.Popen(
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        try:
+            out, err = p.communicate(timeout=t)
+            return CmdResult(out, err, p.returncode, False)
+        except subprocess.TimeoutExpired:
+            p.kill()
+            out, err = p.communicate()
+            return CmdResult(out, err, p.returncode, True)
+
+
+client = OpenAI()
+executor = ShellExecutor()
+
+# Initial request - use proper message format
+response = client.responses.create(
+    model="gpt-5.4-mini",
+    instructions="You are a Linux system assistant. Use the shell tool to fulfill requests.",
+    input=[
+        {
+            "type": "message",
+            "role": "user",
+            "content": [
+                {
+                    "type": "input_text",
+                    "text": "find me the largest pdf file in ~/Documents",
+                }
+            ],
+        }
+    ],
+    tools=[{"type": "shell", "environment": {"type": "local"}}],
+)
+
+# --- AGENT LOOP START ---
+while True:
+    # Check for shell calls in the output
+    shell_calls = [item for item in response.output if item.type == "shell_call"]
+
+    if not shell_calls:
+        break  # No more shell calls, exit loop
+
+    tool_outputs = []
+
+    # Execute each shell call
+    for item in shell_calls:
+        call_id = item.call_id
+        commands = item.action.commands
+
+        # Execute all commands
+        for command in commands:
+            print(f"AI wants to run: {command}")
+
+            # Execute the command
+            result = executor.run(command)
+
+            # Format outcome based on timeout status
+            if result.timed_out:
+                outcome = {"type": "timeout"}
+            else:
+                outcome = {"type": "exit", "exit_code": result.exit_code}
+
+            # Format output for the API - NOTE: exit_code goes inside outcome
+            output_entry = {
+                "stdout": result.stdout,
+                "stderr": result.stderr,
+                "outcome": outcome,
+            }
+
+            tool_outputs.append({"call_id": call_id, "output": [output_entry]})
+            print(f"Command finished with outcome: {outcome}")
+
+    # Submit results back to the API with previous_response_id to maintain context
+    response = client.responses.create(
+        model="gpt-5.4-mini",
+        previous_response_id=response.id,
+        input=[
+            {
+                "type": "shell_call_output",
+                "call_id": output["call_id"],
+                "output": output["output"],
+            }
+            for output in tool_outputs
+        ],
+    )
+# --- AGENT LOOP END ---
+
+# Print the final natural language response
+for item in response.output:
+    if item.type == "message":
+        for content in item.content:
+            if content.type == "output_text":
+                print(f"\nFinal Answer:\n{content.text}")
+```
 
 
 
