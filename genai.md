@@ -99,4 +99,22 @@ response = client.models.generate_content(
 print(response.text)  
 ```
 
+## Streaming
 
+```python
+from google import genai
+import os
+  
+# Initialize client with your API key  
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)  
+model = 'gemini-3.1-flash-lite'
+prompt = "Is Pluto a planet?"
+
+response = client.models.generate_content_stream(
+    model=model,
+    contents=[prompt]
+)
+for chunk in response:
+    print(chunk.text, end="")
+```
