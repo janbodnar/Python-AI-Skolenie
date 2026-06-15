@@ -33,14 +33,17 @@ read `choices[0].message.content`.
 from openai import OpenAI
 import os
 
+api_key = os.environ.get("OPENROUTER_API_KEY")
+model = 'minimax/minimax-m3'
+
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key=os.environ.get("OPENROUTER_API_KEY"),
+    api_key=api_key,
 )
 
 completion = client.chat.completions.create(
     extra_body={},
-    model="z-ai/glm-4.5-air:free",
+    model=model,
     messages=[
         {
           "role": "user",
