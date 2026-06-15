@@ -54,14 +54,16 @@ from prototyping to production.
 
 ```python  
 from google import genai  
+import os
   
 # Initialize client with your API key  
-client = genai.Client(api_key='YOUR_API_KEY')  
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)  
   
 # Generate content from a text prompt  
 response = client.models.generate_content(  
     model='gemini-2.5-flash',  
-    contents='Explain what a GenAI SDK is in one sentence.'  
+    contents='Is Pluto a planet?',  
 )  
   
 print(response.text)  
