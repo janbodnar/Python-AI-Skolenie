@@ -151,3 +151,39 @@ for message in chat.get_history():
     print(f"role - {message.role}", end=": ")
     print(message.parts[0].text)
 ```
+
+## Code execution
+
+```python
+from google import genai  
+from google.genai import types
+import os
+  
+# Initialize client with your API key  
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)  
+
+model = 'gemini-3.1-flash-lite'
+prompt = '''
+What is the sum of the first 50 prime numbers? 
+Generate and run code for the calculation, and make sure you get all 50.
+'''
+
+response = client.models.generate_content(
+    model=model,
+    contents=prompt,
+    config=types.GenerateContentConfig(
+        tools=[types.Tool(code_execution=types.ToolCodeExecution)]
+    ),
+)
+
+for part in response.candidates[0].content.parts:
+    if part.text is not None:
+        print(part.text)
+    if part.executable_code is not None:
+        print(part.executable_code.code)
+    if part.code_execution_result is not None:
+        print(part.code_execution_result.output)
+```
+
+
