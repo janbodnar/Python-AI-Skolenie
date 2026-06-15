@@ -31,7 +31,7 @@ uv simplifies Python development by consolidating multiple tools into one
 fast, reliable package manager with predictable dependency resolution.  
 
 
-## 🚀 Project & Environment Setup  
+## Project & Environment Setup  
 
 Setting up projects and environments is the first step in any workflow. These commands help you initialize  
 new projects, manage virtual environments, and control Python versions seamlessly.  
@@ -46,7 +46,7 @@ new projects, manage virtual environments, and control Python versions seamlessl
 
 ---
 
-## 📦 Package Management  
+## Package Management  
 Managing dependencies is at the heart of Python development. These commands let you add, 
 update, and control packages with precision, whether from PyPI or GitHub.  
 
@@ -58,9 +58,8 @@ update, and control packages with precision, whether from PyPI or GitHub.
 | `uv add "numpy>=1.24.0,<2.0.0"` | Install a package within a version range. |
 | `uv add "git+https://github.com/psf/requests.git@v2.31.0"` | Install directly from a Git repository. |
 
----
 
-## 🏃 Running Code  
+## Running Code  
 
 Once dependencies are installed, you’ll want to run scripts or tests inside the correct  
 environment. These commands ensure your code executes with the right packages and Python version.  
@@ -71,9 +70,8 @@ environment. These commands ensure your code executes with the right packages an
 | `uv run --with requests python -c "import requests; ..."` | Run inline code with temporary dependencies. |
 | `uv run pytest` | Run tests with dependencies resolved automatically. |
 
----
 
-## 🔒 Dependency Resolution  
+## Dependency Resolution  
 Reproducibility is key in modern development. These commands help you lock dependencies,  
 sync environments, and maintain compatibility with traditional `requirements.txt` workflows.  
 
@@ -85,9 +83,8 @@ sync environments, and maintain compatibility with traditional `requirements.txt
 | `uv pip compile pyproject.toml -o requirements.txt` | Generate a `requirements.txt` file from `pyproject.toml`. |
 | `uv pip sync requirements.txt` | Sync environment to match a `requirements.txt`. |
 
----
 
-## 🛠 Tool Runner (CLI Tools)  
+## Tool Runner (CLI Tools)  
 
 `uvx` makes it easy to run Python tools without installing them globally. This is perfect  
 for formatters, linters, and test runners that you want isolated per project.  
@@ -99,9 +96,8 @@ for formatters, linters, and test runners that you want isolated per project.
 | `uvx pytest tests/` | Run Pytest in an isolated environment. |
 | `uvx --from "black==23.12.0" black src/` | Run a specific version of a tool. |
 
----
 
-## ⚡ Cache & Maintenance  
+## Cache & Maintenance  
 Over time, caches can grow large or become corrupted. These commands help you inspect  
 and clean the cache to keep your environment healthy and efficient.  
 
@@ -113,7 +109,7 @@ and clean the cache to keep your environment healthy and efficient.
 
 ---
 
-## 🧑‍💻 CI/CD & Docker  
+## CI/CD & Docker  
 
 Automation is where `uv` shines. These commands integrate smoothly into CI/CD pipelines  
 and Docker builds, ensuring fast, reproducible environments for deployment.  
