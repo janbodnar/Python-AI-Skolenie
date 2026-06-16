@@ -331,3 +331,81 @@ wraps the file bytes in a `types.Part` object with the correct MIME type,
 submits both the document and the prompt in a single multimodal request,  
 and finally prints the summary returned by the model.
 
+
+## Analyze CSV data
+
+Simple data analysis. 
+
+```csv
+id,first_name,last_name,email,occupation,salary,created_at
+1,Jana,Nováková,jana.novakova@gmail.com,Software Engineer,3200.0,2026-01-01
+2,Peter,Kováč,peter.kovac@example.com,Data Analyst,2800.0,2026-01-02
+3,Lucia,Horváthová,lucia.horvathova@example.com,Project Manager,3500.0,2026-01-03
+4,Martin,Tóth,martin.toth@example.com,UX Designer,3000.0,2026-01-04
+5,Simona,Varga,simona.varga@example.com,QA Engineer,2700.0,2026-01-05
+6,Marek,Polák,marek.polak@example.com,DevOps Engineer,3400.0,2026-01-06
+7,Zuzana,Bartošová,zuzana.bartosova@example.com,HR Specialist,2500.0,2026-01-07
+8,Tomáš,Urban,tomas.urban@example.com,Business Analyst,2900.0,2026-01-08
+9,Barbora,Králová,barbora.kralova@simplemail.com,Marketing Manager,3300.0,2026-01-09
+10,Jozef,Šimek,jozef.simek@example.com,System Administrator,3100.0,2026-01-10
+11,Michaela,Dudová,michaela.dudova@example.com,Content Writer,2200.0,2026-01-11
+12,Richard,Bielik,richard.bielik@example.com,Product Owner,3600.0,2026-01-12
+13,Katarína,Farkašová,katarina.farkasova@gmail.com,Accountant,2600.0,2026-01-13
+14,Andrej,Gregor,andrej.gregor@example.com,Network Engineer,3200.0,2026-01-14
+15,Veronika,Kučerová,veronika.kucerova@gmail.com,Graphic Designer,2400.0,2026-01-15
+16,Patrik,Holub,patrik.holub@gmail.com,Mobile Developer,3300.0,2026-01-16
+17,Eva,Švecová,eva.svecova@example.com,Recruiter,2300.0,2026-01-17
+18,Roman,Marek,roman.marek@simplemail.com,Database Administrator,3400.0,2026-01-18
+19,Monika,Blažeková,monika.blazekova@example.com,Scrum Master,3100.0,2026-01-19
+20,Filip,Klein,filip.klein@example.com,Web Developer,3000.0,2026-01-20
+```
+
+We have these 20 rows. To do the analysis, we utilize `types.ToolCodeExecution`. 
+
+```python
+from google import genai
+from google.genai import types
+from pydantic import BaseModel
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+file_name = "users.csv"
+
+
+class SalaryReport(BaseModel):
+    minimum: float
+    maximum: float
+    sum: float
+    average: float
+
+
+with open(file_name, "r", encoding="utf-8") as file:
+    data = file.read()
+
+    prompt = f"""Generate a report containing minimum, maximum, sum, and average of salaries
+    from the CSV data provided. Write and run Python code to analyze the data.
+    Please provide the results in JSON format.\n\nData:\n{data}"""
+
+    response = client.models.generate_content(
+        model="gemini-3.1-flash-lite",
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            tools=[types.Tool(code_execution=types.ToolCodeExecution)],
+            response_mime_type="application/json",
+            response_json_schema=SalaryReport.model_json_schema(),
+        ),
+    )
+
+    report = SalaryReport.model_validate_json(response.text)
+    print(report.model_dump_json(indent=2))
+```
+
+This example reads a local CSV file containing user salary data and sends  
+it to the Gemini API along with a prompt instructing the model to write and  
+execute Python code to compute the minimum, maximum, sum, and average of the  
+salaries; the request enables the built‑in code execution tool and specifies  
+that the response must be valid JSON matching a `SalaryReport` Pydantic schema,  
+after which the returned JSON is validated and parsed into a `SalaryReport` 
+object and printed in a nicely formatted structure.
