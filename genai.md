@@ -142,63 +142,23 @@ how efficiently a request was handled.
 
 
 
-```
-                          ┌──────────────────────────┐
-                          │        Your Input        │
-                          │  (Prompt, text, files)   │
-                          └─────────────┬────────────┘
-                                        │
-                                        ▼
-                          ┌──────────────────────────┐
-                          │   prompt_token_count     │
-                          │  + prompt_tokens_details │
-                          └─────────────┬────────────┘
-                                        │
-                                        ▼
-                     ┌─────────────────────────────────────┐
-                     │   Model Internal Processing         │
-                     │   (hidden reasoning, planning)      │
-                     └───────────────┬─────────────────────┘
-                                     │
-                                     ▼
-                     ┌─────────────────────────────────────┐
-                     │        thoughts_token_count         │
-                     └───────────────┬─────────────────────┘
-                                     │
-                                     ▼
-        ┌─────────────────────────────────────────────────────────────────┐
-        │                     Tool Use (optional)                         │
-        │  e.g., code execution, search, function calling                 │
-        └───────────────┬──────────────────────────────────────v──────────┘
-                        │
-                        ▼
-        ┌────────────────────────────────────────────────────────────────┐
-        │ tool_use_prompt_token_count + tool_use_prompt_tokens_details   │
-        └───────────────┬────────────────────────────────────────────────┘
-                        │
-                        ▼
-                ┌───────────────────────────┐
-                │  Model Output Candidates  │
-                │ (1 or more possible replies) 
-                └─────────────┬─────────────┘
-                              │
-                              ▼
-                ┌───────────────────────────┐
-                │  candidates_token_count   │
-                │ + candidates_tokens_details
-                └─────────────┬─────────────┘
-                              │
-                              ▼
-        ┌─────────────────────────────────────────────────────────────────┐
-        │                     Caching (optional)                          │
-        │ cache_tokens_details + cached_content_token_count               │
-        └───────────────┬─────────────────────────────────────────────────┘
-                        │
-                        ▼
-                ┌───────────────────────────┐
-                │     total_token_count     │
-                │ (sum of ALL categories)   │
-                └───────────────────────────┘
+```mermaid
+flowchart TD
+
+    A[Your Input<br/>(Prompt)] --> B[prompt_token_count]
+
+    B --> C[Model Internal Processing<br/>(Hidden Reasoning)]
+    C --> D[thoughts_token_count]
+
+    D --> E[Tool Use<br/>(optional)]
+    E --> F[tool_use_prompt_token_count]
+
+    F --> G[Model Output Candidate]
+    G --> H[candidates_token_count]
+
+    H --> I[Caching<br/>(optional)]
+    I --> J[total_token_count]
+
 ```
 
 ```python
