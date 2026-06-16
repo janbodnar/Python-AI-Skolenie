@@ -143,16 +143,23 @@ how efficiently a request was handled.
 
 
 ```mermaid
-flowchart LR
-    A["Your Input (Prompt)"] --> B["prompt_token_count"]
-    B --> C["Model Internal Processing"]
-    C --> D["thoughts_token_count"]
-    D --> E["Tool Use (optional)"]
-    E --> F["tool_use_prompt_token_count"]
-    F --> G["Model Output Candidate"]
-    G --> H["candidates_token_count"]
-    H --> I["Caching (optional)"]
-    I --> J["total_token_count"]
+flowchart TD
+    %% Input Stage
+    Input["Your Input (Prompt)"] --> PromptCount["prompt_token_count"]
+    
+    %% Core Model Processing
+    PromptCount --> Processing{"Model Internal Processing"}
+    
+    %% Parallel Token Streams (This keeps the chart compact and balanced)
+    Processing -->|Reasoning| Thoughts["thoughts_token_count"]
+    Processing -->|Tools| Tools["tool_use_prompt_token_count (optional)"]
+    Processing -->|Response| Candidates["candidates_token_count"]
+    
+    %% Aggregation Stage
+    PromptCount ----> Total{"total_token_count"}
+    Thoughts --> Total
+    Tools -.-> Total
+    Candidates --> Total
 ```
 
 ```python
