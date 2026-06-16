@@ -160,6 +160,38 @@ response = client.models.generate_content(
 print(response.text)
 ```
 
+## Image creation
+
+```python
+from google import genai
+from google.genai import types
+from PIL import Image
+
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.1-flash-image"
+
+prompt = """
+Create an image of Ferdo mravec, Včielka Maja, Chrobak Truhlik and their friends
+in a beautiful garden, enjoying a sunny day together. The scene should be
+vibrant and colorful, capturing the essence of friendship and nature.
+"""
+response = client.models.generate_content(
+    model=model,
+    contents=[prompt],
+)
+
+for part in response.parts:
+    if part.text is not None:
+        print(part.text)
+    elif part.inline_data is not None:
+        image = part.as_image()
+        image.save("generated_image.png")
+```
+
 
 ## Thinking level
 
