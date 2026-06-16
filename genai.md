@@ -245,6 +245,11 @@ print(response.text)
 
 ## Grounding
 
+Grounding means giving an AI access to verified external information—such  
+as search results or documents—so its answers are based on real, current  
+facts rather than only its internal training data. It helps the model reduce 
+hallucinations by tying its responses directly to authoritative sources.
+
 ```python
 from google import genai
 from google.genai import types
