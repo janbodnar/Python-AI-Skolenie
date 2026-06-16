@@ -130,6 +130,36 @@ to the `generate_content` endpoint. The model processes the image, interprets
 its visual content, and returns a natural‑language description, which the  
 script prints to the console.
 
+From URL.
+
+```python
+from google import genai
+from google.genai import types
+import requests
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.1-flash-lite"
+# model = "gemini-3.5-flash"
+prompt = """
+Describe the image provided. 
+"""
+
+
+image_path = "https://ipravda.sk/res/2016/07/29/thumbs/jubileum-nestandard1.jpg"
+image_bytes = requests.get(image_path).content
+image = types.Part.from_bytes(data=image_bytes, mime_type="image/jpeg")
+
+response = client.models.generate_content(
+    model=model,
+    contents=["What is this image?", image],
+)
+
+print(response.text)
+```
+
 
 ## Thinking level
 
