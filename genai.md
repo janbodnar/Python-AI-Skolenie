@@ -202,8 +202,36 @@ how efficiently a request was handled.
 ```
 
 ```python
+from google import genai  
+from google.genai import types
+import os
+  
+# Initialize client with your API key  
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)  
 
+model = 'gemini-3.1-flash-lite'
+prompt = '''
+Is Pluto a planent. Answer in a paragraph. 
+'''
+
+# Generate content from a text prompt  
+response = client.models.generate_content(  
+    model=model,  
+    contents=prompt,  
+    config=types.GenerateContentConfig(  
+        thinking_config=types.ThinkingConfig(thinking_level='medium')  
+    )
+)  
+  
+print(response.text)  
+print(response.usage_metadata.prompt_token_count)
+print(response.usage_metadata.cached_token_count)
+print(response.usage_metadata.candidates_token_count)
+print(response.usage_metadata.total_token_count)
 ```
+
+The example shows the token usage for a single prompt. 
 
 ## Streaming
 
