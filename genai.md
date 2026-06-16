@@ -275,6 +275,14 @@ except ClientError as e:
     print(e.message)
 ```
 
+This example shows how to call the Gemini `generate_content` API with  
+**Google Search grounding enabled**, allowing the model to answer questions  
+using up‑to‑date web information; the script initializes a Gemini client,  
+defines a `GoogleSearch` tool inside a `GenerateContentConfig`, and sends  
+a query (“Who won the FO 2026?”) to the lightweight `gemini-3.1-flash-lite`  
+model, while wrapping the call in a `try/except` block to catch and display  
+any `ClientError` returned by the API.
+
 ## Summarize PDF
 
 The next example summarizes a PDF file. 
