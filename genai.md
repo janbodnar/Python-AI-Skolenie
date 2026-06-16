@@ -400,6 +400,18 @@ with open(file_name, "r", encoding="utf-8") as file:
 
     report = SalaryReport.model_validate_json(response.text)
     print(report.model_dump_json(indent=2))
+
+    print('------------------------------')
+
+    print(report.minimum)
+    print(report.maximum)
+    print(report.sum)
+    print(report.average)
+
+    print('------------------------------')
+
+    print(response.code_execution_result)
+    print(response.executable_code)
 ```
 
 This example reads a local CSV file containing user salary data and sends  
