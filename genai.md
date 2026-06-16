@@ -121,6 +121,86 @@ response = client.models.generate_content(
 print(response.text)  
 ```
 
+## Tokens used
+
+| Term | Meaning |
+| --- | --- |
+| **prompt_token_count** | Number of tokens in your **input** (the text, files, or instructions you sent to the model). |
+| **candidates_token_count** | Number of tokens in the **model’s final visible answer** (the chosen candidate). Even if only one answer is returned, it is still called a “candidate.” |
+| **thoughts_token_count** | Number of tokens used in the model’s **hidden reasoning**, which is not shown to you but counted for billing and transparency. |
+| **total_token_count** | The **sum of all tokens** used: prompt + candidate response + hidden reasoning + any tool‑related tokens. |
+| **cache_tokens_details** | Information about tokens served from the model’s **cache**, if caching was used. Often ``None`` if no caching occurred. |
+| **cached_content_token_count** | Number of tokens retrieved from cache instead of recomputed. Saves cost and latency. |
+| **candidates_tokens_details** | A detailed breakdown of token usage for each candidate (usually ``None`` unless multiple candidates are requested). |
+| **prompt_tokens_details** | A breakdown of token counts per modality (e.g., text, image, audio) in your prompt. |
+| **tool_use_prompt_token_count** | Tokens used to generate instructions for tools (like code execution or search). |
+| **tool_use_prompt_tokens_details** | Detailed breakdown of those tool‑instruction tokens. |
+| **traffic_type** | Indicates whether the request was online, cached, or served from a special routing path. Often ``None``. |
+
+
+```
+                          ┌──────────────────────────┐
+                          │        Your Input        │
+                          │  (Prompt, text, files)   │
+                          └─────────────┬────────────┘
+                                        │
+                                        ▼
+                          ┌──────────────────────────┐
+                          │   prompt_token_count     │
+                          │  + prompt_tokens_details │
+                          └─────────────┬────────────┘
+                                        │
+                                        ▼
+                     ┌─────────────────────────────────────┐
+                     │   Model Internal Processing         │
+                     │   (hidden reasoning, planning)      │
+                     └───────────────┬─────────────────────┘
+                                     │
+                                     ▼
+                     ┌─────────────────────────────────────┐
+                     │        thoughts_token_count         │
+                     └───────────────┬─────────────────────┘
+                                     │
+                                     ▼
+        ┌─────────────────────────────────────────────────────────────────┐
+        │                     Tool Use (optional)                         │
+        │  e.g., code execution, search, function calling                 │
+        └───────────────┬──────────────────────────────────────v──────────┘
+                        │
+                        ▼
+        ┌────────────────────────────────────────────────────────────────┐
+        │ tool_use_prompt_token_count + tool_use_prompt_tokens_details   │
+        └───────────────┬────────────────────────────────────────────────┘
+                        │
+                        ▼
+                ┌───────────────────────────┐
+                │  Model Output Candidates  │
+                │ (1 or more possible replies) 
+                └─────────────┬─────────────┘
+                              │
+                              ▼
+                ┌───────────────────────────┐
+                │  candidates_token_count   │
+                │ + candidates_tokens_details
+                └─────────────┬─────────────┘
+                              │
+                              ▼
+        ┌─────────────────────────────────────────────────────────────────┐
+        │                     Caching (optional)                          │
+        │ cache_tokens_details + cached_content_token_count               │
+        └───────────────┬─────────────────────────────────────────────────┘
+                        │
+                        ▼
+                ┌───────────────────────────┐
+                │     total_token_count     │
+                │ (sum of ALL categories)   │
+                └───────────────────────────┘
+```
+
+```python
+
+```
+
 ## Streaming
 
 ```python
