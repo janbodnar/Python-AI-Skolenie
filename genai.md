@@ -404,6 +404,50 @@ wraps the file bytes in a `types.Part` object with the correct MIME type,
 submits both the document and the prompt in a single multimodal request,  
 and finally prints the summary returned by the model.
 
+## Audio transcription
+
+Audio transcription is the process of converting spoken words from an audio  
+recording into written text. It allows you to turn speech—whether from  
+conversations, lectures, podcasts, or voice notes—into a readable, searchable  
+format that can be analyzed, edited, or used in downstream tasks.
+
+```python
+from google import genai  
+from google.genai import types
+import os
+  
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)  
+
+model = 'gemini-3.1-flash-lite'
+prompt = '''
+Generate a transcript of the speech. Skip the introduction and conclusion. 
+'''
+
+with open('aesop_cat_mice.mp3', 'rb') as f:
+    audio_bytes = f.read()
+
+response = client.models.generate_content(
+  model=model,
+  contents=[
+    prompt,
+    types.Part.from_bytes(
+      data=audio_bytes,
+      mime_type='audio/mp3',
+    )
+  ]
+)
+
+print(response.text)
+```
+
+This script sends an audio file to Gemini and asks the model to generate  
+a transcript, while ignoring the introduction and conclusion. It loads  
+an MP3 file as raw bytes, wraps it in a `types.Part.from_bytes` object with  
+the correct MIME type, and sends both the prompt and the audio to  
+`generate_content`. The model processes the audio, produces a text transcript, 
+and the script prints the result.
+
 
 ## Analyze CSV data
 
