@@ -143,7 +143,7 @@ how efficiently a request was handled.
 
 
 ```mermaid
-flowchart TD
+flowchart LR
     A["Your Input (Prompt)"] --> B["prompt_token_count"]
     B --> C["Model Internal Processing"]
     C --> D["thoughts_token_count"]
