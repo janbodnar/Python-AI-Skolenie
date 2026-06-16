@@ -144,16 +144,15 @@ how efficiently a request was handled.
 
 ```mermaid
 flowchart TD
-
-    A[Your Input (Prompt)] --> B[prompt_token_count]
-    B --> C[Model Internal Processing]
-    C --> D[thoughts_token_count]
-    D --> E[Tool Use (optional)]
-    E --> F[tool_use_prompt_token_count]
-    F --> G[Model Output Candidate]
-    G --> H[candidates_token_count]
-    H --> I[Caching (optional)]
-    I --> J[total_token_count]
+    A["Your Input (Prompt)"] --> B["prompt_token_count"]
+    B --> C["Model Internal Processing"]
+    C --> D["thoughts_token_count"]
+    D --> E["Tool Use (optional)"]
+    E --> F["tool_use_prompt_token_count"]
+    F --> G["Model Output Candidate"]
+    G --> H["candidates_token_count"]
+    H --> I["Caching (optional)"]
+    I --> J["total_token_count"]
 ```
 
 ```python
