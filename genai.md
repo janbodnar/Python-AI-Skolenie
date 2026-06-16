@@ -8,18 +8,12 @@ provides a unified, high-performance interface for accessing
 models like Gemini, allowing you to build AI-powered features  
 without managing the underlying complexity of API calls.  
 
-### Why Choose the Google GenAI SDK?  
 
 As the recommended way to build with the Gemini API, the SDK  
 has reached **General Availability (GA)** and is fully supported  
 for production use. It represents a significant evolution from  
 legacy libraries, offering a streamlined developer experience  
-with a focus on consistency and performance. If you're using  
-older libraries like `google-generativeai` for Python, migrating  
-is highly encouraged, as legacy versions are deprecated. The SDK  
-is actively maintained and provides access to the latest features,  
-ensuring your applications benefit from ongoing advancements in  
-Google's AI technology.  
+with a focus on consistency and performance. 
 
 ### Key Features and Unified Design  
 
