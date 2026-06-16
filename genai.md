@@ -275,3 +275,46 @@ except ClientError as e:
     print(e.message)
 ```
 
+## Summarize PDF
+
+The next example summarizes a PDF file. 
+
+```python
+from google import genai
+from google.genai import types
+import httpx
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+model = "gemini-3.1-flash-lite"
+
+doc_url = "https://web2.mlp.cz/koweb/00/03/73/22/08/neprebudeny.pdf"
+
+# Retrieve and encode the PDF byte
+doc_data = httpx.get(doc_url).content
+
+prompt = "Summarize this document"
+response = client.models.generate_content(
+    model=model,
+    contents=[
+        types.Part.from_bytes(
+            data=doc_data,
+            mime_type='application/pdf',
+        ),
+        prompt
+    ]
+)
+
+print(response.text)
+```
+
+This example shows how to use the Google Gemini `generate_content` API to  
+download a PDF from a remote URL, encode it as binary data, and send it  
+to the lightweight `gemini-3.1-flash-lite` model together with a text prompt  
+so the model can read and summarize the document; the script retrieves  
+the API key from an environment variable, fetches the PDF using `httpx`,  
+wraps the file bytes in a `types.Part` object with the correct MIME type,  
+submits both the document and the prompt in a single multimodal request,  
+and finally prints the summary returned by the model.
+
