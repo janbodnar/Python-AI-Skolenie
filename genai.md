@@ -96,8 +96,55 @@ for model in resp:
     print(model.name)
 ```
 
+## Image description
+
+This snippet is a compact example of image understanding with Gemini. 
+
+```python
+from google import genai
+from google.genai import types
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.1-flash-lite"
+prompt = """
+Describe the image provided. 
+"""
+
+with open("sid.jpg", "rb") as f:
+    image_bytes = f.read()
+
+response = client.models.generate_content(
+    model=model,
+    contents=[
+        types.Part.from_bytes(
+            data=image_bytes,
+            mime_type="image/jpeg",
+        ),
+        prompt,
+    ],
+)
+
+print(response.text)
+```
+
+It loads a JPEG file from disk, wraps the raw bytes in a Part object with  
+the correct MIME type, and sends both the image and a short text prompt  
+to the `generate_content` endpoint. The model processes the image, interprets  
+its visual content, and returns a natural‑language description, which the  
+script prints to the console.
+
 
 ## Thinking level
+
+Thinking level is a setting that controls how much internal reasoning the model  
+performs before producing its final answer. A higher level encourages deeper,  
+more structured analysis, while a lower level keeps responses fast and direct.  
+This allows developers to choose between quick replies and more deliberate,  
+thoughtful output depending on the needs of their application or prompt.  
+
 
 ```python
 from google import genai
@@ -120,6 +167,14 @@ response = client.models.generate_content(
   
 print(response.text)  
 ```
+
+This code sends a simple question to the Gemini model and configures it to use  
+a medium thinking level, which instructs the model to perform a deeper round  
+of internal reasoning before producing its final answer. The example sets the  
+`thinking_level` option to `medium`, encouraging the model to analyze the prompt  
+more carefully and generate a more deliberate and thoughtful response while  
+keeping the overall structure of the script straightforward and easy to read.  
+
 
 ## Tokens used
 
