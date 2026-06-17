@@ -1080,4 +1080,168 @@ guarantees the response conforms to the specified types. The parsed result is
 returned as a Pydantic instance (`response.parsed`) and printed as pretty-printed  
 JSON.
 
+## Shell code execution
+
+In the context of AI, shell code execution refers to an AI system generating or running  
+commands in a computer’s command‑line environment (like Bash or PowerShell) to perform tasks  
+such as manipulating files, launching programs, or interacting with the operating system. 
+
+When AI models are involved, this usually means the model is either producing shell commands  
+as output or triggering their execution through a controlled tool or sandbox. Because shell  
+commands can directly affect the system, AI‑driven shell execution is always handled with  
+strict safeguards to prevent harmful or unintended operations.
+
+```python
+from google import genai
+from google.genai import types
+from dataclasses import dataclass
+from pydantic import BaseModel
+import subprocess
+import os
+
+
+@dataclass
+class CmdResult:
+    stdout: str
+    stderr: str
+    exit_code: int | None
+    timed_out: bool
+
+
+class ShellExecutor:
+    def __init__(self, default_timeout=60):
+        self.default_timeout = default_timeout
+
+    def run(self, cmd: str, timeout: int | None = None) -> CmdResult:
+        t = timeout or self.default_timeout
+        p = subprocess.Popen(
+            cmd,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        try:
+            out, err = p.communicate(timeout=t)
+            return CmdResult(out, err, p.returncode, False)
+        except subprocess.TimeoutExpired:
+            p.kill()
+            out, err = p.communicate()
+            return CmdResult(out, err, p.returncode, True)
+
+
+# ── Tool definition ──────────────────────────────────────────────
+class RunShellCommand(BaseModel):
+    """Run a shell command on the local Linux system."""
+
+    command: str
+
+
+shell_tool = types.Tool(
+    function_declarations=[
+        types.FunctionDeclaration(
+            name="run_shell",
+            description="Execute a shell command on the local Linux system and return its output.",
+            parameters=types.Schema(
+                type=types.Type.OBJECT,
+                properties={
+                    "command": types.Schema(
+                        type=types.Type.STRING,
+                        description="The shell command to execute.",
+                    ),
+                },
+                required=["command"],
+            ),
+        )
+    ],
+)
+
+# ── Client ───────────────────────────────────────────────────────
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+executor = ShellExecutor()
+
+model = "gemini-3.1-flash-lite"
+
+config = types.GenerateContentConfig(
+    tools=[shell_tool],
+    system_instruction="""
+You are a Linux system assistant. Use the run_shell function to execute 
+commands and fulfill the user's request.""",
+)
+
+# Initial request
+contents = [
+    types.Content(
+        role="user",
+        parts=[types.Part(text="find me the largest pdf file in ~/Documents")],
+    ),
+]
+
+print(f"── Request ──────────────────────────────────────────────")
+print(contents[0].parts[0].text)
+print()
+
+# ── AGENT LOOP ──────────────────────────────────────────────────
+while True:
+    response = client.models.generate_content(
+        model=model,
+        contents=contents,
+        config=config,
+    )
+
+    part = response.candidates[0].content.parts[0]
+
+    if part.function_call:
+        # The model wants to run a shell command
+        call = part.function_call
+        cmd: str = call.args["command"]
+        print(f"AI wants to run: {cmd}")
+
+        result = executor.run(cmd)
+        outcome = "timeout" if result.timed_out else f"exit_code={result.exit_code}"
+
+        # Append the model's function call to history
+        contents.append(response.candidates[0].content)
+
+        # Append the function response
+        contents.append(
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part(
+                        function_response=types.FunctionResponse(
+                            name=call.name,
+                            response={
+                                "stdout": result.stdout or "",
+                                "stderr": result.stderr or "",
+                                "outcome": outcome,
+                            },
+                        )
+                    )
+                ],
+            )
+        )
+
+        print(f"Command finished with {outcome}")
+        print()
+    else:
+        # Natural language response — we're done
+        print(f"── Final Answer ─────────────────────────────────────────")
+        print(part.text)
+        break
+# ── AGENT LOOP END ──────────────────────────────────────────────
+```
+
+This example builds a **tool-using agent loop** with Google's genai SDK. A `ShellExecutor`  
+class wraps `subprocess.Popen` to run shell commands locally with timeout handling.  
+A `run_shell` function declaration is registered as a tool in the `GenerateContentConfig`,  
+telling Gemini it can execute shell commands. The script enters a `while True` loop: it sends  
+the conversation history (`contents` list) to `gemini-3.1-flash-lite`, and whenever the model  
+responds with a `function_call`, the requested command is executed, then both the model's call  
+and the result (`stdout`, `stderr`, `outcome`) are appended back to `contents` so the model can  
+reason further. When the model responds with natural language instead of a function call, the  
+loop breaks and prints the final answer — effectively giving Gemini iterative shell access to  
+fulfill the user's request autonomously.
+
 
