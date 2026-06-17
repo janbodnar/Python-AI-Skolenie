@@ -602,6 +602,111 @@ the model focused, sending everything through the `generate_content` call, and f
 printing the model’s textual classification results.
 
 
+### Classifying tickets
+
+Classification of customer tickets.
+
+```python
+import argparse
+import os
+from textwrap import dedent
+
+from google import genai
+from pydantic import BaseModel
+from rich.console import Console
+from rich.table import Table
+
+
+DEFAULT_MODEL = "gemini-3.1-flash-lite"
+
+CATEGORIES = ["billing", "technical", "account", "shipping", "other"]
+
+TICKETS = [
+    "My last invoice seems too high, can you check the charges?",
+    "I can't log in after resetting my password.",
+    "Where is my package? The tracking has not updated for 3 days.",
+    "How do I change the email on my profile?",
+    "The app crashes when I try to upload a file.",
+    "I was billed twice for the same subscription this month.",
+    "My profile picture keeps disappearing after I upload it.",
+    "Can I get a refund for the duplicate charge?",
+    "The login page shows an error after the latest update.",
+    "I need to update my shipping address before the order ships.",
+]
+
+
+class TicketClassification(BaseModel):
+    ticket: str
+    category: str
+
+
+class ClassificationResult(BaseModel):
+    classifications: list[TicketClassification]
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Ticket classification demo.")
+    parser.add_argument("--model", type=str, default=DEFAULT_MODEL,
+                        help=f"LLM model (default: {DEFAULT_MODEL})")
+    return parser.parse_args()
+
+
+def classify_tickets(client, model, tickets):
+    system_instruction = dedent(f"""
+        You are a helpful assistant that classifies short customer support tickets.
+        Classify each ticket into one of these categories: {CATEGORIES}.
+    """).strip()
+
+    ticket_list = "\n".join(f"{i+1}. {t}" for i, t in enumerate(tickets))
+    prompt = f"Classify the following tickets:\n{ticket_list}"
+
+    response = client.models.generate_content(
+        model=model,
+        contents=prompt,
+        config={
+            "system_instruction": system_instruction,
+            "response_mime_type": "application/json",
+            "response_schema": ClassificationResult,
+        },
+    )
+
+    return response.parsed.classifications  # list[TicketClassification]
+
+
+def main():
+    args = parse_args()
+    api_key = os.getenv("AI_STUDIO_API_KEY")
+    client = genai.Client(api_key=api_key)
+
+    print("Task: Classify support tickets into one of", CATEGORIES)
+    print("\nTickets:")
+    for i, t in enumerate(TICKETS, 1):
+        print(f"{i}. {t}")
+
+    # Classify all tickets in one request
+    classifications = classify_tickets(client, args.model, TICKETS)
+
+    # Summary table
+    console = Console()
+    table = Table(title="Classification Summary")
+    table.add_column("#", justify="right")
+    table.add_column("Ticket", max_width=60)
+    table.add_column("Category")
+
+    for i, item in enumerate(classifications, 1):
+        table.add_row(str(i), item.ticket, item.category)
+    console.print(table)
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Classifies customer support tickets using Google's Gemini API with typed   
+structured output. Pydantic models (`TicketClassification` and `ClassificationResult`)    
+define the expected JSON schema. The API is configured with response_schema to    
+guarantee type-safe, structured responses. Results are displayed in a rich table.  
+
 ## Analyze CSV data
 
 Simple data analysis. 
