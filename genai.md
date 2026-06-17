@@ -654,7 +654,7 @@ object and printed in a nicely formatted structure.
 
 The next example filters out all female users from the CSV file.
 
-```
+```python
 """
 filter_female.py
 
