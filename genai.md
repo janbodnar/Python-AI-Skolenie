@@ -649,3 +649,108 @@ salaries; the request enables the built‑in code execution tool and specifies
 that the response must be valid JSON matching a `SalaryReport` Pydantic schema,  
 after which the returned JSON is validated and parsed into a `SalaryReport` 
 object and printed in a nicely formatted structure.
+
+### Filtering female users
+
+The next example filters out all female users from the CSV file.
+
+```
+"""
+filter_female.py
+
+This program reads a CSV file (users.csv) containing user data, uses the
+Gemini API (gemini-3.1-flash-lite) to classify each user's first name as
+'female' or 'male' (supporting Czech/Slovak names), filters the dataset to
+keep only female users, prints the results in a formatted table, and saves
+the filtered data to a new CSV file (female_users.csv).
+"""
+
+import os
+import csv
+from google import genai
+from pydantic import BaseModel
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+
+class GenderClassification(BaseModel):
+    gender: str  # "female" or "male"
+
+
+# Read users from CSV
+users = []
+with open("users.csv", "r", encoding="utf-8") as f:
+    reader = csv.DictReader(f)
+    for row in reader:
+        users.append(row)
+
+# Build list of first names to classify
+first_names = [u["first_name"] for u in users]
+prompt = f"""Classify each of the following first names by gender. 
+    These are Czech/Slovak names. Respond with a JSON object mapping each 
+    name to 'female' or 'male'.\n\n {first_names}
+    """
+
+system_instruction = """
+You are an expert in Czech and Slovak given names. Classify each name strictly
+as 'female' or 'male'. Return a JSON object where each key is the exact first
+name and the value is either 'female' or 'male'. Only return the JSON object, no
+other text.
+"""
+
+model = 'gemini-3.1-flash-lite'
+
+response = client.models.generate_content(
+    model=model,
+    config={"system_instruction": system_instruction},
+    contents=prompt,
+)
+
+# Parse the classification result
+import json
+
+# Clean up markdown code fences if present
+text = response.text.strip()
+if text.startswith("```"):
+    text = text.split("\n", 1)[1]
+    if text.endswith("```"):
+        text = text[:-3]
+    text = text.strip()
+
+classification = json.loads(text)
+print("Gender classification:")
+for name, gender in classification.items():
+    print(f"  {name}: {gender}")
+
+# Filter female users
+female_users = [u for u in users if classification.get(u["first_name"]) == "female"]
+
+print(f"\n{'='*60}")
+print(f"Total users: {len(users)}")
+print(f"Female users: {len(female_users)}")
+print(f"{'='*60}\n")
+
+# Print female users
+print("Female users:")
+print(
+    f"{'ID':<5} {'First Name':<15} {'Last Name':<15} {'Email':<40} {'Occupation':<25} {'Salary':<10}"
+)
+print("-" * 120)
+for u in female_users:
+    print(
+        f"{u['id']:<5} {u['first_name']:<15} {u['last_name']:<15} {u['email']:<40} {u['occupation']:<25} {u['salary']:<10}"
+    )
+
+# Save filtered results to a new CSV
+file_name = "female_users.csv"
+with open(file_name, "w", encoding="utf-8", newline="") as f:
+    writer = csv.DictWriter(f, fieldnames=users[0].keys())
+    writer.writeheader()
+    writer.writerows(female_users)
+
+print(f"\nFiltered results saved to '{file_name}'")
+```
+
+
+
