@@ -996,9 +996,9 @@ saves the resulting subset into a new CSV file called `female_users.csv`.
 
 ## Data extraction
 
-Data extraction is the process of pulling specific pieces of information out of 
+Data extraction is the process of pulling specific pieces of information out of  
 a larger source—such as a file, database, webpage, or dataset—so that the extracted  
-data can be analyzed, transformed, or used for further processing.
+data can be analyzed, transformed, or used for further processing.  
 
 ```python
 import os
