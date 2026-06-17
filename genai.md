@@ -753,4 +753,36 @@ print(f"\nFiltered results saved to '{file_name}'")
 ```
 
 
+## Data extraction
+
+
+```python
+import os
+from google import genai
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.1-flash-lite"
+prompt = """
+Extract information about people mentioned in the following text. For each
+person, provide their name, age, and city of residence in a structured JSON
+format. John Doe is a software engineer living in New York. He
+is 30 years old and enjoys hiking and photography. Jane Smith is a graphic
+designer based in San Francisco. She is 28 years old and loves painting and
+traveling."""
+
+
+response = client.models.generate_content(
+    model=model,
+    contents=prompt,
+    config={
+        "response_mime_type": "application/json",
+    },
+)
+
+print(response.text)
+```
+
+
 
