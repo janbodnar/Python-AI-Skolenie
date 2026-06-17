@@ -230,6 +230,11 @@ For creative writing, typical values are:
 - `temperature = 0.7–1.0`
 - `top_p = 0.9–1.0`
 
+In the Google genai SDK, the defaults are:
+
+- temperature: 1.0
+- top_p: 0.95
+
 
 ```python
 """Demonstrates temperature and top_p parameters in the Google genai SDK.
