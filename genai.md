@@ -1388,3 +1388,198 @@ loop breaks and prints the final answer — effectively giving Gemini iterative 
 fulfill the user's request autonomously.
 
 
+## Generate charts with Matplotlib and Seaborn
+
+### Bar chart with Matplotlib
+
+Bar chart of average salary by occupation.
+
+```python
+"""Uses ToolCodeExecution to generate a matplotlib chart from users.csv.
+
+The model writes and runs Python code in Google's sandbox to create a
+bar chart of average salary by occupation, then returns the image inline.
+"""
+
+from google import genai
+from google.genai import types
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+with open("users.csv", "r", encoding="utf-8") as f:
+    data = f.read()
+
+prompt = f"""You have Python with matplotlib, pandas, and numpy available.
+
+From the CSV data below, write and run Python code to:
+
+1. Parse the CSV into a pandas DataFrame.
+2. Group by occupation and calculate the average salary.
+3. Create a **matplotlib** bar chart:
+   - Title: "Average Salary by Occupation"
+   - Y-axis label: "Average Salary (EUR)"
+   - X-axis label: "Occupation"
+   - Rotate x-axis labels to 45 degrees so they don't overlap.
+   - Use a light blue bar color with a dark edge.
+   - Add grid lines on the y-axis for readability.
+4. Show the plot so it is returned as an inline image.
+5. Print the numerical averages clearly below the chart.
+
+CSV Data:
+{data}
+"""
+
+response = client.models.generate_content(
+    model="gemini-3.1-flash-lite",
+    contents=prompt,
+    config=types.GenerateContentConfig(
+        tools=[types.Tool(code_execution=types.ToolCodeExecution)],
+    ),
+)
+
+# ── Save the chart from inline image data ─────────────────────
+chart_saved = False
+for part in response.candidates[0].content.parts:
+    if part.inline_data and part.inline_data.mime_type == "image/png":
+        with open("matplotlib_chart.png", "wb") as img_file:
+            img_file.write(part.inline_data.data)
+        print(f"Chart saved as matplotlib_chart.png ({len(part.inline_data.data)} bytes)")
+        chart_saved = True
+        break
+
+if not chart_saved:
+    print("(No inline chart image found; the model may have only returned text.)")
+
+# ── Print the model's natural language response ───────────────
+print("\n── Model response ──────────────────────────────────────")
+print(response.text)
+
+# ── Show the code that was generated ──────────────────────────
+print("\n── Generated code ──────────────────────────────────────")
+if response.executable_code:
+    print(response.executable_code)
+else:
+    print("(No executable code in response)")
+```
+
+### HeatMap with Seaborn
+
+Heatmap of salary statistics by occupation.
+
+```python
+"""Uses ToolCodeExecution to generate a seaborn heatmap from users.csv.
+
+The model writes and runs Python code in Google's sandbox to create a
+heatmap of salary statistics by occupation using seaborn, then returns
+the image inline and prints structured stats.
+"""
+
+from google import genai
+from google.genai import types
+from pydantic import BaseModel
+import os
+
+
+class SalaryStats(BaseModel):
+    occupation: str
+    average_salary: float
+    min_salary: float
+    max_salary: float
+    count: int
+
+
+class AnalysisResult(BaseModel):
+    stats: list[SalaryStats]
+
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+with open("users.csv", "r", encoding="utf-8") as f:
+    data = f.read()
+
+prompt = f"""You have Python with matplotlib, seaborn, pandas, and numpy available.
+
+From the CSV data below, write and run Python code to:
+
+1. Parse the CSV into a pandas DataFrame.
+2. Group by occupation and calculate the average, min, and max salary for each.
+3. Build a pivot-style matrix suitable for a seaborn heatmap:
+   - Rows: occupations, sorted by average salary descending (highest at top).
+   - Columns: "Average Salary", "Min Salary", "Max Salary".
+   - Values: the corresponding salary numbers.
+4. Create a seaborn heatmap on a dark background:
+   - Use seaborn's darkgrid style. Set the figure facecolor to "#1e1e1e" and
+     the axes facecolor to "#2d2d2d".
+   - Title: "Salary Statistics by Occupation", in light text ("#e0e0e0").
+   - Use a bright sequential colormap ("plasma", "magma", or "inferno").
+   - Annotate each cell with the salary value, fmt=".1f".
+   - After drawing the heatmap, iterate over the annotation Text objects and
+     set each one to "black" if the normalised cell value is above 0.5
+     (bright cell) or "white" otherwise, so labels stay readable across the
+     full colour range.
+   - Size the figure at least 10 inches wide and tall enough for 20 rows
+     (roughly 0.5-0.6 inches of height per row, plus margin).
+   - Keep x-axis and y-axis tick labels horizontal (rotation=0).
+   - Add a colorbar labelled "Salary (EUR)" with light text and tick labels.
+   - Set all tick label colours to "#e0e0e0".
+5. Show the plot so it is returned as an inline image.
+6. Print the per-occupation stats clearly.
+
+After generating the chart, return the stats as valid JSON matching this schema:
+{{
+  "stats": [
+    {{"occupation": "...", "average_salary": 0.0, "min_salary": 0.0, "max_salary": 0.0, "count": 0}}
+  ]
+}}
+
+CSV Data:
+{data}
+"""
+
+response = client.models.generate_content(
+    model="gemini-3.1-flash-lite",
+    contents=prompt,
+    config=types.GenerateContentConfig(
+        tools=[types.Tool(code_execution=types.ToolCodeExecution)],
+    ),
+)
+
+# ── Save the heatmap from inline image data ───────────────────
+chart_saved = False
+for part in response.candidates[0].content.parts:
+    if part.inline_data and part.inline_data.mime_type == "image/png":
+        with open("seaborn_heatmap.png", "wb") as img_file:
+            img_file.write(part.inline_data.data)
+        print(f"Heatmap saved as seaborn_heatmap.png ({len(part.inline_data.data)} bytes)")
+        chart_saved = True
+        break
+
+if not chart_saved:
+    print("(No inline heatmap image found; the model may have only returned text.)")
+
+# ── Print the model's natural language response ───────────────
+print("\n── Model response ──────────────────────────────────────")
+print(response.text)
+
+# ── Try to parse structured stats from the response ───────────
+print("\n── Structured stats ────────────────────────────────────")
+try:
+    result = AnalysisResult.model_validate_json(response.text)
+    for s in result.stats:
+        print(f"  {s.occupation:25s}  avg={s.average_salary:7.1f}  min={s.min_salary:7.1f}  "
+              f"max={s.max_salary:7.1f}  count={s.count}")
+except Exception:
+    print("(Could not parse structured stats from response)")
+
+# ── Show the code that was generated ──────────────────────────
+print("\n── Generated code ──────────────────────────────────────")
+if response.executable_code:
+    print(response.executable_code)
+else:
+    print("(No executable code in response)")
+```
+
+
