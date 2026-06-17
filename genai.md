@@ -828,4 +828,12 @@ result = response.parsed  # returns ExtractionResult instance
 print(result.model_dump_json(indent=2))
 ```
 
+Demonstrates how to use Gemini's structured output (typed JSON response) with  
+Pydantic models. Two model classes — `Person` and `ExtractionResult` — define the  
+expected schema. The API is configured with response_schema pointing to  
+`ExtractionResult` and response_mime_type set to "application/json", which  
+guarantees the response conforms to the specified types. The parsed result is  
+returned as a Pydantic instance (`response.parsed`) and printed as pretty-printed  
+JSON.
+
 
