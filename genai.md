@@ -784,5 +784,48 @@ response = client.models.generate_content(
 print(response.text)
 ```
 
+In the next example, we specify the JSON output with Pydantic.
+
+
+```python
+import os
+from google import genai
+from pydantic import BaseModel
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+
+class Person(BaseModel):
+    name: str
+    age: int
+    city: str
+
+
+class ExtractionResult(BaseModel):
+    people: list[Person]
+
+
+model = "gemini-3.1-flash-lite"
+prompt = """
+Extract information about people mentioned in the following text. For each
+person, provide their name, age, and city of residence. John Doe is a software
+engineer living in New York. He is 30 years old and enjoys hiking and
+photography. Jane Smith is a graphic designer based in San Francisco. She is
+28 years old and loves painting and traveling."""
+
+
+response = client.models.generate_content(
+    model=model,
+    contents=prompt,
+    config={
+        "response_mime_type": "application/json",
+        "response_schema": ExtractionResult,
+    },
+)
+
+result = response.parsed  # returns ExtractionResult instance
+print(result.model_dump_json(indent=2))
+```
 
 
