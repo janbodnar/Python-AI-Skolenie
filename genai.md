@@ -794,6 +794,13 @@ with open(file_name, "w", encoding="utf-8", newline="") as f:
 print(f"\nFiltered results saved to '{file_name}'")
 ```
 
+This example loads user records from a CSV file, sends all first names to  
+the Gemini model to classify them as either female or male—specifically tuned  
+for Czech and Slovak naming conventions—parses the model’s JSON response,  
+filters the original dataset to keep only users whose first names were labeled  
+female, prints a neatly formatted table of those filtered users, and finally  
+saves the resulting subset into a new CSV file called `female_users.csv`.
+
 
 ## Data extraction
 
