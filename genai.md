@@ -560,6 +560,48 @@ the correct MIME type, and sends both the prompt and the audio to
 and the script prints the result.
 
 
+## Classification
+
+Classification is the process of assigning items, data, or observations into predefined  
+categories based on their characteristics. In machine learning and AI, it means mapping  
+inputs to one label from a fixed set of labels.
+
+```python
+import os
+from google import genai
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+# The items to classify
+items = ["elephant", "mouse", "dog", "snail", "giraffe", "ant"]
+prompt = f"Classify the following items as [large, medium, small, tiny]:\n" + "\n".join(items)
+model = 'gemini-3.1-flash-lite'
+
+system_instruction = """
+You are a helpful assistant that classifies items strictly into the categories provided.
+"""
+
+# Use system_instruction to ensure the model stays on task
+response = client.models.generate_content(
+    model=model, 
+    config={
+        'system_instruction': system_instruction
+    },
+    contents=prompt
+)
+
+print("Classification Results:")
+print(response.text)
+```
+
+The example shows a short Python script that sends a list of animals to Google's  
+Gemini model and asks it to classify each one into one of four size categories—large, 
+medium, small, or tiny—by building a prompt, adding a system instruction to keep  
+the model focused, sending everything through the `generate_content` call, and finally  
+printing the model’s textual classification results.
+
+
 ## Analyze CSV data
 
 Simple data analysis. 
