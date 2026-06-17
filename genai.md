@@ -192,6 +192,144 @@ for part in response.parts:
         image.save("generated_image.png")
 ```
 
+## Temperatrure and top_p
+
+`Temperature` is a parameter that controls how *bold or conservative* a model’s  
+word choices are by scaling the entire probability distribution of possible  
+next tokens; when the temperature is low, the model behaves predictably and  
+sticks to the safest, most likely answers, while a higher temperature makes  
+it more adventurous, creative, and willing to pick less probable options. 
+
+`Top‑p`, on the other hand, limits randomness by restricting the model to a  
+subset of tokens whose combined probability mass reaches a chosen threshold  
+`p`, meaning the model only samples from the “most likely” portion of the  
+distribution rather than considering every possible token.  
+
+The key difference is that temperature reshapes the whole probability  
+landscape—making it flatter or sharper—while `top‑p` trims the landscape by  
+cutting off the long tail of unlikely tokens and sampling only from the  
+nucleus of probable ones. Temperature affects *how* probabilities are  
+distributed, whereas `top‑p` affects *which* probabilities are even allowed 
+into the sampling pool, giving you two complementary ways to tune creativity  
+and control.
+
+### Common temerature and top_p values
+
+Here’s a table with commonly used `temperature` and `top_p` values for different tasks with models:
+
+| Task Type         | temperature | top_p | Description                                      |
+|-------------------|-------------|-------|--------------------------------------------------|
+| Creative Writing  | 0.7–1.0     | 0.9–1 | More randomness and diversity for creativity      |
+| Factual QA        | 0.0–0.3     | 0.8–1 | Deterministic, focused, less risk of hallucination|
+| Summarization     | 0.3–0.7     | 0.8–1 | Balanced, concise, and relevant output           |
+| Code Generation   | 0.2–0.5     | 0.8–1 | Accurate, less creative, more reliable code       |
+| Brainstorming     | 0.8–1.0     | 0.9–1 | Highly creative, many ideas, less repetition      |
+| Translation       | 0.3–0.7     | 0.8–1 | Balanced, accurate, and fluent translations       |
+
+For creative writing, typical values are:
+- `temperature = 0.7–1.0`
+- `top_p = 0.9–1.0`
+
+
+```python
+"""Demonstrates temperature and top_p parameters in the Google genai SDK.
+
+temperature (0.0–2.0):
+  - Controls the randomness of token selection.
+  - Lower values (e.g. 0.0) make output more deterministic and focused.
+  - Higher values (e.g. 1.5) make output more creative, surprising, and diverse.
+
+top_p (0.0–1.0):
+  - Nucleus sampling: only tokens whose cumulative probability ≤ top_p are considered.
+  - Lower values (e.g. 0.1) produce more focused, conservative output.
+  - Higher values (e.g. 0.9) allow more diversity.
+  - Recommend changing one at a time, not both simultaneously.
+
+Run this script multiple times to observe the variability!
+"""
+
+from google import genai
+from google.genai import types
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-2.5-flash"
+prompt = "Write a one-sentence tagline for a futuristic coffee shop."
+
+# ── 1. Deterministic (temperature=0.0, top_p=1.0) ──────────────
+config_deterministic = types.GenerateContentConfig(
+    temperature=0.0,
+    top_p=1.0,
+)
+
+response = client.models.generate_content(
+    model=model,
+    contents=prompt,
+    config=config_deterministic,
+)
+print(f"── Deterministic (temp=0.0, top_p=1.0) ──────────────")
+print(f"{response.text}\n")
+
+# ── 2. Creative (temperature=1.2, top_p=0.95) ──────────────────
+config_creative = types.GenerateContentConfig(
+    temperature=1.2,
+    top_p=0.95,
+)
+
+response = client.models.generate_content(
+    model=model,
+    contents=prompt,
+    config=config_creative,
+)
+print(f"── Creative (temp=1.2, top_p=0.95) ───────────────────")
+print(f"{response.text}\n")
+
+# ── 3. Focused (temperature=0.3, top_p=0.1) ────────────────────
+config_focused = types.GenerateContentConfig(
+    temperature=0.3,
+    top_p=0.1,
+)
+
+response = client.models.generate_content(
+    model=model,
+    contents=prompt,
+    config=config_focused,
+)
+print(f"── Focused (temp=0.3, top_p=0.1) ─────────────────────")
+print(f"{response.text}\n")
+
+# ── 4. Highly random (temperature=1.8, top_p=1.0) ──────────────
+config_random = types.GenerateContentConfig(
+    temperature=1.8,
+    top_p=1.0,
+    # Safety settings are kept at defaults for this example.
+)
+
+response = client.models.generate_content(
+    model=model,
+    contents=prompt,
+    config=config_random,
+)
+print(f"── Highly random (temp=1.8, top_p=1.0) ───────────────")
+print(f"{response.text}\n")
+
+print("─" * 50)
+print("Run this script a few times — low-temperature outputs will stay")
+print("similar, while high-temperature outputs will vary widely.")
+```
+
+| # | Config | Observed behavior |
+|---|---|---|
+| **1** | `temp=0.0, top_p=1.0` | **Deterministic** — gives the same 5 safe taglines every run |
+| **3** | `temp=0.3, top_p=0.1` | **Focused** — very similar to temp=0.0, nearly identical outputs |
+| **2** | `temp=1.2, top_p=0.95` | **Creative** — more varied phrasing, explores different angles |
+| **4** | `temp=1.8, top_p=1.0` | **Highly random** — wild single-line output like *"Harnessing quantum beans to brew your next-gen daily boost"* |
+
+
+
+
 
 ## Thinking level
 
