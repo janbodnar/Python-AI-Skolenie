@@ -707,6 +707,93 @@ structured output. Pydantic models (`TicketClassification` and `ClassificationRe
 define the expected JSON schema. The API is configured with response_schema to    
 guarantee type-safe, structured responses. Results are displayed in a rich table.  
 
+## Sentiment analysis
+
+Sentiment analysis is the process of using computational methods to determine the  
+emotional tone expressed in text—typically classifying it as positive, negative,  
+or neutral, or assigning a numerical score that reflects how favorable or unfavorable  
+the sentiment is.
+
+```python
+"""
+sentiment_analysis.py
+
+Analyzes sentiment of Slovak movie reviews using Gemini's typed structured
+output. All reviews are sent in a single request — the Pydantic model
+ReviewSentiment defines the expected schema (id, review, sentiment score 0-1),
+and ReviewSentimentList wraps all results. The API returns a validated typed
+response instead of needing 10 separate requests.
+"""
+
+import os
+from google import genai
+from pydantic import BaseModel
+
+
+slovak_movie_reviews = {
+    1: "Príbeh bol úplne pútavý a herecké výkony brilantné. Nemohol som sa odtrhnúť ani na sekundu!",
+    2: "Tempo bolo mimoriadne pomalé a postavy nemali žiadnu hĺbku. Nudil som sa už v polovici.",
+    3: "Hoci vizuálne efekty boli ohromujúce, dej pôsobil predvídateľne a bez inšpirácie.",
+    4: "Toto je filmové dielo, ktoré mi dojalo srdce. Každá scéna bola dokonalosť!",
+    5: "Dialógy boli trápne a humor úplne zlyhal. Určite to nestojí za ten humbug.",
+    6: "Bol to priemerný film - nie dobrý, ale ani úplná katastrofa. Niektoré časti ma bavili.",
+    7: "Chemia medzi hlavnými postavami bola elektrizujúca a soundtrack fenomenálny!",
+    8: "Film začal skvele, ale v druhej polovici sa úplne rozpadol. Veľké sklamanie.",
+    9: "Vizualne ohromujúci film, ktorý dokonale spája akciu a emócie. Určite odporúčam!",
+    10: "Premisa bola zaujímavá, ale realizácia bola slabá. Nedokázalo ma to zaujať."
+}
+
+
+class ReviewSentiment(BaseModel):
+    id: int
+    review: str
+    sentiment: float  # 0.0 = very negative, 1.0 = very positive
+
+
+class ReviewSentimentList(BaseModel):
+    reviews: list[ReviewSentiment]
+
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+# Build a single prompt with all reviews
+review_lines = "\n".join(
+    f"{k}. {v}" for k, v in slovak_movie_reviews.items()
+)
+prompt = f"""
+Ohodnoť sentiment nasledujúcich recenzií filmov.
+Pre každú recenziu vráť id, presné znenie recenzie a sentiment na škále od 0 do 1
+(0 = veľmi negatívny, 1 = veľmi pozitívny).
+
+Recenzie:
+{review_lines}
+"""
+
+response = client.models.generate_content(
+    model="gemini-3.1-flash-lite",
+    contents=prompt,
+    config={
+        "response_mime_type": "application/json",
+        "response_schema": ReviewSentimentList,
+    },
+)
+
+# Print results
+for r in response.parsed.reviews:
+    print(f"{r.id}. [sentiment: {r.sentiment:.2f}] {r.review}")
+```
+
+The provided script performs sentiment analysis on a set of Slovak movie reviews  
+by sending all ten reviews in a single request to the Gemini model, which is instructed  
+to return structured JSON that matches two Pydantic models: one describing each  
+review's ID, text, and a sentiment score between 0 and 1, and another wrapping the full list.  
+Instead of making separate API calls for each review, the program builds one combined prompt, 
+requests a typed JSON response, and receives a validated Python object containing all  
+sentiment results. It then iterates through the parsed output and prints each review  
+alongside its computed sentiment score, giving a clear, efficient overview of how positively  
+or negatively each movie review was interpreted.
+
 ## Analyze CSV data
 
 Simple data analysis. 
