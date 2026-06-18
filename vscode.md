@@ -15,6 +15,39 @@ with VS Code for Python development.
 
 Great tutorial: https://code.visualstudio.com/docs/editor/codebasics
 
+## Deepseek settings
+
+```json
+[
+	{
+		"name": "DeepSeek",
+		"vendor": "customendpoint",
+		"apiKey": "${input:chat.lm.secret.3767139b}",
+		"apiType": "chat-completions",
+		"models": [
+			{
+				"id": "deepseek-v4-flash",
+				"name": "DeepSeek V4 Flash",
+				"url": "https://api.deepseek.com/v1/chat/completions",
+				"toolCalling": true,
+				"vision": false,
+				"maxInputTokens": 1000000,
+				"maxOutputTokens": 384000
+			},
+			{
+				"id": "deepseek-v4-pro",
+				"name": "DeepSeek V4 Pro",
+				"url": "https://api.deepseek.com/v1/chat/completions",
+				"toolCalling": true,
+				"vision": false,
+				"maxInputTokens": 1000000,
+				"maxOutputTokens": 384000
+			}
+		]
+	}
+]
+```
+
 ## Essential shortcuts
 
 - `Ctrl + P` - search for symbols
