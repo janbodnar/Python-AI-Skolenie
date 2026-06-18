@@ -441,7 +441,7 @@ response = client.models.generate_content(
   
 print(response.text)  
 print(response.usage_metadata.prompt_token_count)
-print(response.usage_metadata.cached_token_count)
+print(response.usage_metadata.cached_content_token_count)
 print(response.usage_metadata.candidates_token_count)
 print(response.usage_metadata.total_token_count)
 ```
