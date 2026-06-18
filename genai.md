@@ -209,7 +209,7 @@ The key difference is that temperature reshapes the whole probability
 landscape—making it flatter or sharper—while `top‑p` trims the landscape by  
 cutting off the long tail of unlikely tokens and sampling only from the  
 nucleus of probable ones. Temperature affects *how* probabilities are  
-distributed, whereas `top‑p` affects *which* probabilities are even allowed 
+distributed, whereas `top‑p` affects *which* probabilities are even allowed  
 into the sampling pool, giving you two complementary ways to tune creativity  
 and control.
 
@@ -370,7 +370,7 @@ print(response.text)
 This code sends a simple question to the Gemini model and configures it to use  
 a medium thinking level, which instructs the model to perform a deeper round  
 of internal reasoning before producing its final answer. The example sets the  
-`thinking_level` option to `medium`, encouraging the model to analyze the prompt  
+`thinking_level` option to `medium`, encouraging the model to analyze the prompt   
 more carefully and generate a more deliberate and thoughtful response while  
 keeping the overall structure of the script straightforward and easy to read.  
 
