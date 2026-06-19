@@ -1584,13 +1584,12 @@ else:
 
 ## Duckduckgo search 
 
+Using se Google's genai library with function calling. The agent searches the  
+web via DuckDuckGo and answers questions with real-time data.
+
 ```python
 """
 duck_search.py — GenAI version of the DDGS (DuckDuckGo Search) agent.
-
-Rewritten from the OpenAI Agents SDK pattern to use Google's genai library
-with function calling. The agent searches the web via DuckDuckGo and
-answers questions with real-time data.
 """
 
 import os
