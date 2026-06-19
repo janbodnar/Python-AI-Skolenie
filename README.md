@@ -2,6 +2,9 @@
 
 https://gemini.google.com/share/32b297d2d753
 
+https://www.facebook.com/profile.php?id=61590475374227
+
+
 Kurz *Úvod do veľkých jazykových modelov a AI v dátovej analýze*, kontakt jan.bodnar@gmail.com
 
 Kurz je určený najmä pre dátových analytikov, vývojárov, študentov technických odborov  
