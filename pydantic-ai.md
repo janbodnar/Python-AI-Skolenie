@@ -256,3 +256,282 @@ result = agent.run_sync(
 
 print(result.output)
 ```
+
+## Parallel agents
+
+```python
+import asyncio
+import time
+
+from pydantic_ai import Agent
+
+# ── Define agents with different specializations ────────────────────────────
+
+critic = Agent(
+    "deepseek:deepseek-v4-flash",
+    system_prompt=(
+        "You are a harsh critic. Be concise and blunt. "
+        "Identify weaknesses, flaws, and risks. Never praise."
+    ),
+)
+
+optimist = Agent(
+    "deepseek:deepseek-v4-flash",
+    system_prompt=(
+        "You are a relentless optimist. Be concise. "
+        "Find the upside, opportunities, and best-case scenario in everything. "
+        "Ignore downsides entirely."
+    ),
+)
+
+pragmatist = Agent(
+    "deepseek:deepseek-v4-flash",
+    system_prompt=(
+        "You are a pragmatic realist. Be concise. "
+        "Give a balanced, practical assessment of what is most likely to happen. "
+        "Acknowledge both upsides and downsides proportionally."
+    ),
+)
+
+# ── Run all agents concurrently ─────────────────────────────────────────────
+
+
+async def main():
+    prompt = 'Should a startup raise VC funding or bootstrap?'
+
+    async def run_agent(name: str, agent: Agent, prompt: str) -> tuple[str, str]:
+        result = await agent.run(prompt)
+        return name, result.output
+
+    start = time.perf_counter()
+
+    # Launch all three agents in parallel
+    results = await asyncio.gather(
+        run_agent("Critic", critic, prompt),
+        run_agent("Optimist", optimist, prompt),
+        run_agent("Pragmatist", pragmatist, prompt),
+    )
+
+    elapsed = time.perf_counter() - start
+
+    for name, output in results:
+        print(f"── {name} ──")
+        print(output)
+        print()
+
+    print(f"Completed in {elapsed:.2f}s (all ran in parallel)")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+## Delegation
+
+```python
+import asyncio
+import json
+import os
+import sys
+import time
+from dataclasses import dataclass
+from pathlib import Path
+
+from pydantic import BaseModel, Field
+
+from pydantic_ai import Agent, RunContext
+from pydantic_ai.common_tools.web_fetch import web_fetch_tool
+
+# ── Structured types ───────────────────────────────────────────────────────
+
+class ExtractedParagraphs(BaseModel):
+    paragraphs: list[str] = Field(description="List of main body paragraphs")
+
+class PageSummary(BaseModel):
+    title: str = Field(description="Inferred title of the page")
+    summary: str = Field(description="One-paragraph summary of the content")
+    key_points: list[str] = Field(description="3-5 key takeaways")
+
+class CrossPageAnalysis(BaseModel):
+    common_themes: list[str] = Field(description="Themes appearing across multiple pages")
+    differences: list[str] = Field(description="Notable differences or unique angles")
+    overall_summary: str = Field(description="Synthesized overview of all pages")
+
+
+# ── Agent 1: Web page fetcher ──────────────────────────────────────────────
+
+fetch_agent = Agent(
+    "deepseek:deepseek-v4-flash",
+    tools=[web_fetch_tool()],
+    system_prompt=(
+        "Fetch the full content of the given URL. "
+        "Return the complete text exactly as received — do not summarize or truncate."
+    ),
+)
+
+
+# ── Agent 2: Paragraph extractor ───────────────────────────────────────────
+
+extract_agent = Agent(
+    "deepseek:deepseek-v4-flash",
+    output_type=ExtractedParagraphs,
+    retries={'output': 3},
+    system_prompt=(
+        "Extract all meaningful paragraph text from the provided page content. "
+        "Skip navigation, headers, footers, ads, and boilerplate. "
+        "Return only the main body paragraphs as a list. "
+        "You MUST respond with a valid JSON object containing a 'paragraphs' array. "
+        "Do NOT include any explanation, markdown fences, or text outside the JSON."
+    ),
+)
+
+
+# ── Agent 3: Single-page summarizer ────────────────────────────────────────
+
+summarize_agent = Agent(
+    "deepseek:deepseek-v4-flash",
+    output_type=PageSummary,
+    retries={'output': 3},
+    system_prompt=(
+        "Analyze the provided paragraphs and produce a structured summary. "
+        "Infer a meaningful title, write a concise summary, "
+        "and list 3-5 key takeaways. "
+        "You MUST respond with ONLY a valid JSON object with fields: "
+        "title (str), summary (str), key_points (list[str]). "
+        "No markdown fences, no explanation, no extra text."
+    ),
+)
+
+
+# ── Agent 4: Cross-page analyst ────────────────────────────────────────────
+
+cross_analysis_agent = Agent(
+    "deepseek:deepseek-v4-flash",
+    output_type=CrossPageAnalysis,
+    retries={'output': 3},
+    system_prompt=(
+        "Compare and synthesize content from multiple web pages. "
+        "Identify common themes, notable differences, and write an overall synthesis. "
+        "You MUST respond with ONLY a valid JSON object with fields: "
+        "common_themes (list[str]), differences (list[str]), overall_summary (str). "
+        "No markdown fences, no explanation, no extra text."
+    ),
+)
+
+
+# ── File writer tool ───────────────────────────────────────────────────────
+
+@dataclass
+class OutputDeps:
+    output_dir: str
+
+
+file_writer_agent = Agent(
+    "deepseek:deepseek-v4-flash",
+    deps_type=OutputDeps,
+    system_prompt=(
+        "You write structured data to the filesystem. "
+        "Call the appropriate tool to persist results."
+    ),
+)
+
+
+@file_writer_agent.tool
+async def write_json_file(ctx: RunContext[OutputDeps], filename: str, data: str) -> str:
+    """Write JSON data to a file. `data` must be a valid JSON string."""
+    out_dir = Path(ctx.deps.output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    filepath = out_dir / filename
+    filepath.write_text(data)
+    return f"Written to {filepath}"
+
+
+# ── Per-page pipeline ──────────────────────────────────────────────────────
+
+async def process_page(url: str) -> dict:
+    """Fetch → extract → summarize a single page."""
+    print(f"  [{url}] Fetching...")
+    fetch_result = await fetch_agent.run(f"Fetch the content of: {url}")
+    print(f"  [{url}] Fetched {len(fetch_result.output)} chars, extracting...")
+
+    extract_result = await extract_agent.run(
+        f"Extract paragraphs from this page content:\n\n{fetch_result.output}"
+    )
+    paragraphs: ExtractedParagraphs = extract_result.output
+    print(f"  [{url}] Extracted {len(paragraphs.paragraphs)} paragraphs, summarizing...")
+
+    summary_result = await summarize_agent.run(
+        f"Summarize these paragraphs from {url}:\n" + "\n".join(paragraphs.paragraphs)
+    )
+    page_summary: PageSummary = summary_result.output
+    print(f"  [{url}] Done — '{page_summary.title}'")
+
+    return {
+        "url": url,
+        "paragraph_count": len(paragraphs.paragraphs),
+        "title": page_summary.title,
+        "summary": page_summary.summary,
+        "key_points": page_summary.key_points,
+        "paragraphs": paragraphs.paragraphs,
+    }
+
+
+# ── Main orchestration ─────────────────────────────────────────────────────
+
+async def main():
+    if len(sys.argv) < 2:
+        print(f"Usage: python {__file__} <url1> <url2> ...", file=sys.stderr)
+        print(f"Example: python {__file__} https://example.com https://httpbin.org/html", file=sys.stderr)
+        sys.exit(1)
+
+    if not os.getenv("DEEPSEEK_API_KEY"):
+        print("Error: DEEPSEEK_API_KEY environment variable is not set.", file=sys.stderr)
+        sys.exit(1)
+
+    urls = sys.argv[1:]
+    output_dir = os.getenv("MULTIPAGE_OUTPUT_DIR", "/tmp/multipage_output")
+
+    print(f"Processing {len(urls)} pages in parallel...\n")
+    start = time.perf_counter()
+
+    # Step 1+2+3 — process all pages concurrently
+    page_results = await asyncio.gather(*[process_page(url) for url in urls])
+
+    # Step 4 — cross-page analysis
+    print(f"\nRunning cross-page analysis on {len(page_results)} pages...")
+    summaries_text = "\n\n---\n\n".join(
+        f"URL: {p['url']}\nTitle: {p['title']}\nSummary: {p['summary']}\nKey Points: {json.dumps(p['key_points'])}"
+        for p in page_results
+    )
+    cross_result = await cross_analysis_agent.run(
+        f"Analyze these page summaries and identify common themes, differences, and overall synthesis:\n\n{summaries_text}"
+    )
+    analysis: CrossPageAnalysis = cross_result.output
+
+    # Step 5 — save everything
+    print("Saving results...")
+    report = {
+        "pages": page_results,
+        "cross_analysis": {
+            "common_themes": analysis.common_themes,
+            "differences": analysis.differences,
+            "overall_summary": analysis.overall_summary,
+        },
+    }
+    report_json = json.dumps(report, indent=2, ensure_ascii=False)
+
+    await file_writer_agent.run(
+        f"Call write_json_file with filename='multipage_report.json' and the following data:\n{report_json}",
+        deps=OutputDeps(output_dir=output_dir),
+    )
+
+    elapsed = time.perf_counter() - start
+    print(f"\nCompleted in {elapsed:.1f}s")
+    print(f"Report saved to {output_dir}/multipage_report.json")
+    print(f"Common themes: {', '.join(analysis.common_themes)}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
