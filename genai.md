@@ -1734,7 +1734,7 @@ hardcoded anywhere in the script.
 1. **You provide one broad prompt:**  
    `"What are the latest updates on the James Webb Space Telescope as of 2026?"`
 
-2. **Gemini decides to use the tool** — it sees `search_web` is available, and autonomously
+2. **Gemini decides to use the tool** — it sees `search_web` is available, and autonomously  
    chooses to call it. It also decides what specific queries will yield the best results.
    Sample generated questions:
    
@@ -1742,7 +1742,7 @@ hardcoded anywhere in the script.
    - `"what is the current status of JWST 2026"`
    - `"recent major discoveries James Webb Space Telescope 2026"`
 
-4. **Your code executes the tool** — the Python loop catches the `function_call`,
+4. **Your code executes the tool** — the Python loop catches the `function_call`,  
    runs `search_web_impl()` for each query against DuckDuckGo, and returns the results to the model.
 
 6. **Gemini synthesizes the final answer** from all the search results.
