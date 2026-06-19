@@ -1591,137 +1591,111 @@ web via DuckDuckGo and answers questions with real-time data.
 """
 duck_search.py — GenAI version of the DDGS (DuckDuckGo Search) agent.
 
-Rewritten from the OpenAI Agents SDK pattern to use Google's genai library
-with function calling. The agent searches the web via DuckDuckGo and
-answers questions with real-time data.
+Uses Google's genai library with manual function calling: the model
+requests a DuckDuckGo search via the search_web tool, and the agent
+loop runs it and feeds the results back until a final answer appears.
 """
 
 import os
+
 from ddgs import DDGS
 from google import genai
 from google.genai import types
-from pydantic import BaseModel, Field
 
-# ── Tool definition ──────────────────────────────────────────────
-
-class SearchWebParams(BaseModel):
-    """Parameters for search_web."""
-    query: str = Field(description="The search query string.")
-
-
-tool_desc = "Search the web for a given query and return the top results with snippets."
+MODEL = "gemini-3.1-flash-lite"
+SYSTEM_INSTRUCTION = (
+    "You are a research assistant. Use the search_web function to answer "
+    "questions factually with real-time data from the web."
+)
 
 search_tool = types.Tool(
     function_declarations=[
         types.FunctionDeclaration(
             name="search_web",
-            description=tool_desc,
-            parameters=SearchWebParams,
+            description="Search the web for a query and return the top results with snippets.",
+            parameters_json_schema={
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "The search query string."},
+                },
+                "required": ["query"],
+            },
         )
     ],
 )
 
-
-def search_web_impl(query: str) -> str:
-    """Run a DuckDuckGo search and format the results as text."""
-    try:
-        with DDGS() as ddgs:
-            results = ddgs.text(query, max_results=5)
-
-        if not results:
-            return f"No results found for '{query}'."
-
-        formatted = f"Top 5 results for '{query}':\n\n"
-        for i, res in enumerate(results, 1):
-            formatted += (
-                f"{i}. {res.get('title', 'No Title')}\n"
-                f"   URL: {res.get('href', 'No URL')}\n"
-                f"   Snippet: {res.get('body', 'No Snippet')}\n\n"
-            )
-        return formatted.strip()
-
-    except Exception as e:
-        return f"Web search failed with error: {str(e)}"
-
-
-# ── Client & config ─────────────────────────────────────────────
-
-api_key = os.getenv("AI_STUDIO_API_KEY")
-client = genai.Client(api_key=api_key)
-
-model = "gemini-3.1-flash-lite"
-
 config = types.GenerateContentConfig(
     tools=[search_tool],
-    system_instruction=(
-        "You are a research assistant. Use the search_web function to answer "
-        "questions factually with real-time data from the web."
-    ),
+    system_instruction=SYSTEM_INSTRUCTION,
 )
 
 
-# ── Agent loop ──────────────────────────────────────────────────
+def search_web(query: str, max_results: int = 5) -> str:
+    """Run a DuckDuckGo search and format the results as text."""
+    try:
+        with DDGS() as ddgs:
+            results = ddgs.text(query, max_results=max_results)
+    except Exception as e:
+        return f"Web search failed with error: {e}"
 
-prompt = "What are the latest updates on the James Webb Space Telescope as of 2026?"
+    if not results:
+        return f"No results found for '{query}'."
 
-def main() -> None:
-    contents = [
-        types.Content(
-            role="user",
-            parts=[types.Part(text=prompt)],
-        ),
-    ]
+    lines = [f"Top {len(results)} results for '{query}':\n"]
+    for i, res in enumerate(results, 1):
+        lines.append(
+            f"{i}. {res.get('title', 'No Title')}\n"
+            f"   URL: {res.get('href', 'No URL')}\n"
+            f"   Snippet: {res.get('body', 'No Snippet')}"
+        )
+    return "\n\n".join(lines)
 
-    print("── Request ────────────────────────────────────────────")
-    print(contents[0].parts[0].text)
-    print()
+
+def run_agent(client: genai.Client, prompt: str) -> str:
+    """Run the search-augmented agent loop and return the final answer."""
+    contents = [types.Content(role="user", parts=[types.Part(text=prompt)])]
 
     while True:
         response = client.models.generate_content(
-            model=model,
-            contents=contents,
-            config=config,
+            model=MODEL, contents=contents, config=config,
         )
-
         part = response.candidates[0].content.parts[0]
 
-        if part.function_call:
-            call = part.function_call
-            # Model may pass "query" (str) or "queries" (list of strings)
-            if "query" in call.args:
-                queries = [call.args["query"]]
-            else:
-                queries = list(call.args["queries"])
+        if not part.function_call:
+            return part.text
 
-            all_results = []
-            for query in queries:
-                print(f"Searching for: {query}")
-                result_text = search_web_impl(query)
-                all_results.append(result_text)
+        call = part.function_call
+        query = call.args["query"]
+        print(f"Searching for: {query}")
+        result_text = search_web(query)
 
-            combined = "\n\n".join(all_results)
-
-            # Append the model's function call, then one aggregated response
-            contents.append(response.candidates[0].content)
-            contents.append(
-                types.Content(
-                    role="user",
-                    parts=[
-                        types.Part(
-                            function_response=types.FunctionResponse(
-                                name=call.name,
-                                response={"result": combined},
-                            )
+        contents.append(response.candidates[0].content)
+        contents.append(
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part(
+                        function_response=types.FunctionResponse(
+                            name=call.name,
+                            response={"result": result_text},
                         )
-                    ],
-                )
+                    )
+                ],
             )
-            print()
-        else:
-            # Natural language response — done
-            print("── Final Answer ────────────────────────────────────")
-            print(part.text)
-            break
+        )
+
+
+def main() -> None:
+    client = genai.Client(api_key=os.getenv("AI_STUDIO_API_KEY"))
+    prompt = "What are the latest updates on the James Webb Space Telescope as of 2026?"
+
+    print("── Request ────────────────────────────────────────────")
+    print(prompt, "\n")
+
+    answer = run_agent(client, prompt)
+
+    print("── Final Answer ────────────────────────────────────────")
+    print(answer)
 
 
 if __name__ == "__main__":
@@ -1752,4 +1726,122 @@ it plans *what* to search, decomposes your question into sub-questions, and then
 to compose a coherent answer. The only thing your Python code does is ferry the search requests  
 to DuckDuckGo and back.
 
+
+### Using Pydantic
+
+```python
+"""
+duck_search.py — GenAI version of the DDGS (DuckDuckGo Search) agent.
+
+Uses Google's genai library with manual function calling: the model
+requests a DuckDuckGo search via the search_web tool, and the agent
+loop runs it and feeds the results back until a final answer appears.
+"""
+
+import os
+
+from ddgs import DDGS
+from google import genai
+from google.genai import types
+from pydantic import BaseModel, Field
+
+MODEL = "gemini-3.1-flash-lite"
+SYSTEM_INSTRUCTION = (
+    "You are a research assistant. Use the search_web function to answer "
+    "questions factually with real-time data from the web."
+)
+
+
+class SearchWebParams(BaseModel):
+    """Parameters for search_web."""
+    query: str = Field(description="The search query string.")
+
+
+search_tool = types.Tool(
+    function_declarations=[
+        types.FunctionDeclaration(
+            name="search_web",
+            description="Search the web for a query and return the top results with snippets.",
+            parameters_json_schema=SearchWebParams.model_json_schema(),
+        )
+    ],
+)
+
+config = types.GenerateContentConfig(
+    tools=[search_tool],
+    system_instruction=SYSTEM_INSTRUCTION,
+)
+
+
+def search_web(query: str, max_results: int = 5) -> str:
+    """Run a DuckDuckGo search and format the results as text."""
+    try:
+        with DDGS() as ddgs:
+            results = ddgs.text(query, max_results=max_results)
+    except Exception as e:
+        return f"Web search failed with error: {e}"
+
+    if not results:
+        return f"No results found for '{query}'."
+
+    lines = [f"Top {len(results)} results for '{query}':\n"]
+    for i, res in enumerate(results, 1):
+        lines.append(
+            f"{i}. {res.get('title', 'No Title')}\n"
+            f"   URL: {res.get('href', 'No URL')}\n"
+            f"   Snippet: {res.get('body', 'No Snippet')}"
+        )
+    return "\n\n".join(lines)
+
+
+def run_agent(client: genai.Client, prompt: str) -> str:
+    """Run the search-augmented agent loop and return the final answer."""
+    contents = [types.Content(role="user", parts=[types.Part(text=prompt)])]
+
+    while True:
+        response = client.models.generate_content(
+            model=MODEL, contents=contents, config=config,
+        )
+        part = response.candidates[0].content.parts[0]
+
+        if not part.function_call:
+            return part.text
+
+        call = part.function_call
+        params = SearchWebParams(**call.args)
+        print(f"Searching for: {params.query}")
+        result_text = search_web(params.query)
+
+        contents.append(response.candidates[0].content)
+        contents.append(
+            types.Content(
+                role="user",
+                parts=[
+                    types.Part(
+                        function_response=types.FunctionResponse(
+                            name=call.name,
+                            response={"result": result_text},
+                        )
+                    )
+                ],
+            )
+        )
+
+
+def main() -> None:
+    client = genai.Client(api_key=os.getenv("AI_STUDIO_API_KEY"))
+    prompt = "What are the latest updates on the James Webb Space Telescope as of 2026?"
+
+    print("── Request ────────────────────────────────────────────")
+    print(prompt, "\n")
+
+    answer = run_agent(client, prompt)
+
+    print("── Final Answer ────────────────────────────────────────")
+    print(answer)
+
+
+if __name__ == "__main__":
+    main()
+```
 
