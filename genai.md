@@ -1590,30 +1590,33 @@ web via DuckDuckGo and answers questions with real-time data.
 ```python
 """
 duck_search.py — GenAI version of the DDGS (DuckDuckGo Search) agent.
+
+Rewritten from the OpenAI Agents SDK pattern to use Google's genai library
+with function calling. The agent searches the web via DuckDuckGo and
+answers questions with real-time data.
 """
 
 import os
 from ddgs import DDGS
 from google import genai
 from google.genai import types
+from pydantic import BaseModel, Field
 
 # ── Tool definition ──────────────────────────────────────────────
+
+class SearchWebParams(BaseModel):
+    """Parameters for search_web."""
+    query: str = Field(description="The search query string.")
+
+
+tool_desc = "Search the web for a given query and return the top results with snippets."
 
 search_tool = types.Tool(
     function_declarations=[
         types.FunctionDeclaration(
             name="search_web",
-            description="Search the web for a given query and return the top results with snippets.",
-            parameters=types.Schema(
-                type=types.Type.OBJECT,
-                properties={
-                    "query": types.Schema(
-                        type=types.Type.STRING,
-                        description="The search query string.",
-                    ),
-                },
-                required=["query"],
-            ),
+            description=tool_desc,
+            parameters=SearchWebParams,
         )
     ],
 )
@@ -1684,15 +1687,22 @@ def main() -> None:
 
         if part.function_call:
             call = part.function_call
-            query: str = call.args["query"]
-            print(f"Searching for: {query}")
+            # Model may pass "query" (str) or "queries" (list of strings)
+            if "query" in call.args:
+                queries = [call.args["query"]]
+            else:
+                queries = list(call.args["queries"])
 
-            result_text = search_web_impl(query)
+            all_results = []
+            for query in queries:
+                print(f"Searching for: {query}")
+                result_text = search_web_impl(query)
+                all_results.append(result_text)
 
-            # Append the model's function call to history
+            combined = "\n\n".join(all_results)
+
+            # Append the model's function call, then one aggregated response
             contents.append(response.candidates[0].content)
-
-            # Append the function response
             contents.append(
                 types.Content(
                     role="user",
@@ -1700,13 +1710,12 @@ def main() -> None:
                         types.Part(
                             function_response=types.FunctionResponse(
                                 name=call.name,
-                                response={"result": result_text},
+                                response={"result": combined},
                             )
                         )
                     ],
                 )
             )
-            print(f"Search complete ({len(result_text)} chars)")
             print()
         else:
             # Natural language response — done
@@ -1719,5 +1728,28 @@ if __name__ == "__main__":
     main()
 ```
 
+The model (Gemini) is generating those search queries on its own — they are **not**  
+hardcoded anywhere in the script.
+
+1. **You provide one broad prompt:**  
+   `"What are the latest updates on the James Webb Space Telescope as of 2026?"`
+
+2. **Gemini decides to use the tool** — it sees `search_web` is available, and autonomously
+   chooses to call it. It also decides what specific queries will yield the best results.
+   Sample generated questions:
+   
+   - `"James Webb Space Telescope status 2026"`
+   - `"what is the current status of JWST 2026"`
+   - `"recent major discoveries James Webb Space Telescope 2026"`
+
+4. **Your code executes the tool** — the Python loop catches the `function_call`,
+   runs `search_web_impl()` for each query against DuckDuckGo, and returns the results to the model.
+
+6. **Gemini synthesizes the final answer** from all the search results.
+
+This is the key difference from a simple RAG pipeline. The model is acting as an **agent** —  
+it plans *what* to search, decomposes your question into sub-questions, and then reads the results  
+to compose a coherent answer. The only thing your Python code does is ferry the search requests  
+to DuckDuckGo and back.
 
 
