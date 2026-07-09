@@ -1,5 +1,7 @@
 
-```
+## Opakovanie
+
+```python
 # in the examples, use random and list comprehensions
 
 
@@ -21,6 +23,28 @@ words = ['sky', 'cloud', 'rain', 'cup', 'tree', 'leaf', 'flower', 'grass',
          'sun', 'wind', 'storm', 'snow', 'fog', 'hail', 'thunder']
 ```
 
+
+## Riesenia
+
+```python
+import random
+
+# select a random colour from the list of colours
+# select two random colours from the list of colours
+# select colours which have 4 letters in their name
+colours = ['red', 'green', 'blue', 'yellow', 
+           'orange', 'purple', 'pink', 'brown', 'black', 'white']
+
+
+random_colour = random.choice(colours)
+print(random_colour)
+
+random_colours = random.sample(colours, k=2)
+print(random_colours)
+
+colours_len_4 = [colour for colour in colours if len(colour) == 4]
+print(colours_len_4)
+```
 
 
 
