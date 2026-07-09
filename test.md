@@ -1,3 +1,5 @@
+
+```
 # in the examples, use random and list comprehensions
 
 
@@ -17,7 +19,7 @@ vals = [1, -2, -3, 4, -5, 6, -7, 8, -9, 10]
 # select words that start with the letter 's' and end with the letter 'n'
 words = ['sky', 'cloud', 'rain', 'cup', 'tree', 'leaf', 'flower', 'grass',
          'sun', 'wind', 'storm', 'snow', 'fog', 'hail', 'thunder']
-
+```
 
 
 
