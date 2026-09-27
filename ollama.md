@@ -305,7 +305,7 @@ print(f"Podobnosť: {similarity:.3f}")
 
 ### Slovenské vyhľadávanie s `nomic-embed-text-v2-moe`
 
-Model `nomic-embed-text-v2-moe` je viacjazyčný a podporuje aj slovenčinu.  
+Model `nomic-embed-text-v2-moe` je viacjazyčný a podporuje aj slovenčinu.   
 Pri dokumentoch použite prefix `search_document:` a pri otázke prefix  
 `search_query:`. Model má maximálnu dĺžku vstupu 512 tokenov.  
 
@@ -349,7 +349,7 @@ print(f"Podobnosť: {scores[best_index]:.3f}")
 
 ## Správa modelov cez Python
 
-Knižnica `ollama` umožňuje získať zoznam modelov alebo stiahnuť model priamo
+Knižnica `ollama` umožňuje získať zoznam modelov alebo stiahnuť model priamo  
 z programu:
 
 ```python
@@ -362,13 +362,13 @@ for model in models["models"]:
 ollama.pull("llama3.2")
 ```
 
-Sťahovanie veľkého modelu môže trvať dlho a môže spotrebovať veľa miesta na
-disku. V produkcii je preto vhodné kontrolovať chyby a stav sťahovania.
+Sťahovanie veľkého modelu môže trvať dlho a môže spotrebovať veľa miesta na  
+disku. V produkcii je preto vhodné kontrolovať chyby a stav sťahovania.  
 
 ## Spracovanie chýb
 
-Sieťová služba nemusí bežať alebo model nemusí byť stiahnutý. Výnimku možno
-zachytiť a používateľovi zobraziť zrozumiteľnú informáciu:
+Sieťová služba nemusí bežať alebo model nemusí byť stiahnutý. Výnimku možno  
+zachytiť a používateľovi zobraziť zrozumiteľnú informáciu:  
 
 ```python
 import ollama
