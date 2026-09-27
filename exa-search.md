@@ -1,6 +1,3 @@
-Tu je upravený dokument s doplnenými časťami:
-
-```markdown
 # Exa Search
 
 ## Čo je Exa
@@ -418,6 +415,3 @@ Dokument vychádza z oficiálnej dokumentácie Exa:
 - [Exa Snapshot](https://exa.ai/docs/search/snapshot)
 - [Contents Retrieval](https://exa.ai/docs/reference/contents-retrieval)
 - [exa-py na PyPI](https://pypi.org/project/exa-py/)
-```
-
-Hlavné doplnenia: rozšírená tabuľka režimov (`neural`, `keyword`, `instant`, `deep-reasoning`), `category` filter, `livecrawl` vysvetlenie, `find_similar`, `answer`/`stream_answer`, rozšírené `get_contents` (`subpages`), spracovanie chýb, async klient a záverečný RAG príklad.
