@@ -2,8 +2,35 @@
 ## Opakovanie
 
 ```python
-# in the examples, use random and list comprehensions
 
+
+#-----------------------------------------------------
+
+# calculate sum with while loop
+vals = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+
+#-----------------------------------------------------
+
+# generate 100 random values between 1-100
+# a) print first, second, last, last but one elements
+# b) calculate sum, min, max, len of the numbers
+import random 
+
+rand_vals = []
+
+#-----------------------------------------------------
+
+
+# count the # of words in the sentence
+msg = 'There are seven falcons in the sky.'
+
+#-----------------------------------------------------
+# create words_cleaned with all spaced removed
+
+words = [' sky', 'time ', ' glow', 'small\n\n', '\tarchon', ' car\r', 'cup']
+
+#-----------------------------------------------------
+# list random module
 
 # select a random colour from the list of colours
 # select two random colours from the list of colours
@@ -11,9 +38,20 @@
 colours = ['red', 'green', 'blue', 'yellow', 
            'orange', 'purple', 'pink', 'brown', 'black', 'white']
 
+#-----------------------------------------------------
+
+# sum the numbers in the list and print the result
+data = ((1, 2, 3), (4, 5, 6), (7, 8, 9))
+
+#-----------------------------------------------------
+# use list comprehensions
+
 # select negative values that are even
 # select positive values that are odd
 vals = [1, -2, -3, 4, -5, 6, -7, 8, -9, 10]
+
+#-----------------------------------------------------
+# use list comprehensions
 
 # select words that start with the letter 's'
 # select words that contain the letter 'f'
@@ -26,11 +64,6 @@ words = ['sky', 'cloud', 'rain', 'cup', 'tree', 'leaf', 'flower', 'grass',
 
 
 
-
-
-```
-Imagine I am a total beginner in Python, generate an introductory tutorial for me with lots of Python code examples
-```
 
 
 # Priklady
