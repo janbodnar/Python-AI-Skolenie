@@ -2,20 +2,20 @@
 
 ## Čo je Exa
 
-Exa je vyhľadávacie API určené pre aplikácie, agentov a pracovné postupy,
-ktoré potrebujú nájsť relevantné webové stránky a pracovať s ich obsahom.
-Vyhľadávací dotaz môže byť napísaný prirodzeným jazykom.
+Exa je vyhľadávacie API určené pre aplikácie, agentov a pracovné postupy,  
+ktoré potrebujú nájsť relevantné webové stránky a pracovať s ich obsahom.  
+Vyhľadávací dotaz môže byť napísaný prirodzeným jazykom.  
 
-Exa vráti zoradené výsledky s metadátami, napríklad s názvom, URL,
-a dátumom publikovania. Pomocou parametra `contents` môžeme k výsledkom
-pridať relevantné úryvky, celý text alebo zhrnutie stránky. Ak `contents`
-nepošleme, výsledky obsahujú iba metadáta (názov, URL, dátum) bez textu.
+Exa vráti zoradené výsledky s metadátami, napríklad s názvom, URL,  
+a dátumom publikovania. Pomocou parametra `contents` môžeme k výsledkom  
+pridať relevantné úryvky, celý text alebo zhrnutie stránky. Ak `contents`  
+nepošleme, výsledky obsahujú iba metadáta (názov, URL, dátum) bez textu.  
 
-Exa neposiela odpoveď ako všeobecný chat. Najskôr vyhľadá zdroje a potom
-môže vrátiť obsah týchto zdrojov. Výsledky preto môžeme použiť na vyhľadávanie,
-RAG, rešerš alebo ako podklady pre ďalší model. Okrem vyhľadávania ponúka Exa
-aj samostatné API na priame odpovede s citáciami (`answer`) a na hľadanie
-podobných stránok (`find_similar`) — obe si ukážeme nižšie.
+Exa neposiela odpoveď ako všeobecný chat. Najskôr vyhľadá zdroje a potom  
+môže vrátiť obsah týchto zdrojov. Výsledky preto môžeme použiť na vyhľadávanie,  
+RAG, rešerš alebo ako podklady pre ďalší model. Okrem vyhľadávania ponúka Exa  
+aj samostatné API na priame odpovede s citáciami (`answer`) a na hľadanie  
+podobných stránok (`find_similar`) — obe si ukážeme nižšie.  
 
 ## Inštalácia a API kľúč
 
@@ -31,13 +31,13 @@ API kľúč nastavíme v prostredí:
 export EXA_API_KEY="váš-api-kľúč"
 ```
 
-Klient `Exa()` túto premennú automaticky použije. Kľúč nevkladáme priamo do
-zdrojového kódu ani do git repozitára.
+Klient `Exa()` túto premennú automaticky použije. Kľúč nevkladáme priamo do  
+zdrojového kódu ani do git repozitára.  
 
 ## Prvé vyhľadávanie
 
-Najmenšia užitočná požiadavka obsahuje prirodzený dotaz a `highlights`.
-Exa vyberie relevantné úryvky a prispôsobí ich dĺžku výsledku.
+Najmenšia užitočná požiadavka obsahuje prirodzený dotaz a `highlights`.  
+Exa vyberie relevantné úryvky a prispôsobí ich dĺžku výsledku.  
 
 ```python
 from exa_py import Exa
@@ -55,8 +55,8 @@ for item in result.results:
     print(item.highlights)
 ```
 
-Vyhľadávanie a načítanie obsahu môžeme spojiť aj do jedného volania pomocou
-`search_and_contents()`, čo je bežnejší spôsob v praxi:
+Vyhľadávanie a načítanie obsahu môžeme spojiť aj do jedného volania pomocou  
+`search_and_contents()`, čo je bežnejší spôsob v praxi:  
 
 ```python
 result = exa.search_and_contents(
@@ -66,14 +66,14 @@ result = exa.search_and_contents(
 )
 ```
 
-Vyhľadávanie štandardne vráti najviac desať výsledkov. Počet môžeme zmeniť
-parametrom `num_results`, najviac však na sto výsledkov. Search API nepodporuje
-stránkovanie výsledkov.
+Vyhľadávanie štandardne vráti najviac desať výsledkov. Počet môžeme zmeniť  
+parametrom `num_results`, najviac však na sto výsledkov. Search API nepodporuje  
+stránkovanie výsledkov.  
 
 ## Režimy vyhľadávania
 
-Parameter `type` volí spôsob vyhľadávania. Jednotlivé režimy sa líšia
-kvalitou aj latenciou, preto voľbu prispôsobíme konkrétnej úlohe:
+Parameter `type` volí spôsob vyhľadávania. Jednotlivé režimy sa líšia  
+kvalitou aj latenciou, preto voľbu prispôsobíme konkrétnej úlohe:  
 
 | Režim (`type`) | Popis | Kedy použiť |
 |---|---|---|
@@ -86,14 +86,14 @@ kvalitou aj latenciou, preto voľbu prispôsobíme konkrétnej úlohe:
 | `deep-lite` | Odľahčená verzia `deep` | Syntéza s nižšou latenciou ako plný `deep` |
 | `deep-reasoning` | Hĺbková rešerš s uvažovaním nad výsledkami | Náročné výskumné otázky |
 
-Pre technickú dokumentáciu (napríklad hľadanie konkrétnej chybovej hlášky
-alebo API funkcie) je často vhodnejší `keyword` než `auto`, pretože
-sémantické vyhľadávanie môže presné reťazce interpretovať príliš voľne.
+Pre technickú dokumentáciu (napríklad hľadanie konkrétnej chybovej hlášky  
+alebo API funkcie) je často vhodnejší `keyword` než `auto`, pretože  
+sémantické vyhľadávanie môže presné reťazce interpretovať príliš voľne.  
 
 ## Ako písať dotazy
 
-Dotaz má opisovať stránky, ktoré chceme nájsť, nie iba zoznam kľúčových slov.
-Pomáha uviesť tému, typ zdroja, obdobie alebo vlastnosť relevantného obsahu.
+Dotaz má opisovať stránky, ktoré chceme nájsť, nie iba zoznam kľúčových slov.  
+Pomáha uviesť tému, typ zdroja, obdobie alebo vlastnosť relevantného obsahu.  
 
 ```python
 result = exa.search(
@@ -103,20 +103,20 @@ result = exa.search(
 )
 ```
 
-Pri ladení kvality meníme naraz iba jednu časť požiadavky. Najskôr skontrolujeme
-názvy, URL a úryvky. Až potom pridávame filtre, meníme počet výsledkov alebo
-volíme iný režim vyhľadávania.
+Pri ladení kvality meníme naraz iba jednu časť požiadavky. Najskôr skontrolujeme  
+názvy, URL a úryvky. Až potom pridávame filtre, meníme počet výsledkov alebo  
+volíme iný režim vyhľadávania.  
 
 ## Filtrovanie domén, obsahu a dátumu
 
-`include_domains` obmedzí výsledky na dôveryhodné domény. `exclude_domains`
-naopak odstráni domény, ktoré nechceme použiť. Filter je vhodný vtedy, keď
-by výsledok mimo danej podmienky nebol použiteľný.
-
-Parameter `category` obmedzí výsledky na konkrétny typ zdroja, napríklad
-`company`, `research paper`, `news`, `pdf`, `github`, `personal site`,
-`linkedin profile` alebo `tweet`. Je to často presnejší nástroj než
-doménové filtre, ak nám ide o typ obsahu, nie o konkrétny web.
+`include_domains` obmedzí výsledky na dôveryhodné domény. `exclude_domains`  
+naopak odstráni domény, ktoré nechceme použiť. Filter je vhodný vtedy, keď  
+by výsledok mimo danej podmienky nebol použiteľný.  
+  
+Parameter `category` obmedzí výsledky na konkrétny typ zdroja, napríklad  
+`company`, `research paper`, `news`, `pdf`, `github`, `personal site`,  
+`linkedin profile` alebo `tweet`. Je to často presnejší nástroj než  
+doménové filtre, ak nám ide o typ obsahu, nie o konkrétny web.  
 
 ```python
 result = exa.search(
@@ -132,17 +132,17 @@ for item in result.results:
     print(item.title, item.url)
 ```
 
-Ak potrebujeme filtrovať priamo podľa slov v texte stránky (nie iba v dotaze),
-poslúžia `include_text` a `exclude_text`.
+Ak potrebujeme filtrovať priamo podľa slov v texte stránky (nie iba v dotaze),  
+poslúžia `include_text` a `exclude_text`.  
 
-Preferenciu zdroja je často lepšie vyjadriť priamo v dotaze. Tvrdý filter
-používame iba vtedy, keď iné zdroje nemôžeme použiť.
-
+Preferenciu zdroja je často lepšie vyjadriť priamo v dotaze. Tvrdý filter  
+používame iba vtedy, keď iné zdroje nemôžeme použiť.  
+ 
 ## Úryvky a celý text
 
-Úryvky (`highlights`) sú vhodné pre RAG, odpovede a náhľady, pretože vracajú
-iba časti stránky relevantné pre dotaz. Celý text (`text`) použijeme vtedy,
-keď potrebujeme širší kontext alebo štruktúru dokumentu.
+Úryvky (`highlights`) sú vhodné pre RAG, odpovede a náhľady, pretože vracajú  
+iba časti stránky relevantné pre dotaz. Celý text (`text`) použijeme vtedy,  
+keď potrebujeme širší kontext alebo štruktúru dokumentu.  
 
 ```python
 result = exa.search(
@@ -156,11 +156,11 @@ for item in result.results:
     print(item.text[:1000])
 ```
 
-V jednej požiadavke je vhodné vybrať iba potrebný typ obsahu. Úryvky a celý
-text zväčšujú odpoveď a každý požadovaný pohľad môže mať vlastnú cenu.
+V jednej požiadavke je vhodné vybrať iba potrebný typ obsahu. Úryvky a celý  
+text zväčšujú odpoveď a každý požadovaný pohľad môže mať vlastnú cenu.  
 
-Ak už URL poznáme, nepoužívame vyhľadávanie. Vtedy je vhodnejšie zavolať
-`exa.get_contents()` a požiadať priamo o obsah týchto stránok:
+Ak už URL poznáme, nepoužívame vyhľadávanie. Vtedy je vhodnejšie zavolať  
+`exa.get_contents()` a požiadať priamo o obsah týchto stránok:  
 
 ```python
 result = exa.get_contents(
@@ -171,25 +171,25 @@ result = exa.get_contents(
 )
 ```
 
-Parameter `subpages` umožňuje spolu s hlavnou stránkou načítať aj vybraný
-počet podstránok; `subpage_target` obmedzí, ktoré podstránky sa majú
-uprednostniť podľa kľúčových slov v ich URL alebo obsahu.
+Parameter `subpages` umožňuje spolu s hlavnou stránkou načítať aj vybraný  
+počet podstránok; `subpage_target` obmedzí, ktoré podstránky sa majú  
+uprednostniť podľa kľúčových slov v ich URL alebo obsahu.  
 
 ## Živé sťahovanie obsahu (livecrawl)
 
-Exa štandardne vracia obsah z vlastného indexu, ktorý nemusí byť úplne
-aktuálny. Parameter `livecrawl` vnútri `contents` určuje, kedy sa má stránka
+Exa štandardne vracia obsah z vlastného indexu, ktorý nemusí byť úplne  
+aktuálny. Parameter `livecrawl` vnútri `contents` určuje, kedy sa má stránka  
 sťahovať naživo:
 
-- `never` (predvolené) — použije sa iba uložený obsah z indexu.
-- `fallback` — použije index, a ak chýba, stiahne stránku naživo.
-- `always` — vždy sťahuje naživo (vyššia latencia, najčerstvejší obsah).
-- `preferred` — skúsi najprv naživo, pri zlyhaní použije index.
+- `never` (predvolené) — použije sa iba uložený obsah z indexu.  
+- `fallback` — použije index, a ak chýba, stiahne stránku naživo.  
+- `always` — vždy sťahuje naživo (vyššia latencia, najčerstvejší obsah).  
+- `preferred` — skúsi najprv naživo, pri zlyhaní použije index.  
 
-Súvisiaci parameter `max_age_hours` (mimo `contents`, priamo v požiadavke
-na vyhľadávanie) určuje maximálny vek indexovaného obsahu v hodinách — ak je
-obsah starší, Exa ho podľa potreby dohľadá naživo. Hodnota `0` vynúti vždy
-čerstvé sťahovanie, `-1` naopak použije výhradne uložený index.
+Súvisiaci parameter `max_age_hours` (mimo `contents`, priamo v požiadavke  
+na vyhľadávanie) určuje maximálny vek indexovaného obsahu v hodinách — ak je  
+obsah starší, Exa ho podľa potreby dohľadá naživo. Hodnota `0` vynúti vždy  
+čerstvé sťahovanie, `-1` naopak použije výhradne uložený index.  
 
 ```python
 result = exa.get_contents(
@@ -201,9 +201,9 @@ result = exa.get_contents(
 
 ## Hľadanie podobných stránok
 
-Okrem vyhľadávania podľa textového dotazu vie Exa nájsť stránky podobné
-zadanej URL — užitočné napríklad na hľadanie konkurenčného obsahu,
-podobných článkov alebo alternatívnych zdrojov k dokumentácii.
+Okrem vyhľadávania podľa textového dotazu vie Exa nájsť stránky podobné  
+zadanej URL — užitočné napríklad na hľadanie konkurenčného obsahu,  
+podobných článkov alebo alternatívnych zdrojov k dokumentácii.  
 
 ```python
 result = exa.find_similar_and_contents(
@@ -216,14 +216,14 @@ for item in result.results:
     print(item.title, item.url)
 ```
 
-Parameter `exclude_source_domain` odstráni z výsledkov stránky z rovnakej
-domény ako zdrojová URL, čo sa hodí, ak chceme naozaj externé porovnanie.
+Parameter `exclude_source_domain` odstráni z výsledkov stránky z rovnakej  
+domény ako zdrojová URL, čo sa hodí, ak chceme naozaj externé porovnanie.  
 
 ## Priama odpoveď s citáciami (Answer API)
 
-Ak nepotrebujeme zoznam výsledkov, ale rovno odpoveď na otázku podloženú
-zdrojmi, poslúži `exa.answer()`. Na rozdiel od `search` s `output_schema`
-ide o samostatný endpoint určený priamo na tento účel:
+Ak nepotrebujeme zoznam výsledkov, ale rovno odpoveď na otázku podloženú  
+zdrojmi, poslúži `exa.answer()`. Na rozdiel od `search` s `output_schema`  
+ide o samostatný endpoint určený priamo na tento účel:  
 
 ```python
 response = exa.answer(
@@ -236,8 +236,8 @@ for citation in response.citations:
     print(citation.url)
 ```
 
-Pre postupné vypisovanie odpovede (napríklad v chatovacom rozhraní) existuje
-aj `exa.stream_answer()`, ktorý vracia odpoveď po častiach:
+Pre postupné vypisovanie odpovede (napríklad v chatovacom rozhraní) existuje  
+aj `exa.stream_answer()`, ktorý vracia odpoveď po častiach:  
 
 ```python
 for chunk in exa.stream_answer("Explain the CAP theorem"):
@@ -246,9 +246,9 @@ for chunk in exa.stream_answer("Explain the CAP theorem"):
 
 ## Štruktúrovaný výstup
 
-Pomocou `output_schema` môže Exa vytvoriť odpoveď podľa schémy. Výsledky
-vyhľadávania zostanú v `result.results` a vytvorená hodnota bude v
-`result.output.content`.
+Pomocou `output_schema` môže Exa vytvoriť odpoveď podľa schémy. Výsledky  
+vyhľadávania zostanú v `result.results` a vytvorená hodnota bude v  
+`result.output.content`.  
 
 ```python
 from exa_py import Exa
@@ -274,14 +274,14 @@ if result.output:
     print(result.output.grounding)
 ```
 
-Schému udržiavame malú. `system_prompt` slúži na pokyny o zdrojoch alebo
-spôsobe syntézy. Citácie a dôkazy sa vracajú v `output.grounding`, preto ich
+Schému udržiavame malú. `system_prompt` slúži na pokyny o zdrojoch alebo  
+spôsobe syntézy. Citácie a dôkazy sa vracajú v `output.grounding`, preto ich  
 netreba duplikovať vo vlastnej schéme.
 
 ## Vyhľadávanie k historickému dátumu
 
-Snapshot umožňuje pracovať s uloženou verziou stránky, ktorá existovala
-najneskôr v určenom čase. Na Search API patrí `snapshot_as_of` dovnútra
+Snapshot umožňuje pracovať s uloženou verziou stránky, ktorá existovala  
+najneskôr v určenom čase. Na Search API patrí `snapshot_as_of` dovnútra  
 objektu `contents`.
 
 ```python
@@ -298,19 +298,19 @@ for item in result.results:
     print(item.title, item.url)
 ```
 
-Snapshot je užitočný pri spätnom testovaní agentov, opakovateľných evaluáciách
-alebo porovnávaní starších verzií dokumentácie. Exa hľadá kandidátne URL podľa
-aktuálnych signálov, ale obsah výsledkov obmedzí zadaným časom.
+Snapshot je užitočný pri spätnom testovaní agentov, opakovateľných evaluáciách  
+alebo porovnávaní starších verzií dokumentácie. Exa hľadá kandidátne URL podľa  
+aktuálnych signálov, ale obsah výsledkov obmedzí zadaným časom.  
 
-Pri snapshote nekombinujeme `snapshot_as_of` s čerstvým načítaním stránky,
-`subpages` ani s `max_age_hours`. Historické výsledky musia pochádzať z
-uloženej verzie.
+Pri snapshote nekombinujeme `snapshot_as_of` s čerstvým načítaním stránky,  
+`subpages` ani s `max_age_hours`. Historické výsledky musia pochádzať z  
+uloženej verzie.  
 
 ## Spracovanie chýb
 
-Volania API môžu zlyhať — napríklad pri neplatnom kľúči, prekročení limitu
-požiadaviek alebo nevalidných parametroch (napríklad `num_results` nad 100).
-Volania preto obaľujeme do `try`/`except`:
+Volania API môžu zlyhať — napríklad pri neplatnom kľúči, prekročení limitu  
+požiadaviek alebo nevalidných parametroch (napríklad `num_results` nad 100).  
+Volania preto obaľujeme do `try`/`except`:  
 
 ```python
 from exa_py import Exa
@@ -323,14 +323,14 @@ except Exception as e:
     print(f"Chyba pri volaní Exa API: {e}")
 ```
 
-Pri produkčnom nasadení sa oplatí rozlíšiť chyby spôsobené prekročením limitu
-(retry s odstupom) od chýb v samotnej požiadavke (opraviť parametre).
+Pri produkčnom nasadení sa oplatí rozlíšiť chyby spôsobené prekročením limitu  
+(retry s odstupom) od chýb v samotnej požiadavke (opraviť parametre).  
 
 ## Asynchrónne volania
 
-Pre servery a agentov, ktorí spracúvajú viac požiadaviek naraz, SDK ponúka
-aj asynchrónny klient:
-
+Pre servery a agentov, ktorí spracúvajú viac požiadaviek naraz, SDK ponúka  
+aj asynchrónny klient:  
+ 
 ```python
 import asyncio
 from exa_py import AsyncExa
@@ -354,16 +354,16 @@ Každý parameter spotrebúva iný zdroj:
 - Režimy `deep` a `deep-reasoning` vykonávajú viac krokov vyhľadávania a uvažovania.
 - `max_age_hours=0` alebo `livecrawl="always"` môže vyvolať čerstvé načítanie stránky.
 
-Najprv používame najmenšiu požiadavku s `highlights=True`. Ďalšie možnosti
-pridávame až vtedy, keď ich vyžaduje konkrétna úloha.
+Najprv používame najmenšiu požiadavku s `highlights=True`. Ďalšie možnosti  
+pridávame až vtedy, keď ich vyžaduje konkrétna úloha.  
 
 ## Dôležité názvy v Python SDK
 
-Python SDK používa názvy v tvare `snake_case`. Napríklad API parameter
-`includeDomains` je v Pythone `include_domains` a `maxAgeHours` je
-`max_age_hours`. Pri `search` sú voľby obsahu vnorené pod `contents`.
+Python SDK používa názvy v tvare `snake_case`. Napríklad API parameter  
+`includeDomains` je v Pythone `include_domains` a `maxAgeHours` je  
+`max_age_hours`. Pri `search` sú voľby obsahu vnorené pod `contents`.  
 
-Pri už známych URL je rozdiel v umiestnení obsahu dôležitý:
+Pri už známych URL je rozdiel v umiestnení obsahu dôležitý:  
 
 ```python
 exa.search(
@@ -379,8 +379,8 @@ exa.get_contents(
 
 ## Jednoduchý RAG pipeline
 
-Na záver príklad, ktorý spája vyhľadávanie, získanie textu a spracovanie
-ďalším modelom — typický základ RAG pracovného postupu:
+Na záver príklad, ktorý spája vyhľadávanie, získanie textu a spracovanie  
+ďalším modelom — typický základ RAG pracovného postupu:  
 
 ```python
 from exa_py import Exa
