@@ -157,12 +157,13 @@ more portable in some multi-model or cross-provider setups.
 ## Reasoning mode
 
 Reasoning mode is a setting that instructs an AI model to spend additional  
-computation time "thinking" before it generates a final answer.
+computation time "thinking" before it generates a final answer.  
 
 Instead of immediately outputting text, the model builds a hidden,  
-internal chain of thought to break down complex problems, plan out steps, 
+internal chain of thought to break down complex problems, plan out steps,  
 and self-correct errors. This delayed-response approach mimics human deliberation,  
-resulting in much higher accuracy for rigorous tasks like advanced coding, math, and deep logic.
+resulting in much higher accuracy for rigorous tasks like advanced  
+coding, math, and deep logic.
 
 ```python
 from openai import OpenAI
@@ -192,8 +193,8 @@ In this snippet, the inclusion of `reasoning={"effort": "medium"}` signals the A
 to allocate additional computation for internal, step-by-step thinking before  
 outputting the final result. Instead of immediately streaming the first solution  
 that comes to mind, the model evaluates the constraints of the requested matrix format,  
-works through the transposition logic in the background, and then returns the completed, 
-highly accurate script via `response.output_text`.
+works through the transposition logic in the background, and then returns the completed,  
+highly accurate script via `response.output_text`. 
 
 ## Setting roles
 
