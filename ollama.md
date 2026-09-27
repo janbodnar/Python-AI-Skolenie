@@ -74,7 +74,7 @@ Lokálny server Ollama štandardne počúva na adrese
 2. pomocou OpenAI knižnice cez OpenAI-kompatibilný endpoint,
 3. pomocou oficiálnej knižnice `ollama`.
 
-Prvé dve možnosti sú užitočné pri existujúcej aplikácii, ktorá ich používa.  
+Prvé dve možnosti sú užitočné pri existujúcej aplikácii, ktorá ich používa.   
 Knižnica `ollama` však poskytuje najpriamejšie rozhranie pre Ollamu.  
 
 ### 1. Jedna ukážka s knižnicou `requests`
@@ -213,8 +213,8 @@ print(reply["message"]["content"])
 
 ## Ovládanie odpovede
 
-Možnosti `options` umožňujú nastaviť napríklad teplotu alebo dĺžku kontextu.
-Nižšia teplota zvyčajne vedie k predvídateľnejšej odpovedi:
+Možnosti `options` umožňujú nastaviť napríklad teplotu alebo dĺžku kontextu. 
+Nižšia teplota zvyčajne vedie k predvídateľnejšej odpovedi:  
 
 ```python
 import ollama
@@ -231,13 +231,13 @@ response = ollama.generate(
 print(response["response"])
 ```
 
-Parameter `keep_alive` určuje, ako dlho má model zostať načítaný v pamäti.
-Po skončení práce môžete model uvoľniť hodnotou `keep_alive=0`.
+Parameter `keep_alive` určuje, ako dlho má model zostať načítaný v pamäti.  
+Po skončení práce môžete model uvoľniť hodnotou `keep_alive=0`.  
 
 ## Štruktúrovaný výstup vo formáte JSON
 
-Parameter `format="json"` požiada model o JSON. Pokyn vo výzve stále uveďte,
-pretože modelu pomáha dodržať požadované kľúče:
+Parameter `format="json"` požiada model o JSON. Pokyn vo výzve stále uveďte,  
+pretože modelu pomáha dodržať požadované kľúče:  
 
 ```python
 import json
@@ -259,13 +259,13 @@ person = json.loads(response["message"]["content"])
 print(person["name"], person["city"])
 ```
 
-Pri kritických aplikáciách výstup vždy overte. Model môže vrátiť neplatný JSON
-alebo hodnoty, ktoré nezodpovedajú vstupnému textu.
+Pri kritických aplikáciách výstup vždy overte. Model môže vrátiť neplatný JSON  
+alebo hodnoty, ktoré nezodpovedajú vstupnému textu.  
 
 ## Embeddingy a podobnosť textov
 
-Embedding je vektorové znázornenie textu. Hodí sa napríklad na vyhľadávanie
-podobných dokumentov alebo na jednoduchý systém otázok a odpovedí.
+Embedding je vektorové znázornenie textu. Hodí sa napríklad na vyhľadávanie  
+podobných dokumentov alebo na jednoduchý systém otázok a odpovedí.  
 
 Najprv stiahnite embeddingový model:
 
@@ -305,9 +305,9 @@ print(f"Podobnosť: {similarity:.3f}")
 
 ### Slovenské vyhľadávanie s `nomic-embed-text-v2-moe`
 
-Model `nomic-embed-text-v2-moe` je viacjazyčný a podporuje aj slovenčinu.
-Pri dokumentoch použite prefix `search_document:` a pri otázke prefix
-`search_query:`. Model má maximálnu dĺžku vstupu 512 tokenov.
+Model `nomic-embed-text-v2-moe` je viacjazyčný a podporuje aj slovenčinu.  
+Pri dokumentoch použite prefix `search_document:` a pri otázke prefix  
+`search_query:`. Model má maximálnu dĺžku vstupu 512 tokenov.  
 
 Model najprv stiahnite:
 
