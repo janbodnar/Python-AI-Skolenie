@@ -24,59 +24,7 @@ words = ['sky', 'cloud', 'rain', 'cup', 'tree', 'leaf', 'flower', 'grass',
 ```
 
 
-## Riesenia
 
-```python
-import random
-
-# select a random colour from the list of colours
-# select two random colours from the list of colours
-# select colours which have 4 letters in their name
-colours = ['red', 'green', 'blue', 'yellow', 
-           'orange', 'purple', 'pink', 'brown', 'black', 'white']
-
-
-random_colour = random.choice(colours)
-print(random_colour)
-
-random_colours = random.sample(colours, k=2)
-print(random_colours)
-
-colours_len_4 = [colour for colour in colours if len(colour) == 4]
-print(colours_len_4)
-
-
-# select negative values that are even
-# select positive values that are odd
-vals = [1, -2, -3, 4, -5, 6, -7, 8, -9, 10]
-
-res = [val for val in vals if val < 0 and val % 2 == 0]
-print(res)
-
-res2 = [val for val in vals if val > 0 if val % 2 == 1]
-print(res2)
-
-
-# select words that start with the letter 's'
-# select words that contain the letter 'f'
-# select words that start with 'f' end with the letter 'r'
-# select words that start with the letter 's' and end with the letter 'n'
-words = ['sky', 'cloud', 'rain', 'cup', 'tree', 'leaf', 'flower', 'grass',
-         'sun', 'wind', 'storm', 'snow', 'fog', 'hail', 'thunder']
-
-
-words_s = [word for word in words if word.startswith('s')]
-print(words_s)
-
-words_contains_f = [word for word in words if 'f' in word]
-print(words_contains_f)
-
-words_f_r = [word for word in words if word.startswith('f') and word.endswith('r')]
-print(words_f_r)
-
-words_s_n = [word for word in words if word.startswith('s') and word.endswith('n')]
-print(words_s_n)
-```
 
 
 
@@ -1091,4 +1039,59 @@ for key, value in slovak_movie_reviews.items():
     # print(chat_completion.choices[0].message.content)
     output = chat_completion.choices[0].message.content
     print(key, value, output)
+```
+
+
+## Riesenia
+
+```python
+import random
+
+# select a random colour from the list of colours
+# select two random colours from the list of colours
+# select colours which have 4 letters in their name
+colours = ['red', 'green', 'blue', 'yellow', 
+           'orange', 'purple', 'pink', 'brown', 'black', 'white']
+
+
+random_colour = random.choice(colours)
+print(random_colour)
+
+random_colours = random.sample(colours, k=2)
+print(random_colours)
+
+colours_len_4 = [colour for colour in colours if len(colour) == 4]
+print(colours_len_4)
+
+
+# select negative values that are even
+# select positive values that are odd
+vals = [1, -2, -3, 4, -5, 6, -7, 8, -9, 10]
+
+res = [val for val in vals if val < 0 and val % 2 == 0]
+print(res)
+
+res2 = [val for val in vals if val > 0 if val % 2 == 1]
+print(res2)
+
+
+# select words that start with the letter 's'
+# select words that contain the letter 'f'
+# select words that start with 'f' end with the letter 'r'
+# select words that start with the letter 's' and end with the letter 'n'
+words = ['sky', 'cloud', 'rain', 'cup', 'tree', 'leaf', 'flower', 'grass',
+         'sun', 'wind', 'storm', 'snow', 'fog', 'hail', 'thunder']
+
+
+words_s = [word for word in words if word.startswith('s')]
+print(words_s)
+
+words_contains_f = [word for word in words if 'f' in word]
+print(words_contains_f)
+
+words_f_r = [word for word in words if word.startswith('f') and word.endswith('r')]
+print(words_f_r)
+
+words_s_n = [word for word in words if word.startswith('s') and word.endswith('n')]
+print(words_s_n)
 ```
