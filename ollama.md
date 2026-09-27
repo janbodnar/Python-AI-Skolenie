@@ -1,10 +1,10 @@
 # Ollama a Python: lokálne jazykové modely
 
-Ollama umožňuje spúšťať veľké jazykové modely (LLM) lokálne na počítači.
-Modely tak pracujú bez odosielania textu do cudzej cloudovej služby.
+Ollama umožňuje spúšťať veľké jazykové modely (LLM) lokálne na počítači.  
+Modely tak pracujú bez odosielania textu do cudzej cloudovej služby.  
 
-Ollama sa postará o sťahovanie modelov, ich načítanie do pamäte aj inferenciu.
-Použiť môžete napríklad modely Llama, Mistral, Gemma alebo Phi.
+Ollama sa postará o sťahovanie modelov, ich načítanie do pamäte aj inferenciu.  
+Použiť môžete napríklad modely Llama, Mistral, Gemma alebo Phi.  
 
 ## Výhody
 
@@ -16,9 +16,9 @@ Použiť môžete napríklad modely Llama, Mistral, Gemma alebo Phi.
 
 ## Inštalácia
 
-Ollama je dostupná pre Linux, macOS aj Windows. Inštalátor nájdete na
-stránke [ollama.com/download](https://ollama.com/download). Na Linuxe môžete
-použiť aj tento príkaz:
+Ollama je dostupná pre Linux, macOS aj Windows. Inštalátor nájdete na  
+stránke [ollama.com/download](https://ollama.com/download). Na Linuxe môžete  
+použiť aj tento príkaz:  
 
 ```bash
 curl -fsSL https://ollama.com/install.sh | sh
@@ -62,20 +62,20 @@ ollama stop llama3.2        # uvoľnenie pamäte
 ollama rm llama3.2          # odstránenie modelu
 ```
 
-Veľkosť modelu ovplyvňuje potrebnú RAM. Menší model býva pomalší alebo menej
-presný, ale je praktickejší na bežnom notebooku.
+Veľkosť modelu ovplyvňuje potrebnú RAM. Menší model býva pomalší alebo menej  
+presný, ale je praktickejší na bežnom notebooku.  
 
 ## Spôsoby volania z Pythonu
 
-Lokálny server Ollama štandardne počúva na adrese
-`http://localhost:11434`. Z Pythonu ho môžete volať tromi bežnými spôsobmi:
+Lokálny server Ollama štandardne počúva na adrese  
+`http://localhost:11434`. Z Pythonu ho môžete volať tromi bežnými spôsobmi:  
 
 1. pomocou HTTP požiadaviek a knižnice `requests`,
 2. pomocou OpenAI knižnice cez OpenAI-kompatibilný endpoint,
 3. pomocou oficiálnej knižnice `ollama`.
 
-Prvé dve možnosti sú užitočné pri existujúcej aplikácii, ktorá ich používa.
-Knižnica `ollama` však poskytuje najpriamejšie rozhranie pre Ollamu.
+Prvé dve možnosti sú užitočné pri existujúcej aplikácii, ktorá ich používa.  
+Knižnica `ollama` však poskytuje najpriamejšie rozhranie pre Ollamu.  
 
 ### 1. Jedna ukážka s knižnicou `requests`
 
