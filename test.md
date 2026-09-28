@@ -1,4 +1,25 @@
 
+
+## Fetch and save URL page
+
+```python
+import requests 
+
+url = 'https://example.com/'
+resp = requests.get(url)
+
+# print(resp.content.decode('utf-8'))
+page_content = resp.text
+
+file_name = 'example.html'
+
+with open(file_name, 'w') as fd:
+    fd.write(page_content)
+```
+
+
+
+
 ## Opakovanie
 
 ```python
