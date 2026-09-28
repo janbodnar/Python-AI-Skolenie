@@ -62,7 +62,34 @@ words = ['sky', 'cloud', 'rain', 'cup', 'tree', 'leaf', 'flower', 'grass',
 ```
 
 
+## Riesenia
 
+```python
+# calculate sum with while loop
+vals = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
+
+suma = 0
+i = 0
+
+n = len(vals) - 1
+
+while i <= n:
+    suma = suma + vals[i]
+    i = i + 1
+
+print(suma)
+
+# ------------------------------
+
+suma = 0 
+
+for val in vals:
+    suma += val
+
+print(suma)
+
+print(sum(vals))
+```
 
 
 
