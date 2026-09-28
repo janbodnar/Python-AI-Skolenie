@@ -277,6 +277,168 @@ vďaka čomu model spracúva kontext v podobe dialógu. Po spracovaní požiadav
 program vypíše spojený textový výstup modelu pomocou pohodlnej vlastnosti  
 `response.output_text`.  
 
+## Viackolové konverzácie
+
+Model si medzi jednotlivými požiadavkami sám nič nepamätá – každé volanie API  
+je samostatné. Ak chcete viesť konverzáciu, musíte mu pri každom kole  
+poskytnúť predchádzajúci kontext. Responses API na to ponúka dva spôsoby:  
+
+- `previous_response_id` – odkážete na predchádzajúcu odpoveď a históriu
+  uchováva OpenAI,
+- ručná správa histórie – celú konverzáciu držíte v zozname správ vy a
+  posielate ju v parametri `input`.
+
+Prvý spôsob je jednoduchší a kód je kratší. Nižšie je jednoduchý chatbot v  
+termináli, ktorý na nadviazanie konverzácie používa `previous_response_id`:  
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+MODEL = "gpt-6-luna"
+
+previous_id = None
+
+print("Chat (type 'quit' to exit)")
+while True:
+    user_text = input("You: ").strip()
+    if user_text.lower() in ("quit", "exit"):
+        break
+    if not user_text:
+        continue
+
+    response = client.responses.create(
+        model=MODEL,
+        instructions="You are a friendly assistant. Keep answers short.",
+        input=user_text,
+        previous_response_id=previous_id,
+    )
+    previous_id = response.id
+
+    print(f"AI: {response.output_text}\n")
+```
+
+Po každej odpovedi si zapamätáme jej `id` a v ďalšom kole ho odovzdáme v  
+`previous_response_id`, vďaka čomu model vidí celý doterajší rozhovor.  
+Všimnite si, že `instructions` posielame pri každom volaní, pretože sa z  
+predchádzajúcej odpovede neprenášajú.  
+
+Druhý spôsob dáva plnú kontrolu: históriu môžete ukladať do vlastnej databázy,  
+skracovať ju či upravovať a nie ste závislí od toho, čo sa uchováva na strane  
+OpenAI.  
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+MODEL = "gpt-6-luna"
+
+history = [
+    {
+        "role": "system",
+        "content": "You are a friendly assistant. Keep answers short.",
+    }
+]
+
+print("Chat (type 'quit' to exit)")
+while True:
+    user_text = input("You: ").strip()
+    if user_text.lower() in ("quit", "exit"):
+        break
+    if not user_text:
+        continue
+
+    history.append({"role": "user", "content": user_text})
+
+    response = client.responses.create(model=MODEL, input=history)
+
+    answer = response.output_text
+    history.append({"role": "assistant", "content": answer})
+
+    print(f"AI: {answer}\n")
+```
+
+V tomto variante si celú históriu držíme v zozname `history`. Po každej otázke  
+do nej pridáme správu s rolou `user` a po odpovedi aj správu modelu s rolou  
+`assistant`. Nevýhodou je, že história rastie, a s ňou aj počet vstupných  
+tokenov, teda aj cena každého ďalšieho volania. Pri dlhých rozhovoroch preto  
+staršie správy skracujte alebo ich nahraďte zhrnutím.  
+
+## Štruktúrované výstupy
+
+Modely bežne vracajú voľný text, ktorý sa programovo spracúva ťažko.  
+**Štruktúrované výstupy** (structured outputs) zaručujú, že odpoveď zodpovedá  
+schéme, ktorú ste definovali. Nemusíte tak parsovať text ani dúfať, že model  
+dodrží požadovaný formát JSON. V Pythone schému najčastejšie zapíšete ako  
+triedu knižnice Pydantic, ktorá sa inštaluje spolu s balíkom `openai`, a SDK  
+sa postará o zvyšok.  
+
+Nasledujúci príklad z voľného textu recenzie extrahuje štruktúrované údaje:  
+
+```python
+from typing import Literal
+
+from openai import OpenAI
+from pydantic import BaseModel
+
+client = OpenAI()
+
+
+class ReviewInfo(BaseModel):
+    product: str
+    sentiment: Literal["positive", "neutral", "negative"]
+    rating_guess: int
+    pros: list[str]
+    cons: list[str]
+
+
+review = """
+I bought the X200 headphones two weeks ago. The sound is fantastic and the
+battery lasts forever, but the ear cups get uncomfortable after an hour and
+the app keeps crashing. Still, I would probably buy them again.
+"""
+
+response = client.responses.parse(
+    model="gpt-6-luna",
+    input=[
+        {
+            "role": "system",
+            "content": (
+                "Extract structured information from the product review. "
+                "The rating_guess field is an integer from 1 to 5."
+            ),
+        },
+        {"role": "user", "content": review},
+    ],
+    text_format=ReviewInfo,
+)
+
+info = response.output_parsed
+
+if info is None:
+    print("The model did not return a structured result.")
+else:
+    print(info.product, info.sentiment, info.rating_guess)
+    print("Pros:", ", ".join(info.pros))
+    print("Cons:", ", ".join(info.cons))
+```
+
+Metóda `responses.parse()` funguje ako `create()`, no navyše prijíma parameter  
+`text_format` – triedu Pydantic. Model vygeneruje odpoveď v súlade so schémou  
+a SDK ju automaticky prevedie na inštanciu `ReviewInfo`, ktorú nájdete vo  
+vlastnosti `response.output_parsed`. Vďaka typu `Literal` je hodnota  
+`sentiment` vždy jedna z troch povolených hodnôt. Ak model požiadavku  
+odmietne, `output_parsed` môže byť `None`, preto tento prípad v produkčnom  
+kóde ošetrite.  
+
+Štruktúrované výstupy sa hodia na extrakciu údajov z textov, klasifikáciu,  
+alebo aj na spracovanie riadkov z CSV súboru z predchádzajúceho príkladu do  
+objektov. Majte však na pamäti, že schéma zaručuje **formát** odpovede, nie  
+jej **pravdivosť**: model môže do správne štruktúrovaného poľa napísať  
+nesprávnu hodnotu.  
+
 ## Volanie nástrojov (tool call)
 
 Volanie nástroja (alebo funkcie) je mechanizmus, ktorý AI modelu umožňuje  
@@ -481,6 +643,83 @@ Skript otvorí kontext streamovania `client.responses.stream` s modelom
 generuje. Na záver vypíše oddeľovač a krátku správu o dokončení analýzy pre  
 spočítané záznamy.  
 
+## Tokeny a náklady
+
+Za používanie API sa platí podľa počtu **tokenov** – malých kúskov textu  
+(zhruba slabika alebo krátke slovo), na ktoré model rozdeľuje vstup aj výstup.  
+Účtujú sa zvlášť vstupné tokeny (výzva, história, priložené dáta) a výstupné  
+tokeny (odpoveď vrátane reasoning tokenov). Výstupné tokeny sú zvyčajne  
+niekoľkonásobne drahšie. Texty v slovenčine a ďalších jazykoch s diakritikou  
+spravidla spotrebujú na rovnaký obsah viac tokenov než anglické.  
+
+Skutočnú spotrebu zistíte z vlastnosti `response.usage`. Skript nižšie ju  
+vypíše a odhadne cenu volania:  
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+# Ceny za 1 milión tokenov (USD) - overte v aktuálnom cenníku OpenAI
+PRICES = {
+    "gpt-6-luna": {"input": 0.10, "output": 0.50},
+    "gpt-6-sol": {"input": 2.00, "output": 10.00},
+}
+
+MODEL = "gpt-6-luna"
+
+
+def estimate_cost(model: str, usage) -> float:
+    price = PRICES[model]
+    return (
+        usage.input_tokens * price["input"]
+        + usage.output_tokens * price["output"]
+    ) / 1_000_000
+
+
+response = client.responses.create(
+    model=MODEL,
+    input="Explain what a hash table is in three sentences.",
+    reasoning={"effort": "low"},
+    max_output_tokens=1000,
+)
+
+if response.status == "incomplete":
+    print("Warning: the response was cut off:",
+          response.incomplete_details.reason)
+
+usage = response.usage
+
+print(response.output_text)
+print("-" * 40)
+print(f"Input tokens:  {usage.input_tokens}")
+print(f"Output tokens: {usage.output_tokens}")
+print(f"  reasoning:   {usage.output_tokens_details.reasoning_tokens}")
+print(f"Total tokens:  {usage.total_tokens}")
+print(f"Estimated cost: ${estimate_cost(MODEL, usage):.6f}")
+```
+
+Objekt `usage` obsahuje počet vstupných, výstupných a celkových tokenov, a pri  
+reasoning modeloch aj počet tokenov použitých na interné uvažovanie. Funkcia  
+`estimate_cost()` ich vynásobí cenou za milión tokenov. Ceny v slovníku  
+`PRICES` sú len ilustračné, nájdete ich v cenníku OpenAI a menia sa, preto ich  
+pravidelne kontrolujte.  
+
+Parameter `max_output_tokens` obmedzuje dĺžku odpovede, a tým aj náklady.  
+Pozor však: do limitu sa počítajú aj reasoning tokeny. Ak je limit príliš  
+nízky, model ho môže vyčerpať uvažovaním skôr, než vygeneruje viditeľný text.  
+Odpoveď má vtedy stav `incomplete`, čo skript vyššie kontroluje.  
+
+Niekoľko zásad, ako náklady znížiť:  
+
+- používajte najlacnejší model, ktorý úlohu zvláda (spravidla `gpt-6-luna`),
+- pri jednoduchých úlohách znížte `reasoning.effort`,
+- nastavte rozumný `max_output_tokens`,
+- neposielajte zbytočné dáta a pri dlhých rozhovoroch skracujte históriu,
+- dlhé opakujúce sa časti (napríklad systémové pokyny) dávajte na začiatok
+  výzvy, aby ich mohla OpenAI ukladať do vyrovnávacej pamäte (prompt caching)
+  a účtovať lacnejšie.
+
 ## Vyhľadávanie na webe
 
 OpenAI ponúka natívny nástroj `web_search`, vďaka ktorému môže model pred  
@@ -502,6 +741,93 @@ response = client.responses.create(
 
 print(response.output_text)
 ```
+
+## Embeddings a sémantické vyhľadávanie
+
+**Embedding** je číselná reprezentácia textu – vektor, teda zoznam stoviek či  
+tisícok čísel, ktorý zachytáva jeho význam. Texty s podobným významom majú  
+vektory blízko seba, aj keď nezdieľajú žiadne rovnaké slová. Na tom je  
+postavené **sémantické vyhľadávanie**: namiesto hľadania kľúčových slov  
+porovnávame význam otázky s významom dokumentov. Embeddingy sa využívajú aj  
+pri odporúčaní, zhlukovaní a klasifikácii a sú základom techniky RAG  
+(retrieval-augmented generation).  
+
+Na embeddingy sa nepoužívajú chatové modely, ale samostatné embedding modely.  
+`text-embedding-3-small` je lacný a dobrá predvolená voľba (1536 dimenzií),  
+`text-embedding-3-large` je presnejší, no drahší (3072 dimenzií). Dĺžku  
+vektora je možné skrátiť parametrom `dimensions`.  
+
+Nasledujúci príklad vytvorí embeddingy pre malú zbierku dokumentov, vypočíta  
+embedding otázky a nájde dokumenty s najpodobnejším významom:  
+
+```python
+import math
+
+from openai import OpenAI
+
+client = OpenAI()
+
+EMBEDDING_MODEL = "text-embedding-3-small"
+
+documents = [
+    "To reset your password, open the account settings page.",
+    "Refunds are available within 14 days of purchase.",
+    "Our support team is available Monday to Friday, 9:00-17:00.",
+    "You can upgrade your subscription plan at any time.",
+    "The mobile app supports both dark and light themes.",
+]
+
+
+def embed(texts: list[str]) -> list[list[float]]:
+    response = client.embeddings.create(model=EMBEDDING_MODEL, input=texts)
+    return [item.embedding for item in response.data]
+
+
+def cosine_similarity(a: list[float], b: list[float]) -> float:
+    dot = sum(x * y for x, y in zip(a, b))
+    norm_a = math.sqrt(sum(x * x for x in a))
+    norm_b = math.sqrt(sum(y * y for y in b))
+    return dot / (norm_a * norm_b)
+
+
+# Embeddingy dokumentov vypočítame raz (jedno volanie API pre všetky texty)
+doc_vectors = embed(documents)
+
+
+def search(query: str, top_k: int = 3):
+    query_vector = embed([query])[0]
+    scored = [
+        (cosine_similarity(query_vector, vector), doc)
+        for vector, doc in zip(doc_vectors, documents)
+    ]
+    scored.sort(reverse=True)
+    return scored[:top_k]
+
+
+for score, doc in search("I forgot my login credentials, what now?"):
+    print(f"{score:.3f}  {doc}")
+```
+
+Funkcia `embed()` odošle zoznam textov jedným volaním a vráti zoznam vektorov.  
+Funkcia `cosine_similarity()` meria podobnosť dvoch vektorov ako kosínus uhla  
+medzi nimi: hodnota bližšie k 1 znamená podobnejší význam. Otázka o  
+zabudnutých prihlasovacích údajoch by mala ako najpodobnejší dokument nájsť  
+návod na obnovu hesla, hoci s ním nezdieľa žiadne kľúčové slovo. Embeddingy  
+OpenAI majú jednotkovú dĺžku, takže by na porovnanie stačil aj obyčajný  
+skalárny súčin. Modely zvyčajne zvládajú aj porovnávanie naprieč jazykmi,  
+takže otázku môžete položiť po slovensky, pričom `-large` model býva pri tom  
+presnejší.  
+
+Pri reálnom nasadení majte na pamäti tieto zásady:  
+
+- embeddingy dokumentov nepočítajte pri každom dopyte znova, ale ich
+  uložte (súbor, databáza, vektorová databáza ako pgvector, FAISS či Chroma),
+- dokumenty aj otázky vždy vektorizujte **rovnakým modelom**, vektory
+  rôznych modelov sa navzájom porovnávať nedajú,
+- dlhé texty rozdeľte na menšie časti (chunky), aby sa zmestili do limitu
+  modelu a aby boli výsledky presnejšie,
+- nájdené dokumenty môžete vložiť do výzvy pre chatový model a získať
+  odpoveď založenú na vašich dátach – to je princíp RAG.
 
 ## Príkazový riadok (shell)
 
