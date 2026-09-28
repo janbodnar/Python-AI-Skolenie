@@ -523,6 +523,182 @@ konverzácie cez `previous_response_id` a odovzdaním `function_call_output`
 model plynule pokračuje a vybraný jazyk použije vo výslednom preklade. Kód  
 spracúva všetky požiadavky na nástroje z jednej odpovede, nielen prvú.  
 
+## Praktický príklad: teplota v meste
+
+Na záver časti o nástrojoch si zostavíme malú aplikáciu pre príkazový riadok,  
+ktorá na otázku v prirodzenom jazyku ("Aké je teraz počasie v Tokiu?") odpovie  
+aktuálnym počasím. Model si z otázky vyberie názov mesta a zavolá náš nástroj,  
+ten zistí súradnice mesta a aktuálne počasie z bezplatného [Open-Meteo  
+API](https://open-meteo.com) (nevyžaduje kľúč) a model výsledok zhrnie do  
+odpovede.  
+
+Oproti bežným ukážkam s tokmi Chat Completions je tu niekoľko zjednodušení:  
+
+- používame Responses API a jediný nástroj `get_current_weather`, ktorý
+  vyhľadá súradnice mesta aj počasie naraz,
+- model nemusíme nútiť volať nástroj, sám sa rozhodne, kedy ho potrebuje,
+  a výslednú odpoveď formuluje sám, takže odpadá vlastné formátovanie
+  výpisu aj tabuľka opisov kódov počasia,
+- chyby (napríklad neexistujúce mesto) vraciame modelu ako výsledok
+  nástroja, aby ich vedel zrozumiteľne vysvetliť, namiesto vyhodenia výnimky,
+- na HTTP požiadavky používame knižnicu `httpx`, ktorá sa inštaluje spolu s
+  balíkom `openai`, takže netreba nič dopĺňať.
+
+```python
+"""Temperature CLI app: OpenAI tool calling + Open-Meteo API."""
+
+import json
+import sys
+
+import httpx
+from openai import OpenAI
+
+client = OpenAI()
+
+MODEL = "gpt-6-luna"
+
+INSTRUCTIONS = (
+    "You are a weather assistant. Use the get_current_weather tool to answer "
+    "questions about the current weather or temperature. The weather_code "
+    "field is a WMO weather code; describe it in words. Answer briefly. "
+    "If the question is not about weather, say so."
+)
+
+TOOLS = [{
+    "type": "function",
+    "name": "get_current_weather",
+    "description": "Get the current weather for a city.",
+    "parameters": {
+        "type": "object",
+        "properties": {
+            "city_name": {
+                "type": "string",
+                "description": "City name, e.g. 'Paris' or 'Bratislava'.",
+            }
+        },
+        "required": ["city_name"],
+    },
+}]
+
+
+def get_current_weather(city_name: str) -> dict:
+    """Find the city's coordinates and return its current weather."""
+    try:
+        geo = httpx.get(
+            "https://geocoding-api.open-meteo.com/v1/search",
+            params={"name": city_name, "count": 1},
+            timeout=10,
+        )
+        geo.raise_for_status()
+        results = geo.json().get("results")
+        if not results:
+            return {"error": f"City '{city_name}' not found."}
+        city = results[0]
+
+        weather = httpx.get(
+            "https://api.open-meteo.com/v1/forecast",
+            params={
+                "latitude": city["latitude"],
+                "longitude": city["longitude"],
+                "current_weather": "true",
+            },
+            timeout=10,
+        )
+        weather.raise_for_status()
+        current = weather.json()["current_weather"]
+    except httpx.HTTPError as e:
+        return {"error": f"Weather service error: {e}"}
+
+    return {
+        "city": city["name"],
+        "country": city.get("country", ""),
+        "temperature_celsius": current["temperature"],
+        "windspeed_kmh": current["windspeed"],
+        "wind_direction_degrees": current["winddirection"],
+        "weather_code": current["weathercode"],
+        "time": current["time"],
+    }
+
+
+def get_tool_calls(response):
+    return [item for item in response.output if item.type == "function_call"]
+
+
+def answer_weather_question(query: str) -> str:
+    response = client.responses.create(
+        model=MODEL,
+        instructions=INSTRUCTIONS,
+        input=query,
+        tools=TOOLS,
+    )
+
+    tool_calls = get_tool_calls(response)
+    while tool_calls:
+        outputs = []
+        for tc in tool_calls:
+            result = get_current_weather(**json.loads(tc.arguments))
+            outputs.append({
+                "type": "function_call_output",
+                "call_id": tc.call_id,
+                "output": json.dumps(result),
+            })
+
+        response = client.responses.create(
+            model=MODEL,
+            instructions=INSTRUCTIONS,
+            previous_response_id=response.id,
+            tools=TOOLS,
+            input=outputs,
+        )
+        tool_calls = get_tool_calls(response)
+
+    return response.output_text
+
+
+def main():
+    if len(sys.argv) > 1:
+        query = " ".join(sys.argv[1:])
+    else:
+        query = input("Ask about the weather: ").strip()
+
+    if not query:
+        sys.exit("Error: no input provided")
+
+    print(answer_weather_question(query))
+
+
+if __name__ == "__main__":
+    main()
+```
+
+Program môžete spustiť s otázkou v argumentoch alebo bez nich, vtedy sa na ňu  
+opýta interaktívne:  
+
+```bash
+python weather.py "How hot is it in Tokyo?"
+```
+
+Funkcia `get_current_weather()` volá najprv geokódovacie API Open-Meteo, ktoré  
+z názvu mesta vráti súradnice, a potom predpoveďové API s aktuálnym počasím.  
+Výsledok vráti ako slovník, ktorý sa modelu odovzdá v podobe JSON. Schéma v  
+zozname `TOOLS` modelu hovorí, že nástroj existuje a aký argument očakáva;  
+popis parametra `city_name` mu pomáha vytiahnuť názov mesta aj z voľne  
+formulovanej vety.  
+
+Funkcia `answer_weather_question()` je rovnaký cyklus, aký poznáte z  
+predchádzajúceho príkladu: kým odpoveď obsahuje `function_call`, vykonáme  
+nástroj a výsledok pošleme späť cez `previous_response_id`. Pretože spracúvame  
+všetky volania z odpovede, aplikácia zvládne aj otázku na viac miest naraz,  
+napríklad "Compare the weather in Prague and Vienna". Pokyny (`instructions`)  
+posielame pri každom volaní, lebo sa z predchádzajúcej odpovede neprenášajú.  
+Keďže máme len jeden nástroj, nekontrolujeme `tc.name`; pri viacerých  
+nástrojoch by ste podľa neho vybrali príslušnú funkciu.  
+
+Výmenou za jednoduchosť sme sa vzdali pevne daného formátu výpisu: vzhľad  
+odpovede teraz určuje model. Ak potrebujete presný, strojovo spracovateľný  
+formát, skombinujte tento príklad so štruktúrovanými výstupmi z  
+predchádzajúcej časti.  
+
 ## Analýza dát CSV
 
 Skript načíta súbor CSV `data/users_data.csv`, spočíta dátové riadky (bez  
