@@ -186,6 +186,29 @@ print(negative_even)
 
 positive_odd = [val for val in vals if val > 0 and val % 2 == 1]
 print(positive_odd)
+
+#-----------------------------------------------------
+# use list comprehensions
+
+# select words that start with the letter 's'
+# select words that contain the letter 'f'
+# select words that start end or end with the letter 'r'
+# select words that start with the letter 's' and end with the letter 'n'
+words = ['sky', 'cloud', 'rain', 'cup', 'tree', 'leaf', 'flower', 'grass',
+         'sun', 'wind', 'storm', 'snow', 'fog', 'hail', 'thunder']
+
+
+words_s = [word for word in words if word.startswith('s')]
+print(words_s)
+
+words_f = [word for word in words if 'f' in word]
+print(words_f)
+
+words_start_end_r = [word for word in words if word.startswith('r') or word.endswith('r')]
+print(words_start_end_r)
+
+words_start_s_end_n = [word for word in words if word.startswith('s') and word.endswith('n')]
+print(words_start_s_end_n)
 ```
 
 
