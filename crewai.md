@@ -323,9 +323,9 @@ with external systems, perform calculations, or access real-time data.
 
 ```python
 from crewai import Agent, Task, Crew
-from crewai_tools import SerperDevTool
+from crewai_tools import ExaSearchTool
 
-search_tool = SerperDevTool()
+search_tool = ExaSearchTool()
 
 research_agent = Agent(
     role="Market Researcher",
@@ -339,6 +339,10 @@ research_agent = Agent(
 task = Task(
     description="Research the current state of electric vehicle adoption "
                 "in European markets",
+    expected_output="A structured market analysis of EV adoption in European "
+                    "markets, including adoption rates by country, key "
+                    "drivers and barriers, major manufacturers, charging "
+                    "infrastructure status, and a forward-looking outlook.",
     agent=research_agent
 )
 
@@ -352,7 +356,7 @@ result = crew.kickoff()
 print(result)
 ```
 
-The SerperDevTool enables the agent to perform real-time web searches,  
+The ExaSearchTool enables the agent to perform real-time web searches,  
 significantly enhancing its research capabilities beyond its training data  
 knowledge cutoff.  
 
