@@ -173,6 +173,19 @@ for nested in data:
 
 print(suma)
 print(sum(sum(nested) for nested in data))
+
+#-----------------------------------------------------
+# use list comprehensions
+
+# select negative values that are even
+# select positive values that are odd
+vals = [1, -2, -3, 4, -5, 6, -7, 8, -9, 10]
+
+negative_even = [val for val in vals if val < 0 and val % 2 == 0]
+print(negative_even)
+
+positive_odd = [val for val in vals if val > 0 and val % 2 == 1]
+print(positive_odd)
 ```
 
 
