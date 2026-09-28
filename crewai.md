@@ -278,11 +278,15 @@ writer = Agent(
 
 research_task = Task(
     description="Research current trends in artificial intelligence market",
+    expected_output="A detailed report summarizing the key trends, key players, "
+                    "market size, and growth drivers of the AI market.",
     agent=researcher
 )
 
 writing_task = Task(
     description="Write a comprehensive article based on the research findings",
+    expected_output="A well-structured, engaging article of at least 800 words "
+                    "summarizing the research findings for a general audience.",
     agent=writer,
     context=[research_task]  # This task depends on research_task
 )
