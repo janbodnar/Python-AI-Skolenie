@@ -1707,7 +1707,7 @@ hardcoded anywhere in the script.
    - `"recent major discoveries James Webb Space Telescope 2026"`
 
 4. **Your code executes the tool** — the Python loop catches the `function_call`,  
-   runs `search_web_impl()` for each query against DuckDuckGo, and returns the results to the model.
+   runs `search_web_impl()` for each query against DuckDuckGo, and returns the results to the model. 
 
 6. **Gemini synthesizes the final answer** from all the search results.
 
@@ -1835,3 +1835,597 @@ if __name__ == "__main__":
     main()
 ```
 
+I'll check the current audio model names and SDK syntax first.Here are new sections that follow your style and don't repeat what's in the tutorial. I checked the current Gemini docs for the audio material, so the model names below are the September 2026 ones. The Voice Library section needs `google-genai` 2.25.0 or newer.
+
+## Text to speech  
+
+Gemini 3.8 has two dedicated text-to-speech (TTS) models. The first is  
+`gemini-3.8-flash-tts`, for maximum quality and expressive control. The  
+second is `gemini-3.8-flash-lite-tts`, a cheaper and faster model for bulk  
+work. Both share the same API, so you switch by changing the model name.  
+
+TTS models take text only and return audio only. On a normal (unary)  
+request the response is a complete WAV file (24 kHz, mono, 16-bit), so  
+you can write the bytes straight to disk without the `wave` module.  
+
+```python
+from google import genai
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.8-flash-tts"
+
+response = client.models.generate_content(
+    model=model,
+    contents=[{
+        "role": "user",
+        "parts": [{
+            "text": "Dobrý deň, vitajte na stránke ZetCode!",
+        }],
+    }],
+    config={
+        "response_modalities": ["AUDIO"],
+        "speech_config": {
+            "voice_config": {"voice": "Kore"},
+        },
+    },
+)
+
+data = response.candidates[0].content.parts[0].inline_data.data
+
+with open("hello.wav", "wb") as f:
+    f.write(data)
+
+print("Saved hello.wav")
+```
+
+The `text` field is a verbatim transcript, and the model reads exactly  
+what you put there. The TTS models detect the language automatically,  
+and Slovak is supported by both.  
+
+## Controlling delivery with style and tags  
+
+In the 3.8 models, instructions and transcript are kept apart. Delivery  
+that lasts for the whole turn (emotion, pace, volume) goes into  
+`speech_metadata.style`. Short events at an exact position (a pause, a  
+sigh, a cough) go inline in the text using angle brackets.  
+
+Capitalised words receive vocal stress. Keep the inline tags in English  
+even when the transcript is in another language.  
+
+```python
+from google import genai
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.8-flash-tts"
+
+text = (
+    "Počkaj chvíľu... <short pause> Myslím, že to mám. <sigh> "
+    "Toto je NAOZAJ dôležitá správa!"
+)
+
+response = client.models.generate_content(
+    model=model,
+    contents=[{
+        "role": "user",
+        "parts": [{
+            "text": text,
+            "speech_metadata": {"style": "whispering, then excited"},
+        }],
+    }],
+    config={
+        "response_modalities": ["AUDIO"],
+        "speech_config": {
+            "voice_config": {"voice": "Puck"},
+        },
+    },
+)
+
+with open("styled.wav", "wb") as f:
+    f.write(response.candidates[0].content.parts[0].inline_data.data)
+```
+
+Start with an empty `style` and add a short one only where a turn needs a  
+tweak. Avoid putting age, gender, or accent into `style`, because those  
+belong to the voice, not the delivery.  
+
+## Multi-speaker dialogue  
+
+A single request can synthesize a conversation between two speakers. You  
+declare the voices in `multi_speaker_voice_config`. Each dialogue turn is  
+then its own part, and its `speech_metadata` names the speaker.  
+
+```python
+from google import genai
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.8-flash-tts"
+
+turns = [
+    ("Joe", "cheerful and friendly",
+     "How's it going today Jane?"),
+    ("Jane", "calm and relaxed",
+     "Not too bad. Ready to record the podcast?"),
+    ("Joe", "excited",
+     "Absolutely |oh nice| let's do it!"),
+]
+
+parts = [
+    {"text": text, "speech_metadata": {"speaker": who, "style": style}}
+    for who, style, text in turns
+]
+
+response = client.models.generate_content(
+    model=model,
+    contents=[{"role": "user", "parts": parts}],
+    config={
+        "response_modalities": ["AUDIO"],
+        "speech_config": {
+            "multi_speaker_voice_config": {
+                "speaker_voice_configs": [
+                    {
+                        "speaker": "Joe",
+                        "voice_config": {
+                            "prebuilt_voice_config": {"voice_name": "Puck"}
+                        },
+                    },
+                    {
+                        "speaker": "Jane",
+                        "voice_config": {
+                            "prebuilt_voice_config": {"voice_name": "Kore"}
+                        },
+                    },
+                ]
+            }
+        },
+    },
+)
+
+with open("dialogue.wav", "wb") as f:
+    f.write(response.candidates[0].content.parts[0].inline_data.data)
+```
+
+Every turn must name one of the configured speakers. The `|oh nice|`  
+syntax wraps a listener's reaction in pipes, and the model turns it into  
+a natural backchannel. A single request supports at most two speakers  
+with prebuilt voices.  
+
+## Browsing the voice library  
+
+Besides the 30 prebuilt studio voices, there is an extended library with  
+hundreds of voices. You can filter it by language, gender, pitch, accent,  
+and usage context. Filters of different types combine with AND, and values  
+inside one list filter combine with OR.  
+
+```python
+from google import genai
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+response = client.voices.list(
+    language_code=["en-US", "en-GB"],
+    gender=["female"],
+    pitch=["medium", "low"],
+    contexts=["Audiobook", "Conversational"],
+    type_=["prebuilt"],
+    search="warm",
+    page_size=20,
+)
+
+for voice in response.voices or []:
+    print(
+        f"{voice.id} | {voice.display_name} "
+        f"({voice.language_code}, {voice.accent}, "
+        f"{voice.gender}, pitch={voice.pitch})"
+    )
+```
+
+The `voice.id` can be passed as the `voice` value in `voice_config`. You  
+can also create persistent custom voices with Voice design (from a text  
+description) or Voice replication (from reference audio). Custom voices  
+get a `voice_...` ID, and stored voices are kept for one year.  
+
+## Streaming speech  
+
+For voice agents you don't want to wait for the whole clip. With  
+`generate_content_stream` the audio arrives in chunks. Streaming returns  
+headerless raw PCM (24 kHz, mono, 16-bit), so we add the WAV header  
+ourselves with the `wave` module.  
+
+```python
+from google import genai
+import os
+import wave
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.8-flash-lite-tts"
+
+text = "Streaming lets you start playback before synthesis is finished."
+
+stream = client.models.generate_content_stream(
+    model=model,
+    contents=[{"role": "user", "parts": [{"text": text}]}],
+    config={
+        "response_modalities": ["AUDIO"],
+        "speech_config": {"voice_config": {"voice": "Charon"}},
+    },
+)
+
+with wave.open("stream.wav", "wb") as wf:
+    wf.setnchannels(1)
+    wf.setsampwidth(2)
+    wf.setframerate(24000)
+
+    for chunk in stream:
+        try:
+            pcm = chunk.candidates[0].content.parts[0].inline_data.data
+        except (IndexError, AttributeError):
+            continue
+        if pcm:
+            wf.writeframes(pcm)
+            print(f"received {len(pcm)} bytes")
+```
+
+If you need raw PCM from a unary request, set `response_format` to  
+`{"audio": {"mime_type": "AUDIO_L16"}}`. The same setting can also  
+request 8 kHz `AUDIO_MULAW` or `AUDIO_ALAW` for telephony.  
+
+## Dedicated transcription model  
+
+The tutorial transcribes audio by prompting a general model. There is now  
+a purpose-built speech-to-text model, `gemini-3.5-transcribe`. It detects  
+the language automatically, handles code-switching, and supports 85+  
+locales, including Slovak (`sk-SK`).  
+
+```python
+from google import genai
+from google.genai import types
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.5-transcribe"
+
+audio_file = client.files.upload(file="aesop_cat_mice.mp3")
+
+response = client.models.generate_content(
+    model=model,
+    contents=[audio_file],
+    config=types.GenerateContentConfig(
+        audio_transcription_config=types.AudioTranscriptionConfig(
+            language_codes=["sk-SK"],
+        )
+    ),
+)
+
+print(response.text)
+```
+
+Leave `language_codes` empty for automatic detection. Passing a known  
+language improves accuracy. Note that no prompt is needed, because the  
+model does only one job.  
+
+## Speaker diarization and word timestamps  
+
+Diarization labels who is speaking (`spk_1`, `spk_2`, up to 8 speakers).  
+Word timestamps give the start and end offset of every word. The two can  
+be combined, but timestamps may slightly reduce overall accuracy.  
+
+```python
+from google import genai
+from google.genai import types
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.5-transcribe"
+
+audio_file = client.files.upload(file="interview.mp3")
+
+response = client.models.generate_content(
+    model=model,
+    contents=[audio_file],
+    config=types.GenerateContentConfig(
+        audio_transcription_config=types.AudioTranscriptionConfig(
+            diarization=True,
+            word_timestamp=True,
+        )
+    ),
+)
+
+for candidate in response.candidates or []:
+    for part in candidate.content.parts or []:
+        tr = getattr(part, "audio_transcription", None)
+        if not tr:
+            continue
+        for w in tr.words or []:
+            print(f"[{tr.speaker_label}] "
+                  f"({w.start_offset} -> {w.end_offset}) {w.word}")
+```
+
+## Smart transcription and custom vocabulary  
+
+The default `VERBATIM` mode keeps every "um" and false start. The `SMART`  
+mode removes disfluencies, resolves spoken self-corrections, and formats  
+dates, numbers, and lists. A custom vocabulary biases the model toward  
+names and jargon.  
+
+These features have compatibility rules, so run them as separate requests.  
+
+| Feature             | With diarization | With timestamps | With SMART |
+|---------------------|------------------|-----------------|------------|
+| `custom_vocabulary` | no               | no              | yes        |
+| `mode="SMART"`      | no               | no              | -          |
+
+```python
+from google import genai
+from google.genai import types
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.5-transcribe"
+audio_file = client.files.upload(file="meeting.mp3")
+
+# Cleaned-up, readable transcript
+smart = client.models.generate_content(
+    model=model,
+    contents=[audio_file],
+    config=types.GenerateContentConfig(
+        audio_transcription_config=types.AudioTranscriptionConfig(
+            mode="SMART",
+        )
+    ),
+)
+print("--- SMART ---")
+print(smart.text)
+
+# Verbatim transcript biased toward domain terms
+vocab = client.models.generate_content(
+    model=model,
+    contents=[audio_file],
+    config=types.GenerateContentConfig(
+        audio_transcription_config=types.AudioTranscriptionConfig(
+            custom_vocabulary=["ZetCode", "Pydantic", "Kubernetes"],
+        )
+    ),
+)
+print("--- VOCABULARY ---")
+print(vocab.text)
+```
+
+## Round trip: speech to text and back  
+
+A practical way to test a pipeline is to synthesize a sentence and then  
+transcribe it again. This example generates a Slovak sentence with TTS,  
+uploads the WAV file, and checks what the transcription model heard.  
+
+```python
+from google import genai
+from google.genai import types
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+original = "Bratislava je hlavné mesto Slovenska."
+
+tts = client.models.generate_content(
+    model="gemini-3.8-flash-lite-tts",
+    contents=[{"role": "user", "parts": [{"text": original}]}],
+    config={
+        "response_modalities": ["AUDIO"],
+        "speech_config": {"voice_config": {"voice": "Sulafat"}},
+    },
+)
+
+with open("roundtrip.wav", "wb") as f:
+    f.write(tts.candidates[0].content.parts[0].inline_data.data)
+
+audio_file = client.files.upload(file="roundtrip.wav")
+
+stt = client.models.generate_content(
+    model="gemini-3.5-transcribe",
+    contents=[audio_file],
+    config=types.GenerateContentConfig(
+        audio_transcription_config=types.AudioTranscriptionConfig(
+            language_codes=["sk-SK"],
+        )
+    ),
+)
+
+print("Original:   ", original)
+print("Transcribed:", stt.text.strip())
+print("Match:      ", original.strip() == stt.text.strip())
+```
+
+## Live API: talking to the model  
+
+The Live API keeps a WebSocket session open for low-latency, two-way  
+audio. The current model is `gemini-3.8-live`, which produces native  
+audio output. Native audio models only support the `AUDIO` response  
+modality, so if you also want text, enable `output_audio_transcription`.  
+
+Audio arrives as raw 24 kHz, 16-bit mono PCM, and we save it as WAV.  
+
+```python
+import asyncio
+import os
+import wave
+
+from google import genai
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.8-live"
+
+config = {
+    "response_modalities": ["AUDIO"],
+    "output_audio_transcription": {},
+    "system_instruction": "You are a friendly assistant. Be brief.",
+}
+
+
+async def main():
+    with wave.open("live_reply.wav", "wb") as wf:
+        wf.setnchannels(1)
+        wf.setsampwidth(2)
+        wf.setframerate(24000)
+
+        async with client.aio.live.connect(model=model,
+                                           config=config) as session:
+            await session.send_realtime_input(
+                text="Hello! Tell me a fun fact about Slovakia."
+            )
+
+            async for message in session.receive():
+                sc = message.server_content
+                if sc is None:
+                    continue
+
+                if sc.model_turn:
+                    for part in sc.model_turn.parts:
+                        if part.inline_data and part.inline_data.data:
+                            wf.writeframes(part.inline_data.data)
+
+                if sc.output_transcription:
+                    print(sc.output_transcription.text, end="", flush=True)
+
+                if sc.turn_complete:
+                    break
+
+    print("\nSaved live_reply.wav")
+
+
+asyncio.run(main())
+```
+
+For microphone input you send 16 kHz, 16-bit mono PCM chunks with  
+`send_realtime_input`. For pure real-time speech-to-text without a model  
+reply, the Live API also offers a dedicated model,  
+`gemini-3.5-transcribe-live`. If you build a browser client that connects  
+directly, use ephemeral tokens instead of shipping your API key.  
+
+## Parallel requests with asyncio  
+
+Everything above also works asynchronously through `client.aio`. This is  
+useful when you need many independent calls, such as summarizing several  
+texts or synthesizing many clips, and don't want to wait for each in turn.  
+
+```python
+import asyncio
+import os
+
+from google import genai
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.1-flash-lite"
+
+topics = ["Python", "Go", "Java", "Dart"]
+
+
+async def describe(topic: str) -> str:
+    response = await client.aio.models.generate_content(
+        model=model,
+        contents=f"Describe {topic} in one sentence.",
+    )
+    return f"{topic}: {response.text.strip()}"
+
+
+async def main():
+    results = await asyncio.gather(*(describe(t) for t in topics))
+    for line in results:
+        print(line)
+
+
+asyncio.run(main())
+```
+
+## Counting tokens before you send  
+
+Audio is tokenized at a fixed rate per second, so the length of a  
+recording predicts its cost. The `count_tokens` method reports the size of  
+a request without generating anything, which helps with budgeting.  
+
+```python
+from google import genai
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.1-flash-lite"
+
+audio_file = client.files.upload(file="aesop_cat_mice.mp3")
+
+result = client.models.count_tokens(
+    model=model,
+    contents=["Summarize this recording.", audio_file],
+)
+
+print(f"Total tokens: {result.total_tokens}")
+```
+
+## Automatic function calling  
+
+In the shell and search agents of the tutorial you wrote the agent loop  
+and the function declarations by hand. The SDK can do both for you. You  
+pass a plain Python function in `tools`, and it builds the schema from the  
+type hints and docstring, calls the function, and returns the final answer.  
+
+```python
+from google import genai
+from google.genai import types
+import os
+
+api_key = os.getenv("AI_STUDIO_API_KEY")
+client = genai.Client(api_key=api_key)
+
+model = "gemini-3.1-flash-lite"
+
+
+def get_temperature(city: str) -> dict:
+    """Return the current temperature in Celsius for a city.
+
+    Args:
+        city: Name of the city, for example "Bratislava".
+    """
+    fake_data = {"Bratislava": 18.5, "Košice": 16.0, "Žilina": 14.2}
+    return {"city": city, "temperature_c": fake_data.get(city, 20.0)}
+
+
+response = client.models.generate_content(
+    model=model,
+    contents="Which is warmer right now, Bratislava or Košice?",
+    config=types.GenerateContentConfig(tools=[get_temperature]),
+)
+
+print(response.text)
+```
+
+The model may call the function several times, once per city, before it  
+answers. To keep manual control, as in your agent loop, disable it with  
+`automatic_function_calling=types.AutomaticFunctionCallingConfig(disable=True)`.  
+
+A caveat on reliability: the TTS and transcription snippets follow the  
+official docs, but the Live API code is assembled from the docs' fragments  
+and short examples, so run it once before publishing. Live API model names  
+have changed several times this year, so check `client.models.list()` too.
