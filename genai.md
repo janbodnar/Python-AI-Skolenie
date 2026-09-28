@@ -1835,7 +1835,6 @@ if __name__ == "__main__":
     main()
 ```
 
-I'll check the current audio model names and SDK syntax first.Here are new sections that follow your style and don't repeat what's in the tutorial. I checked the current Gemini docs for the audio material, so the model names below are the September 2026 ones. The Voice Library section needs `google-genai` 2.25.0 or newer.
 
 ## Text to speech  
 
