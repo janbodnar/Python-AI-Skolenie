@@ -59,6 +59,28 @@ vals = [1, -2, -3, 4, -5, 6, -7, 8, -9, 10]
 # select words that start with the letter 's' and end with the letter 'n'
 words = ['sky', 'cloud', 'rain', 'cup', 'tree', 'leaf', 'flower', 'grass',
          'sun', 'wind', 'storm', 'snow', 'fog', 'hail', 'thunder']
+
+# generate 100 random values between 1-100
+# a) print first, second, last, last but one elements
+# b) calculate sum, min, max, len of the numbers
+import random 
+
+rand_vals = []
+
+for _ in range(100):
+
+    random_val = random.randint(1, 100)
+    rand_vals.append(random_val)
+
+print(rand_vals[0])
+print(rand_vals[1])
+print(rand_vals[-1])
+print(rand_vals[-2])
+
+print(sum(rand_vals))
+print(min(rand_vals))
+print(max(rand_vals))
+print(len(rand_vals))
 ```
 
 
