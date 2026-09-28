@@ -159,6 +159,20 @@ print(rand_2_colours)
 
 four_letters = [col for col in colours if len(col) == 4]
 print(four_letters)
+
+
+#-----------------------------------------------------
+
+# sum the numbers in the list and print the result
+data = ((1, 2, 3), (4, 5, 6), (7, 8, 9))
+# print(sum(data))
+suma = 0
+
+for nested in data:
+    suma += sum(nested)
+
+print(suma)
+print(sum(sum(nested) for nested in data))
 ```
 
 
