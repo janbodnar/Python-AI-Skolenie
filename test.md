@@ -91,6 +91,7 @@ print(suma)
 
 print(sum(vals))
 
+# ------------------------------
 
 # generate 100 random values between 1-100
 # a) print first, second, last, last but one elements
@@ -113,6 +114,15 @@ print(sum(rand_vals))
 print(min(rand_vals))
 print(max(rand_vals))
 print(len(rand_vals))
+
+# ------------------------------
+
+# count the # of words in the sentence
+msg = 'There are seven falcons in the sky.'
+
+words = msg.split()
+print(words)
+print(len(words))
 ```
 
 
