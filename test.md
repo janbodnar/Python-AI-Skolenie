@@ -139,6 +139,26 @@ for word in words:
     words_cleaned.append(word_cleaned)
 
 print(words_cleaned)
+
+#-----------------------------------------------------
+# list random module
+
+# select a random colour from the list of colours
+# select two random colours from the list of colours
+# select colours which have 4 letters in their name
+colours = ['red', 'green', 'blue', 'yellow', 
+           'orange', 'purple', 'pink', 'brown', 'black', 'white']
+
+import random
+
+rand_colour = random.choice(colours)
+print(rand_colour)
+
+rand_2_colours = random.sample(colours, 2)
+print(rand_2_colours)
+
+four_letters = [col for col in colours if len(col) == 4]
+print(four_letters)
 ```
 
 
