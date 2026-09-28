@@ -147,6 +147,7 @@ creating a clear and practical division of responsibilities.
 ```python
 import os
 import pandas as pd
+from pathlib import Path 
 from crewai import Agent, Task, Crew, LLM
 from crewai.tools import BaseTool
 
@@ -183,11 +184,20 @@ class AnalyzeCSVTool(BaseTool):
         return summary
 
 
+class FindDocsDirTool(BaseTool):
+    name: str = "find_home"
+    description: str = "Returns the user's Documents directory"
+
+    def _run(self):
+        docs = Path.home() / 'Documents'
+        return docs
+
+
 # -----------------------------
 # LLM
 # -----------------------------
 
-llm = LLM(model="gpt-4.1-mini", api_key=os.getenv("OPENAI_API_KEY"))
+llm = LLM(model="gpt-6-luna", api_key=os.getenv("OPENAI_API_KEY"))
 
 
 # -----------------------------
@@ -198,7 +208,7 @@ finder_agent = Agent(
     role="CSV Finder",
     goal="Locate all CSV files in a given directory",
     backstory="You specialize in scanning file systems.",
-    tools=[FindCSVFilesTool()],
+    tools=[FindCSVFilesTool(), FindDocsDirTool()],
     llm=llm
 )
 
@@ -215,7 +225,7 @@ analyst_agent = Agent(
 # -----------------------------
 
 task_find = Task(
-    description="Search the './data' directory for CSV files.",
+    description="Search the user's home directory for CSV files.",
     expected_output="A list of CSV file paths.",
     agent=finder_agent
 )
