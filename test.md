@@ -123,6 +123,22 @@ msg = 'There are seven falcons in the sky.'
 words = msg.split()
 print(words)
 print(len(words))
+
+#-----------------------------------------------------
+# create words_cleaned with all spaced removed
+
+words = [' sky', 'time ', ' glow', 'small\n\n', '\tarchon', ' car\r', 'cup']
+
+words_cleaned = [word.strip() for word in words]
+print(words_cleaned)
+
+words_cleaned = []
+
+for word in words:
+    word_cleaned = word.strip()
+    words_cleaned.append(word_cleaned)
+
+print(words_cleaned)
 ```
 
 
