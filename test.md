@@ -59,6 +59,8 @@ words = []
 data = ('sky', 1, 2, True, 'forest', 3.4, 6.7, False, 'water')
 
 # from words.txt read all words that start with 'w' or 'c'
+
+
 ```
 
 ## Riesenia
@@ -182,6 +184,18 @@ print(resp.text)
 file_name = 'example.html'
 with open(file_name, 'w') as fd:
     fd.write(resp.text)
+
+#----------------------------------------------------------
+
+# add strings to the words list
+words = []
+data = ('sky', 1, 2, True, 'forest', 3.4, 6.7, False, 'water')
+
+for element in data:
+    if type(element) == str:
+        words.append(element)
+
+print(words)
 ```
 
 
