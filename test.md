@@ -196,6 +196,22 @@ for element in data:
         words.append(element)
 
 print(words)
+
+#----------------------------------------------------------
+
+file_name = 'words.txt'
+
+with open(file_name, 'r') as fd:
+
+    lines = fd.readlines()
+    print(lines)
+
+    lines_cleaned = [line.strip() for line in lines]
+    print(lines_cleaned)
+
+    # words_w_c = [word for word in lines_cleaned if word.startswith('w') or word.startswith('c')]
+    words_w_c = [word for word in lines_cleaned if word.startswith(('w', 'c'))]
+    print(words_w_c)
 ```
 
 
