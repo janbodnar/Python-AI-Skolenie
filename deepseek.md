@@ -275,9 +275,17 @@ response = client.chat.completions.create(
     ],
     response_format={"type": "json_object"},
     max_tokens=200,
+    extra_body={"thinking": {"type": "disabled"}},
 )
 
-result = json.loads(response.choices[0].message.content)
+content = response.choices[0].message.content
+if not content:
+    raise RuntimeError("API nevrátil JSON odpoveď.")
+
+
+print(content)
+
+result = json.loads(content)
 print(result["nálada"], result["skóre"])
 ```
 
