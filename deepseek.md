@@ -44,6 +44,12 @@ python -m pip install openai
 export DEEPSEEK_API_KEY="váš-api-kľúč"
 ```
 
+Vo Windows PowerShelli použite namiesto posledného riadku:
+
+```powershell
+$env:DEEPSEEK_API_KEY="váš-api-kľúč"
+```
+
 Vytvorenie klienta použijeme v každom príklade. Premenná prostredia  
 musí byť nastavená ešte pred spustením programu.  
 
@@ -58,6 +64,62 @@ client = OpenAI(
 MODEL = "deepseek-flash"
 ```
 
+Každý ďalší príklad obsahuje tento úvod, aby sa dal samostatne skopírovať
+do nového súboru. Pred spustením príkladu musí byť nainštalovaný balík
+`openai`, nastavená premenná `DEEPSEEK_API_KEY` a dostupné internetové
+pripojenie.
+
+## Prvý program
+
+Najjednoduchší program odošle jednu otázku a vypíše odpoveď modelu.
+Je vhodný ako prvý test nastavenia API.
+
+```python
+import os
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=os.environ["DEEPSEEK_API_KEY"],
+    base_url="https://api.deepseek.com",
+)
+MODEL = "deepseek-flash"
+
+response = client.chat.completions.create(
+    model=MODEL,
+    messages=[
+        {"role": "user", "content": "Napíš jednu zaujímavú vetu o Slovensku."},
+    ],
+)
+
+print(response.choices[0].message.content)
+```
+
+## Otázka od používateľa
+
+Otázku nemusíme zapísať priamo do programu. Funkcia `input()` ju načíta
+z klávesnice, takže ten istý program môžeme použiť viackrát.
+
+```python
+import os
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=os.environ["DEEPSEEK_API_KEY"],
+    base_url="https://api.deepseek.com",
+)
+MODEL = "deepseek-flash"
+
+question = input("Čo sa chcete opýtať? ")
+response = client.chat.completions.create(
+    model=MODEL,
+    messages=[
+        {"role": "user", "content": question},
+    ],
+)
+
+print(response.choices[0].message.content)
+```
+
 ## Jednoduchý chat
 
 Každá požiadavka obsahuje zoznam správ. Správa `system` určuje  
@@ -65,6 +127,15 @@ požadované správanie asistenta a správa `user` obsahuje otázku.
 Odpoveď nájdeme v prvom výbere (`choices[0]`).  
 
 ```python
+import os
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=os.environ["DEEPSEEK_API_KEY"],
+    base_url="https://api.deepseek.com",
+)
+MODEL = "deepseek-flash"
+
 response = client.chat.completions.create(
     model=MODEL,
     messages=[
@@ -84,6 +155,15 @@ ho odovzdávame cez `extra_body`. `reasoning_effort` nastavuje
 úsilie uvažovania. Programu zvyčajne stačí zobraziť konečnú odpoveď.  
 
 ```python
+import os
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=os.environ["DEEPSEEK_API_KEY"],
+    base_url="https://api.deepseek.com",
+)
+MODEL = "deepseek-flash"
+
 response = client.chat.completions.create(
     model=MODEL,
     messages=[
@@ -105,6 +185,15 @@ Pri `stream=True` prichádza odpoveď po častiach. To sa hodí
 pri dlhších odpovediach, pretože používateľ nemusí čakať na celý text.  
 
 ```python
+import os
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=os.environ["DEEPSEEK_API_KEY"],
+    base_url="https://api.deepseek.com",
+)
+MODEL = "deepseek-flash"
+
 stream = client.chat.completions.create(
     model=MODEL,
     messages=[
@@ -127,6 +216,15 @@ predchádzajúce správy. História sa preto posiela znovu pri každom
 volaní. Po odpovedi asistenta ju pridáme do zoznamu `messages`.  
 
 ```python
+import os
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=os.environ["DEEPSEEK_API_KEY"],
+    base_url="https://api.deepseek.com",
+)
+MODEL = "deepseek-flash"
+
 messages = [
     {"role": "user", "content": "Ktorý vrch je najvyšší na Zemi?"},
 ]
@@ -147,7 +245,15 @@ program. V pokyne výslovne žiadame JSON a nastavíme `response_format`.
 Pred použitím výsledku ho aj tak overíme parserom.  
 
 ```python
+import os
 import json
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=os.environ["DEEPSEEK_API_KEY"],
+    base_url="https://api.deepseek.com",
+)
+MODEL = "deepseek-flash"
 
 response = client.chat.completions.create(
     model=MODEL,
@@ -177,9 +283,19 @@ print(result["nálada"], result["skóre"])
 V4.1-Flash prijíma text aj obrázok v jednej správe. Pri lokálnom  
 súbore ho zakódujeme ako Base64 a vložíme do dátovej URL. Tento  
 príklad očakáva obrázok `graf.png` v aktuálnom priečinku.  
+Pred spustením preto uložte obrázok PNG s týmto názvom do rovnakého
+priečinka ako Python súbor.
 
 ```python
+import os
 import base64
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=os.environ["DEEPSEEK_API_KEY"],
+    base_url="https://api.deepseek.com",
+)
+MODEL = "deepseek-flash"
 
 with open("graf.png", "rb") as image_file:
     encoded_image = base64.b64encode(image_file.read()).decode("ascii")
@@ -213,7 +329,15 @@ operáciu a poslať výsledok späť. Ukážka používa iba ukážkové údaje,
 nie živú predpoveď počasia.  
 
 ```python
+import os
 import json
+from openai import OpenAI
+
+client = OpenAI(
+    api_key=os.environ["DEEPSEEK_API_KEY"],
+    base_url="https://api.deepseek.com",
+)
+MODEL = "deepseek-flash"
 
 tools = [
     {
