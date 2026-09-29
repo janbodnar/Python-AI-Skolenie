@@ -140,6 +140,30 @@ print(lines2)
 print(lines2[0])
 print(lines2[1])
 print(lines2[-1])
+
+#----------------------------------------------------------
+
+# using faker library, generate 100 users with id, first_name, last_name, job, city
+import faker
+
+faker = faker.Faker()
+
+file_name = 'test_users.csv'
+
+with open(file_name, 'w') as fd:
+
+    fd.write('id,first_name,last_name,job,city\n')
+
+    for idx in range(1, 101):
+
+        first_name = faker.first_name()
+        last_name = faker.last_name()
+        job = faker.job()
+        city = faker.city()
+
+        row = f'{idx},{first_name},{last_name},"{job}",{city}\n'
+        
+        fd.write(row)
 ```
 
 
