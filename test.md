@@ -71,7 +71,19 @@ mix = (1, 2, 3, (4, 5, 6, (7, 8, 9, (10, 11, 12))))
 
 print(mix[3][3][3][1])
 
+#----------------------------------------------------------
 
+# use for loop and if/elif to print positive, negative, zero
+vals = [-2, 3, 0, 4, -6, 0, 9]
+
+for val in vals:
+
+    if val > 0:
+        print(val, 'positive')
+    elif val < 0: 
+        print(val, 'negative')
+    else:
+        print(val, 'zero')
 
 ```
 
