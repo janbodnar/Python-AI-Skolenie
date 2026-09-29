@@ -146,7 +146,6 @@ exa = Exa()
 result = exa.search(
     "New Python features for data engineering",
     num_results=5,
-    category="github",
     include_domains=["python.org", "docs.python.org"],
     start_published_date="2025-01-01",
     contents={"highlights": True},
