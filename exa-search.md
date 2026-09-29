@@ -31,6 +31,12 @@ API kľúč nastavíme v prostredí:
 export EXA_API_KEY="váš-api-kľúč"
 ```
 
+V PowerShelli vo Windows použijeme:
+
+```powershell
+$env:EXA_API_KEY = "váš-api-kľúč"
+```
+
 Klient `Exa()` túto premennú automaticky použije. Kľúč nevkladáme priamo do  
 zdrojového kódu ani do git repozitára.  
 
@@ -59,11 +65,19 @@ Vyhľadávanie a načítanie obsahu môžeme spojiť aj do jedného volania pomo
 `search_and_contents()`, čo je bežnejší spôsob v praxi:  
 
 ```python
+from exa_py import Exa
+
+exa = Exa()
 result = exa.search_and_contents(
     "Recent techniques for improving retrieval in RAG systems",
     type="auto",
     highlights=True,
 )
+
+for item in result.results:
+    print(item.title)
+    print(item.url)
+    print(item.highlights)
 ```
 
 Vyhľadávanie štandardne vráti najviac desať výsledkov. Počet môžeme zmeniť  
@@ -96,11 +110,18 @@ Dotaz má opisovať stránky, ktoré chceme nájsť, nie iba zoznam kľúčovýc
 Pomáha uviesť tému, typ zdroja, obdobie alebo vlastnosť relevantného obsahu.  
 
 ```python
+from exa_py import Exa
+
+exa = Exa()
 result = exa.search(
     "Technical articles comparing hybrid and semantic retrieval "
     "for RAG systems",
     contents={"highlights": True},
 )
+
+for item in result.results:
+    print(item.title, item.url)
+    print(item.highlights)
 ```
 
 Pri ladení kvality meníme naraz iba jednu časť požiadavky. Najskôr skontrolujeme  
@@ -119,6 +140,9 @@ Parameter `category` obmedzí výsledky na konkrétny typ zdroja, napríklad
 doménové filtre, ak nám ide o typ obsahu, nie o konkrétny web.  
 
 ```python
+from exa_py import Exa
+
+exa = Exa()
 result = exa.search(
     "New Python features for data engineering",
     num_results=5,
@@ -145,6 +169,9 @@ iba časti stránky relevantné pre dotaz. Celý text (`text`) použijeme vtedy,
 keď potrebujeme širší kontext alebo štruktúru dokumentu.  
 
 ```python
+from exa_py import Exa
+
+exa = Exa()
 result = exa.search(
     "Technical postmortems of large-scale inference outages",
     num_results=3,
@@ -163,12 +190,19 @@ Ak už URL poznáme, nepoužívame vyhľadávanie. Vtedy je vhodnejšie zavolať
 `exa.get_contents()` a požiadať priamo o obsah týchto stránok:  
 
 ```python
+from exa_py import Exa
+
+exa = Exa()
 result = exa.get_contents(
     ["https://docs.python.org/3/whatsnew/3.14.html"],
     text={"max_characters": 5000},
     subpages=2,
     subpage_target=["docs", "tutorial"],
 )
+
+for item in result.results:
+    print(item.url)
+    print(item.text[:500])
 ```
 
 Parameter `subpages` umožňuje spolu s hlavnou stránkou načítať aj vybraný  
@@ -192,11 +226,18 @@ obsah starší, Exa ho podľa potreby dohľadá naživo. Hodnota `0` vynúti vž
 čerstvé sťahovanie, `-1` naopak použije výhradne uložený index.  
 
 ```python
+from exa_py import Exa
+
+exa = Exa()
 result = exa.get_contents(
-    ["https://example.com/blog"],
+    ["https://blog.python.org/"],
     text=True,
     livecrawl="preferred",
 )
+
+for item in result.results:
+    print(item.url)
+    print(item.text[:1000])
 ```
 
 ## Hľadanie podobných stránok
@@ -206,6 +247,9 @@ zadanej URL — užitočné napríklad na hľadanie konkurenčného obsahu,
 podobných článkov alebo alternatívnych zdrojov k dokumentácii.  
 
 ```python
+from exa_py import Exa
+
+exa = Exa()
 result = exa.find_similar_and_contents(
     "https://docs.python.org/3/whatsnew/3.14.html",
     exclude_source_domain=True,
@@ -226,6 +270,9 @@ zdrojmi, poslúži `exa.answer()`. Na rozdiel od `search` s `output_schema`
 ide o samostatný endpoint určený priamo na tento účel:  
 
 ```python
+from exa_py import Exa
+
+exa = Exa()
 response = exa.answer(
     "What are the main differences between HTTP/2 and HTTP/3?",
     text=True,
@@ -240,6 +287,9 @@ Pre postupné vypisovanie odpovede (napríklad v chatovacom rozhraní) existuje
 aj `exa.stream_answer()`, ktorý vracia odpoveď po častiach:  
 
 ```python
+from exa_py import Exa
+
+exa = Exa()
 for chunk in exa.stream_answer("Explain the CAP theorem"):
     print(chunk, end="", flush=True)
 ```
@@ -285,6 +335,9 @@ najneskôr v určenom čase. Na Search API patrí `snapshot_as_of` dovnútra
 objektu `contents`.
 
 ```python
+from exa_py import Exa
+
+exa = Exa()
 result = exa.search(
     "Latest stable Python release notes",
     num_results=3,
@@ -366,6 +419,10 @@ Python SDK používa názvy v tvare `snake_case`. Napríklad API parameter
 Pri už známych URL je rozdiel v umiestnení obsahu dôležitý:  
 
 ```python
+from exa_py import Exa
+
+exa = Exa()
+
 exa.search(
     "python release notes",
     contents={"highlights": True},
