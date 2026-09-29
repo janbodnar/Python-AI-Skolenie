@@ -231,6 +231,9 @@ messages = [
 
 response = client.chat.completions.create(model=MODEL, messages=messages)
 answer = response.choices[0].message.content
+
+print(answer)
+
 messages.append({"role": "assistant", "content": answer})
 
 messages.append({"role": "user", "content": "A ktorý je druhý najvyšší?"})
