@@ -1,4 +1,26 @@
 
+## EXA Search
+
+```python
+from exa_py import Exa
+
+exa = Exa()
+result = exa.search(
+    "Posledné udalosti v slovenskej politike",
+    type="auto",
+    contents={"highlights": True},
+)
+
+file_name = "sk_politika.txt"
+
+with open(file_name, "w", encoding="utf-8", newline="") as fd:
+
+    for item in result.results:
+
+        fd.write(f"{item.title}\n{item.url}\n{item.highlights}\n\n")
+```
+
+
 
 ## Opakovanie 
 
