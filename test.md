@@ -117,6 +117,29 @@ print(parts)
 vals = [int(part) for part in parts]
 print(vals)
 print(sum(vals))
+
+#----------------------------------------------------------
+
+# print first, secode, last words
+data = """
+sky
+dark
+warm
+water
+cup
+ten
+rock
+"""
+
+lines = data.splitlines()
+print(lines)
+
+lines2 = lines[1:]
+print(lines2)
+
+print(lines2[0])
+print(lines2[1])
+print(lines2[-1])
 ```
 
 
