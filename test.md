@@ -2,6 +2,225 @@
 ## EXA Search
 
 ```python
+"""A small, asset-free Flappy Bird clone built with Arcade."""
+
+from __future__ import annotations
+
+import math
+import random
+from dataclasses import dataclass
+
+import arcade
+
+
+SCREEN_WIDTH = 900
+SCREEN_HEIGHT = 700
+GROUND_HEIGHT = 90
+PLAY_HEIGHT = SCREEN_HEIGHT - GROUND_HEIGHT
+TITLE = "Flappy Bird"
+
+SKY = (122, 205, 238)
+GROUND = (220, 180, 87)
+GROUND_DARK = (185, 139, 54)
+PIPE = (74, 184, 76)
+PIPE_DARK = (45, 135, 57)
+BIRD_YELLOW = (255, 211, 61)
+
+
+@dataclass
+class Pipe:
+	"""The position and opening of one pipe pair."""
+
+	x: float
+	gap_y: float
+	counted: bool = False
+	width: float = 82
+	gap_height: float = 185
+
+	@property
+	def right(self) -> float:
+		return self.x + self.width
+
+	@property
+	def gap_bottom(self) -> float:
+		return self.gap_y - self.gap_height / 2
+
+	@property
+	def gap_top(self) -> float:
+		return self.gap_y + self.gap_height / 2
+
+
+class FlappyBird(arcade.Window):
+	"""Main game window and game state controller."""
+
+	def __init__(self) -> None:
+		super().__init__(SCREEN_WIDTH, SCREEN_HEIGHT, TITLE, resizable=False)
+		arcade.set_background_color(SKY)
+		self.random = random.Random()
+		self.best_score = 0
+		self.state = "ready"
+		self.score = 0
+		self.bird_x = 220.0
+		self.bird_y = PLAY_HEIGHT / 2
+		self.bird_velocity = 0.0
+		self.pipes: list[Pipe] = []
+		self.scroll = 0.0
+		self.reset()
+
+	def reset(self) -> None:
+		"""Put the game back at its starting position."""
+		self.state = "ready"
+		self.score = 0
+		self.bird_y = PLAY_HEIGHT / 2
+		self.bird_velocity = 0.0
+		self.pipes = [
+			Pipe(SCREEN_WIDTH + 120, 390),
+			Pipe(SCREEN_WIDTH + 430, 500),
+			Pipe(SCREEN_WIDTH + 740, 310),
+		]
+		self.scroll = 0.0
+
+	def start_or_flap(self) -> None:
+		if self.state == "game_over":
+			self.reset()
+		self.state = "playing"
+		self.bird_velocity = 390.0
+
+	def on_key_press(self, key: int, modifiers: int) -> None:
+		if key in (arcade.key.SPACE, arcade.key.UP):
+			self.start_or_flap()
+		elif key == arcade.key.R and self.state == "game_over":
+			self.reset()
+		elif key == arcade.key.ESCAPE:
+			self.close()
+
+	def on_mouse_press(self, x: float, y: float, button: int, modifiers: int) -> None:
+		self.start_or_flap()
+
+	def on_update(self, delta_time: float) -> None:
+		if self.state == "ready":
+			self.bird_y = PLAY_HEIGHT / 2 + math.sin(self.scroll * 3) * 10
+			self.scroll += delta_time
+			return
+		if self.state != "playing":
+			return
+
+		delta_time = min(delta_time, 1 / 30)
+		self.bird_velocity -= 1050 * delta_time
+		self.bird_y += self.bird_velocity * delta_time
+		self.scroll += delta_time
+
+		for pipe in self.pipes:
+			pipe.x -= 245 * delta_time
+			if not pipe.counted and pipe.right < self.bird_x:
+				pipe.counted = True
+				self.score += 1
+
+		if self.pipes and self.pipes[0].right < -20:
+			self.pipes.pop(0)
+			last_x = self.pipes[-1].x if self.pipes else SCREEN_WIDTH
+			self.pipes.append(
+				Pipe(last_x + 310, self.random.uniform(220, PLAY_HEIGHT - 150))
+			)
+
+		if self.bird_y - 18 <= 0 or self.bird_y + 18 >= PLAY_HEIGHT:
+			self.end_game()
+			return
+
+		for pipe in self.pipes:
+			overlaps_x = self.bird_x + 17 > pipe.x and self.bird_x - 17 < pipe.right
+			outside_gap = self.bird_y - 15 < pipe.gap_bottom or self.bird_y + 15 > pipe.gap_top
+			if overlaps_x and outside_gap:
+				self.end_game()
+				return
+
+	def end_game(self) -> None:
+		self.state = "game_over"
+		self.best_score = max(self.best_score, self.score)
+
+	def on_draw(self) -> None:
+		self.clear()
+		self.draw_background()
+		for pipe in self.pipes:
+			self.draw_pipe(pipe)
+		self.draw_ground()
+		self.draw_bird()
+		self.draw_hud()
+		if self.state == "ready":
+			self.draw_message("FLAPPY BIRD", "Press SPACE or click to flap")
+		elif self.state == "game_over":
+			self.draw_game_over()
+
+	def draw_background(self) -> None:
+		arcade.draw_lrbt_rectangle_filled(0, SCREEN_WIDTH, 0, SCREEN_HEIGHT, SKY)
+		arcade.draw_circle_filled(730, 570, 52, (255, 231, 139))
+		for x, y, scale in ((130, 565, 1.0), (470, 620, 0.8), (820, 455, 0.7)):
+			self.draw_cloud(x, y, scale)
+
+	@staticmethod
+	def draw_cloud(x: float, y: float, scale: float) -> None:
+		color = (235, 249, 248)
+		arcade.draw_circle_filled(x, y, 25 * scale, color)
+		arcade.draw_circle_filled(x + 30 * scale, y + 8 * scale, 34 * scale, color)
+		arcade.draw_circle_filled(x + 63 * scale, y, 23 * scale, color)
+		arcade.draw_lrbt_rectangle_filled(
+			x - 25 * scale, x + 63 * scale, y - 22 * scale, y + 2 * scale, color
+		)
+
+	@staticmethod
+	def draw_pipe(pipe: Pipe) -> None:
+		arcade.draw_lrbt_rectangle_filled(pipe.x, pipe.right, 0, pipe.gap_bottom, PIPE)
+		arcade.draw_lrbt_rectangle_filled(pipe.x, pipe.right, pipe.gap_top, PLAY_HEIGHT, PIPE)
+		arcade.draw_lrbt_rectangle_filled(pipe.x - 7, pipe.right + 7, pipe.gap_bottom - 24, pipe.gap_bottom, PIPE)
+		arcade.draw_lrbt_rectangle_filled(pipe.x - 7, pipe.right + 7, pipe.gap_top, pipe.gap_top + 24, PIPE)
+		arcade.draw_line(pipe.x + 10, 0, pipe.x + 10, pipe.gap_bottom, PIPE_DARK, 4)
+		arcade.draw_line(pipe.x + 10, pipe.gap_top, pipe.x + 10, PLAY_HEIGHT, PIPE_DARK, 4)
+
+	def draw_ground(self) -> None:
+		arcade.draw_lrbt_rectangle_filled(0, SCREEN_WIDTH, 0, GROUND_HEIGHT, GROUND)
+		arcade.draw_lrbt_rectangle_filled(0, SCREEN_WIDTH, GROUND_HEIGHT - 8, GROUND_HEIGHT, GROUND_DARK)
+		offset = (self.scroll * 180) % 40
+		for x in range(-40, SCREEN_WIDTH + 40, 40):
+			arcade.draw_line(x - offset, 0, x + 20 - offset, GROUND_HEIGHT - 8, (239, 204, 112), 3)
+
+	def draw_bird(self) -> None:
+		arcade.draw_circle_filled(self.bird_x, self.bird_y, 20, BIRD_YELLOW)
+		arcade.draw_circle_filled(self.bird_x + 14, self.bird_y + 8, 7, (255, 246, 220))
+		arcade.draw_circle_filled(self.bird_x + 16, self.bird_y + 8, 3, (35, 48, 55))
+		arcade.draw_lrbt_rectangle_filled(self.bird_x + 14, self.bird_x + 30, self.bird_y - 2, self.bird_y + 5, (240, 112, 49))
+		arcade.draw_line(self.bird_x - 17, self.bird_y - 3, self.bird_x - 28, self.bird_y - 10, (212, 158, 27), 5)
+
+	def draw_hud(self) -> None:
+		arcade.draw_text(str(self.score), SCREEN_WIDTH / 2, SCREEN_HEIGHT - 82, (255, 255, 255), 40, anchor_x="center", bold=True)
+		if self.best_score:
+			arcade.draw_text(f"BEST {self.best_score}", 24, SCREEN_HEIGHT - 42, (255, 255, 255), 16, bold=True)
+
+	@staticmethod
+	def draw_message(title: str, subtitle: str) -> None:
+		arcade.draw_text(title, SCREEN_WIDTH / 2, 390, (255, 255, 255), 46, anchor_x="center", bold=True)
+		arcade.draw_text(subtitle, SCREEN_WIDTH / 2, 345, (255, 255, 255), 20, anchor_x="center")
+
+	def draw_game_over(self) -> None:
+		arcade.draw_lrbt_rectangle_filled(220, 680, 240, 470, (255, 255, 255, 235))
+		arcade.draw_text("GAME OVER", SCREEN_WIDTH / 2, 420, (55, 65, 70), 36, anchor_x="center", bold=True)
+		arcade.draw_text(f"Score  {self.score}     Best  {self.best_score}", SCREEN_WIDTH / 2, 370, (75, 85, 90), 20, anchor_x="center")
+		arcade.draw_text("Press SPACE to play again", SCREEN_WIDTH / 2, 315, PIPE_DARK, 18, anchor_x="center")
+
+
+def main() -> None:
+	"""Start the game."""
+	FlappyBird()
+	arcade.run()
+
+
+if __name__ == "__main__":
+	main()
+```
+
+
+
+
+```python
 from exa_py import Exa
 
 exa = Exa()
