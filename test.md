@@ -59,7 +59,6 @@ words = []
 data = ('sky', 1, 2, True, 'forest', 3.4, 6.7, False, 'water')
 
 # from words.txt read all words that start with 'w' or 'c'
-
 ```
 
 ## Riesenia
@@ -86,6 +85,7 @@ for val in vals:
         print(val, 'zero')
 
 
+#----------------------------------------------------------
 import statistics
 # print mean & median
 vals = [-2, 0, 3, -1, 9, 11, -8]
@@ -94,6 +94,18 @@ print(sum(vals)/len(vals))
 
 print(statistics.mean(vals))
 print(statistics.median(vals))
+
+
+#----------------------------------------------------------
+# print message: Roger Roe is 34 years old, he is a driver and
+# lives in Prague in fstring and with format function
+name = "Roger Doe"
+age = 34
+occupation = 'driver'
+city = "Prague"
+
+print(f'{name} is {age} years old, he is a {occupation} and lives in {city}')
+print('{} is {} years old, he is a {} and lives in {}'.format(name, age, occupation, city))
 ```
 
 
