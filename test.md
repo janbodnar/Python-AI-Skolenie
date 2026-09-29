@@ -164,6 +164,24 @@ with open(file_name, 'w') as fd:
         row = f'{idx},{first_name},{last_name},"{job}",{city}\n'
         
         fd.write(row)
+
+
+#----------------------------------------------------------
+
+# # fetch the content of example.com URL
+import requests
+
+# pip install requests
+
+url = 'https://example.com'
+
+resp = requests.get(url)
+
+print(resp.text)
+
+file_name = 'example.html'
+with open(file_name, 'w') as fd:
+    fd.write(resp.text)
 ```
 
 
