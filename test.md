@@ -1,5 +1,69 @@
 
 
+## Opakovanie 
+
+`words.txt`
+
+```
+war
+sky
+cup
+cloud
+nice
+water
+warm
+```
+
+
+```python
+# print 11 
+mix = (1, 2, 3, (4, 5, 6, (7, 8, 9, (10, 11, 12))))
+
+# use for loop and if/elif to print positive, negative, zero
+vals = [-2, 3, 0, 4, -6, 0, 9]
+
+# print mean & median
+vals = [-2, 0, 3, -1, 9, 11, -8]
+
+# print message: Roger Roe is 34 years old, he is a driver and
+# lives in Prague in fstring and with format function
+name = "Roger Doe"
+age = 34
+occupation = 'driver'
+city = "Prague"
+
+# calculate sum from data
+data = "1,2,3,4,5,6,7,8,9,10"
+
+# print first, secode, last words
+data = """
+sky
+dark
+warm
+water
+cup
+ten
+rock
+"""
+
+# using faker library, generate 100 users with id, first_name, last_name, job, city
+import faker
+...
+
+# fetch the content of example.com URL
+import requests
+...
+
+# add strings to the words list
+words = []
+data = ('sky', 1, 2, True, 'forest', 3.4, 6.7, False, 'water')
+
+# from words.txt read all words that start with 'w' or 'c'
+
+```
+
+
+
 ## Fetch and save URL page
 
 ```python
