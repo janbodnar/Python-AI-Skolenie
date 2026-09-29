@@ -106,6 +106,17 @@ city = "Prague"
 
 print(f'{name} is {age} years old, he is a {occupation} and lives in {city}')
 print('{} is {} years old, he is a {} and lives in {}'.format(name, age, occupation, city))
+
+#----------------------------------------------------------
+# calculate sum from data
+data = "1,2,3,4,5,6,7,8,9,10"
+
+parts = data.split(',')
+print(parts)
+
+vals = [int(part) for part in parts]
+print(vals)
+print(sum(vals))
 ```
 
 
