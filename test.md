@@ -85,6 +85,15 @@ for val in vals:
     else:
         print(val, 'zero')
 
+
+import statistics
+# print mean & median
+vals = [-2, 0, 3, -1, 9, 11, -8]
+
+print(sum(vals)/len(vals))
+
+print(statistics.mean(vals))
+print(statistics.median(vals))
 ```
 
 
